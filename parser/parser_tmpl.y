@@ -1,0 +1,38 @@
+%{
+#include <stdio.h>
+
+#define YYERROR_VERBOSE
+
+int yylex();
+void yyerror(const char *s);
+%}
+
+%define parse.error verbose
+%locations
+
+$decl_section
+
+%right THEN t_else
+%token ';'
+%left  ','
+%right '='
+%left t_or
+%left t_and 
+%left '<' t_less_eq '>' t_greater_eq t_eq t_not_eq
+%left '+' '-'
+%left '*' '/' '%'
+%left '.' 
+%precedence NEG
+%right '!' 
+%left '[' ']' 
+%token '(' ')' '{' '}'
+
+%%
+
+$rule_section
+
+%%
+
+void yyerror(const char *s) {
+  fprintf(stderr, "line:%d Col:%d %s\n", yylloc.first_line, yylloc.first_column, s);
+}
