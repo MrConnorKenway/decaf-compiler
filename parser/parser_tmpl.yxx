@@ -1,9 +1,15 @@
 %{
-#include <stdio.h>
+#include <iostream>
+#include <cassert>
+#include "ast.h"
 
 #define YYERROR_VERBOSE
 
+using std::cout;
+using std::cin;
+
 int yylex();
+
 void yyerror(const char *s);
 %}
 
@@ -35,4 +41,16 @@ $rule_section
 
 void yyerror(const char *s) {
   fprintf(stderr, "line:%d Col:%d %s\n", yylloc.first_line, yylloc.first_column, s);
+}
+
+int main(int argc, char **argv) {
+	++argv, --argc;  /* skip over program name */
+	if (argc > 0) {
+		assert(argc == 1);
+    freopen(argv[0], "r", stdin);
+	}
+
+	yyparse();
+
+	return 0;
 }

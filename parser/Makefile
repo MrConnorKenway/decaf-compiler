@@ -4,12 +4,23 @@
 # you must run GNU make in the top-level directory.
 #
 
-build/parser_gen.tab.c: parser/gen_parser.py parser/bnf parser/parser_tmpl.y
+build/parser_gen.yxx: parser/gen_parser.py parser/bnf parser/parser_tmpl.yxx
 	@echo - generating bison file
 	@$<
-	@echo - building parser source file
-	@bison -d build/parser_gen.y -v -Wall -o $@
 
-all: build/parser_gen.tab.c
+parser/parser_handwritten.yxx: build/parser_gen.yxx
+	@echo - init parser_handwritten.yxx using parser_gen.yxx
+	@cp $< $@
 
-.PHONY: all
+build/parser_gen.tab.cxx: build/parser_gen.yxx parser/gen_parser.py parser/bnf parser/parser_tmpl.yxx
+	@echo - generating parser source file
+	@bison --defines=build/parser_gen.tab.h $< -v -Wall -o $@
+
+build/parser_handwritten.tab.cxx: parser/parser_handwritten.yxx
+	@echo - using handwritten bison file
+	@echo - generating parser source file
+	@bison --defines=build/parser_handwritten.tab.h $< -v -Wall -o $@
+
+all: build/parser_gen.tab.cxx build/parser_handwritten.tab.cxx build/parser_gen.yxx
+
+.PHONY: all init

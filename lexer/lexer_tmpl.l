@@ -1,15 +1,21 @@
 %{
-#include <math.h>
-#include <assert.h>
-#include "parser_gen.tab.h"
+#include "ast.h"
+#include "parser_handwritten.tab.h"
 
 int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 	yylloc.first_column = yycolumn;	yylloc.last_column = yycolumn + yyleng - 1; \
 	yycolumn += yyleng;
+
+yyFlexLexer lexer;
+
+int yylex() {
+	return lexer.yylex();
+}
 %}
 
 %option yylineno
+%option noyywrap
 
 DIGIT [0-9]
 ID [a-z_][A-Za-z0-9_]*
@@ -66,18 +72,3 @@ $rule_list
 }
 
 %%
-
-int main(int argc, char **argv) {
-	++argv, --argc;  /* skip over program name */
-	if (argc > 0) {
-		assert(argc == 1);
-		yyin = fopen(argv[0], "r");
-	}
-	else {
-		yyin = stdin;
-	}
-
-	yyparse();
-
-	return 0;
-}

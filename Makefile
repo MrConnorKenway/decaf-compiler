@@ -5,16 +5,16 @@ include parser/Makefile
 
 build: bin/decaf
 
-bin/decaf: build/lexer_gen.yy.c build/parser_gen.tab.c
+bin/decaf: build/lexer_gen.yy.cxx build/parser_handwritten.tab.cxx
 	@echo - building compiler
-	@gcc build/lexer_gen.yy.c build/parser_gen.tab.c -lfl -ly -o bin/decaf
+	@g++ -o $@ $< $(word 2, $^) -ly
 
 clean:
-	-rm -rf bin/*
-	-rm -rf build/*
+	-rm bin/*
+	-rm build/*
 
 test-%: bin/decaf
 	@echo - testing using $*.decaf
 	@$< test/$*.decaf
 
-.PHONY: clean build
+.PHONY: clean build all

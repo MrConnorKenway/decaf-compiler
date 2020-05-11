@@ -1,11 +1,11 @@
 Program : Decl+
 Decl : VariableDecl | FunctionDecl | ClassDecl | InterfaceDecl
-VariableDecl : Type t_ident+, ;
+VariableDecl : Variable ;
+Variable : Type t_ident
 Type : t_int | t_double | t_bool | t_string | t_type_ident | Type [ ]
 FunctionDecl : Type t_ident ( Formals ) StmtBlock | \
  t_void t_ident ( Formals ) StmtBlock
 Formals : Variable*,
-Variable : Type t_ident
 ClassDecl : t_class t_type_ident Extender? Implementor? { Field* }
 Extender : t_extends t_type_ident
 Implementor : t_implements t_type_ident+,
