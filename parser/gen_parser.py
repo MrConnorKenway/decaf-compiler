@@ -106,7 +106,7 @@ decl_union = set()
 
 # We want some node to be base_node_ptr_t
 with open('parser/parser_tmpl.yxx', 'r') as tmpl:
-  base_node = re.findall(r"%type <.*> (.*)", tmpl.read(), re.M)
+  base_node = re.findall(r"%type <base_node_ptr_t> (.*)", tmpl.read(), re.M)
   for t in base_node:
     non_terminals.discard(t)
 
@@ -123,8 +123,11 @@ with open('build/ast.h', 'w') as ast, open('parser/ast_tmpl.h', 'r') as tmpl:
       # new node type
       beg = non_terminal.find('Optional')
       if beg >= 0:
-        decl_section += '%type <{0}_node_ptr_t> {1}\n'.format(
-            non_terminal[:beg], non_terminal)
+        if non_terminal[:beg] in base_node:
+          decl_section += '%type <base_node_ptr_t> {0}\n'.format(non_terminal)
+        else:
+          decl_section += '%type <{0}_node_ptr_t> {1}\n'.format(
+              non_terminal[:beg], non_terminal)
       else:
         decl_section += '%type <{0}_node_ptr_t> {0}\n'.format(non_terminal)
         decl_union.add('\t{0}_node *{0}_node_ptr_t;\n'.format(non_terminal))
