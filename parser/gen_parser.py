@@ -61,7 +61,7 @@ for rule in rules:
         rule_section += '{0}CommaList '.format(word)
         buffer.add(
             "{0}CommaList : \n  {0}\n  | {0}CommaList ',' {0}\n".format(word))
-        non_terminals.add('{0}ListCommaList'.format(word))
+        non_terminals.add('{0}CommaList'.format(word))
       elif word.endswith('*,'):
         word = word[:-2]
         rule_section += '{0}CommaListOptional '.format(word)
