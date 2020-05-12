@@ -14,7 +14,7 @@ build/parser_gen.yxx: parser/gen_parser.py parser/bnf parser/parser_tmpl.yxx
 
 parser/parser_handwritten.yxx: build/parser_gen.yxx
 	@echo - init parser_handwritten.yxx using parser_gen.yxx
-	@cp $< $@
+	@parser/merge_hand_and_gen.py
 
 build/parser_gen.tab.cxx: build/parser_gen.yxx parser/gen_parser.py parser/bnf parser/parser_tmpl.yxx
 	@echo - generating parser source file
