@@ -1,5 +1,4 @@
 %{
-#include "ast.h"
 #include "parser_handwritten.tab.h"
 
 int yycolumn = 1;

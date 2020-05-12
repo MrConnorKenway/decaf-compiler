@@ -1,7 +1,10 @@
+%code requires {
+#include "ast.h"
+}
+
 %{
 #include <iostream>
 #include <cassert>
-#include "ast.h"
 
 #define YYERROR_VERBOSE
 
@@ -17,6 +20,18 @@ void yyerror(const char *s);
 %locations
 
 $decl_section
+
+%type <base_node_ptr_t> Program
+%type <base_node_ptr_t> Decl
+%type <base_node_ptr_t> VariableDecl
+%type <base_node_ptr_t> Formals
+%type <base_node_ptr_t> Field
+%type <base_node_ptr_t> Actuals
+%type <base_node_ptr_t> Stmt
+%type <base_node_ptr_t> ElseStmt
+%type <base_node_ptr_t> Expr
+%type <base_node_ptr_t> LValue
+%type <base_node_ptr_t> Constant
 
 %right THEN t_else
 %token ';'

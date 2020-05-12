@@ -4,7 +4,7 @@
 # you must run GNU make in the top-level directory.
 #
 
-build/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l
+build/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l build/ast.h
 	@echo - generating flex file
 	@$<
 

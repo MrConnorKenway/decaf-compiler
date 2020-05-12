@@ -1,4 +1,4 @@
 # force git to keep this directory
 
-./*
+*
 !.gitignore

@@ -7,7 +7,7 @@ build: bin/decaf
 
 bin/decaf: build/lexer_gen.yy.cxx build/parser_handwritten.tab.cxx
 	@echo - building compiler
-	@g++ -o $@ $< $(word 2, $^) -ly
+	@g++ -o $@ $< $(word 2, $^) -ly -std=c++11
 
 clean:
 	-rm bin/*
