@@ -154,12 +154,11 @@ with open('build/ast.h', 'w') as ast, open('parser/ast_tmpl.h', 'r') as tmpl:
             'class {0}_node : public AST_node_base {{\n public:\n\t{3}\n\t{0}_node({1}) : {2} {{ node_type = \"{0}_node\"; }};\n}};\n\n'.format(
                 non_terminal, parameter_list_str, assignment_list_str, fields_decl[0]))
 
-union_section = '\n%union {\n\tast_node_ptr_t base_node_ptr_t;\n'
+union_section = ''
 for field in decl_union:
   union_section += field
-decl_section = union_section + '}\n\n' + decl_section
 
 with open('build/parser_gen.yxx', 'w') as parser, open('parser/parser_tmpl.yxx', 'r') as tmpl:
   t = Template(tmpl.read())
   parser.write(t.substitute(
-      decl_section=decl_section, rule_section=rule_section))
+      decl_section=decl_section, rule_section=rule_section, union_section=union_section))

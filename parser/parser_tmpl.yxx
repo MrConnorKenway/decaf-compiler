@@ -19,6 +19,18 @@ void yyerror(const char *s);
 %define parse.error verbose
 %locations
 
+%union {
+$union_section
+	ast_node_ptr_t base_node_ptr_t;
+	Ident_node* Ident_node_ptr_t;
+	Type_ident_node* Type_ident_node_ptr_t;
+	Base_type_node* Base_type_node_ptr_t;
+	Array_type_node* Array_type_node_ptr_t;
+	User_defined_type_node* User_defined_type_node_ptr_t;
+	int int_val;
+	double d_val;
+}
+
 $decl_section
 
 %type <base_node_ptr_t> Program
