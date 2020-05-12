@@ -39,7 +39,7 @@ for rule in rules:
       continue
 
     if production.split() == ['t_if', '(', 'Expr', ')', 'Stmt']:
-      rule_section += "t_if '(' Expr ')' Stmt %prec THEN"
+      rule_section += "t_if '(' Expr ')' Stmt %prec THEN\n"
       continue
 
     for word in production.split():
