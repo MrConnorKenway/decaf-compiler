@@ -1,13 +1,20 @@
 #pragma once
 #include "../ast/ast_base.h"
 
+// $ special mark for python to locate
+// the code above can be copied directly into ast.h
 class List_node : public AST_node_base {
  public:
   vector<ast_node_ptr_t> list;
 };
 
-// $ special mark for python to locate
-// the code above can be copied directly into ast.h
+// special node to handle 'this' reference
+class This_node : public AST_node_base {
+};
+
+class Null_const_node : public AST_node_base {
+};
+
 class Type_ident_node : public AST_node_base {
  public:
   string type_ident_name;
@@ -40,11 +47,6 @@ class Assignment_node : public AST_node_base {
  public:
   ast_node_ptr_t LHS;
   ast_node_ptr_t RHS;
-};
-
-// special node to handle 'this' reference
-class This_node : public AST_node_base {
-  /*virtual*/ void accept(Visitor& v) { v.visit(this); }
 };
 
 class Binary_expr_node : public AST_node_base {
@@ -109,10 +111,6 @@ class Str_const_node : public AST_node_base {
 class Bool_const_node : public AST_node_base {
  public:
   int val;
-};
-
-class Null_const_node : public AST_node_base {
-  /*virtual*/ void accept(Visitor& v) { v.visit(this); }
 };
 
 class Extender_node : public AST_node_base {
