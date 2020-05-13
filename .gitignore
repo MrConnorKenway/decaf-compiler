@@ -2,4 +2,3 @@
 .idea
 *.code-workspace
 bin/*
-*_gen*
