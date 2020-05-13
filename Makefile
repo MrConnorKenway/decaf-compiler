@@ -2,6 +2,7 @@ all:
 
 include lexer/Makefile
 include parser/Makefile
+include ast/Makefile
 
 build: bin/decaf
 
