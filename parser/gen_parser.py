@@ -11,7 +11,6 @@ rules = re.findall(r"^\s*(\S*)\s*:\s*(.*)$", bnf, re.M)
 
 # use set to avoid duplication
 tokens = set()
-constants = set()
 non_terminals = set()
 # buffer: temporally store the string content
 buffer = set()
@@ -83,8 +82,6 @@ for rule in rules:
 
       if word[:2] == 't_':
         tokens.add(word)
-      elif word[:2] == 'c_':
-        constants.add(word)
       elif word[0].isupper():
         non_terminals.add(word)
 
@@ -96,12 +93,12 @@ for r in buffer:
   rule_section += r
 
 for token in tokens:
-  decl_section += '%token <int_val> {0}\n'.format(token)
-
-decl_section += '\n'
-
-for constant in constants:
-  decl_section += '%token <int_val> {0}\n'.format(constant)
+  if token == 't_ident':
+    decl_section += '%token <Ident_node_ptr_t> {0}\n'.format(token)
+  elif token == 't_type_ident':
+    decl_section += '%token <Type_ident_node_ptr_t> {0}\n'.format(token)
+  else:
+    decl_section += '%token <int_val> {0}\n'.format(token)
 
 decl_section += '\n'
 
