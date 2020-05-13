@@ -48,32 +48,33 @@ for rule in rules:
       elif word.endswith('+'):
         word = word[:-1]
         rule_section += '{0}List '.format(word)
-        buffer.add('{0}List : \n  {0} | {0}List {0}\n'.format(word))
+        buffer.add('{0}List : \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
         non_terminals.add('{0}List'.format(word))
       elif word.endswith('*'):
         word = word[:-1]
         rule_section += '{0}ListOptional '.format(word)
         buffer.add(
-            '{0}ListOptional : \n  %empty\n  | {0}ListOptional {0}\n'.format(word))
+            '{0}ListOptional : \n    %empty\n  | {0}ListOptional {0}\n;\n\n'.format(word))
         non_terminals.add('{0}ListOptional'.format(word))
       elif word.endswith('+,'):
         word = word[:-2]
         rule_section += '{0}CommaList '.format(word)
         buffer.add(
-            "{0}CommaList : \n  {0}\n  | {0}CommaList ',' {0}\n".format(word))
+            "{0}CommaList : \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
         non_terminals.add('{0}CommaList'.format(word))
       elif word.endswith('*,'):
         word = word[:-2]
         rule_section += '{0}CommaListOptional '.format(word)
         buffer.add(
-            "{0}CommaList : \n  {0}\n  | {0}CommaList ',' {0}\n".format(word))
+            "{0}CommaList : \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
         buffer.add(
-            '{0}CommaListOptional : \n  %empty\n  | {0}CommaList\n'.format(word))
+            '{0}CommaListOptional : \n    %empty\n  | {0}CommaList\n;\n\n'.format(word))
         non_terminals.add('{0}CommaListOptional'.format(word))
+        non_terminals.add('{0}CommaList'.format(word))
       elif word.endswith('?'):
         word = word[:-1]
         rule_section += '{0}Optional '.format(word)
-        buffer.add('{0}Optional : \n  %empty\n  | {0}\n'.format(word))
+        buffer.add('{0}Optional : \n    %empty\n  | {0}\n;\n\n'.format(word))
         non_terminals.add('{0}Optional'.format(word))
       else:
         rule_section += '{0} '.format(word)
