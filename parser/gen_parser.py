@@ -54,8 +54,10 @@ for rule in rules:
         word = word[:-1]
         rule_section += '{0}ListOptional '.format(word)
         buffer.add(
-            '{0}ListOptional : \n    %empty\n  | {0}ListOptional {0}\n;\n\n'.format(word))
+            '{0}ListOptional : \n    %empty\n  | {0}List\n;\n\n'.format(word))
+        buffer.add('{0}List : \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
         non_terminals.add('{0}ListOptional'.format(word))
+        non_terminals.add('{0}List'.format(word))
       elif word.endswith('+,'):
         word = word[:-2]
         rule_section += '{0}CommaList '.format(word)
