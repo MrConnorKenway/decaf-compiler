@@ -9,6 +9,8 @@ GENDIR := $(BUILDDIR)/gen
 INCDIR := $(BUILDDIR)/include
 BINDIR := $(BUILDDIR)/bin
 
+CFLAGS := -g -std=c++11 -I./
+
 .SECONDARY:
 
 include lexer/Makefile
@@ -26,7 +28,10 @@ dir:
 
 build-%: $(OBJDIR)/%.o $(OBJDIR)/%_main.o $(OBJ)
 	@echo - building $* ast version of compiler
-	@g++ -o $(BINDIR)/decaf $< $(word 2, $^) $(OBJ) -g
+	@g++ -o $(BINDIR)/decaf $< $(word 2, $^) $(OBJ) $(CFLAGS)
+
+gdb-%: 
+	@gdb --args $(BINDIR)/decaf test/$*.decaf
 
 clean:
 	@find build/ -type f -delete

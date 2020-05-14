@@ -8,11 +8,11 @@ OBJ += $(OBJDIR)/parser.o
 
 $(OBJDIR)/parser.o: $(SRCDIR)/parser_handwritten.tab.cxx $(INCDIR)/ast.h
 	@echo - generating $(@F)
-	@g++ -c -o $@ $< -ly -I./ 
+	@g++ -c -o $@ $< -ly $(CFLAGS)
 
 $(OBJDIR)/%_main.o: parser/parser_%.cxx $(OBJDIR)/%.o
 	@echo - generating $(@F)
-	@g++ -c -o $@ $< -I./ 
+	@g++ -c -o $@ $< $(CFLAGS)
 
 $(GENDIR)/parser_gen.yxx: parser/gen_parser.py parser/bnf parser/parser_tmpl.yxx
 	@echo - generating bison file

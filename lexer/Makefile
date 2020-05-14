@@ -8,7 +8,7 @@ OBJ += $(OBJDIR)/lexer.o
 
 $(OBJDIR)/lexer.o: $(GENDIR)/lexer_gen.yy.cxx $(INCDIR)/parser_handwritten.tab.h $(INCDIR)/ast.h
 	@echo - generating $(@F)
-	@g++ -c -o $@ $< -I./
+	@g++ -c -o $@ $< $(CFLAGS)
 
 $(GENDIR)/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l
 	@echo - generating flex file

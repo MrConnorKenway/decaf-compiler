@@ -10,9 +10,9 @@ $(SRCDIR)/%_visitor.cxx: visitor/gen_visitor.py
 $(INCDIR)/%_visitor.h: visitor/gen_visitor.py
 	@$< $*_visitor --header-dst $@ --src-dst $(SRCDIR)/$*_visitor.cxx
 
-$(OBJDIR)/%.o: $(SRCDIR)/%_visitor.cxx $(INCDIR)/%_visitor.h $(INCDIR)/visitor.h $(INCDIR)/ast.h
+$(OBJDIR)/%.o: visitor/%_visitor_handwritten.cxx $(INCDIR)/%_visitor.h $(INCDIR)/visitor.h $(INCDIR)/ast.h
 	@echo - generating $(@F)
-	@g++ -c -o $@ $< -I./
+	@g++ -c -o $@ $< $(CFLAGS)
 
 $(INCDIR)/visitor.h: visitor/gen_visitor.py visitor/visitor_tmpl.h
 	@echo - generating visitor header file

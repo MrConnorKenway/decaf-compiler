@@ -8,7 +8,7 @@ OBJ += $(OBJDIR)/ast.o
 
 $(OBJDIR)/ast.o: $(SRCDIR)/ast.cxx $(INCDIR)/ast.h $(INCDIR)/visitor.h
 	@echo - generating $(@F)
-	@g++ -c -o $@ $< -I./
+	@g++ -c -o $@ $< $(CFLAGS)
 
 $(INCDIR)/ast.h: ast/gen_ast.py ast/ast_tmpl.h
 	@echo - generating ast header and source file
