@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import re
-import sys
+import argparse
 from string import Template
 
 '''
@@ -9,10 +9,10 @@ virtual function declaration for Visitor class.
 '''
 
 
-def gen_base():
+def gen_base(args):
   with open('visitor/visitor_tmpl.h', 'r') as vis_tmpl, \
           open('ast/ast_tmpl.h', 'r') as ast_tmpl, \
-          open('visitor/visitor.h', 'w') as vis:
+          open(args.header, 'w') as vis:
     ast_tmpl = ast_tmpl.read()
     subclass_names = re.findall(
         r"class (.*) : .* {[\s\S]*?};", ast_tmpl, re.MULTILINE)
@@ -24,16 +24,15 @@ def gen_base():
     vis.write(vis_tmpl.substitute(decl=function_decl))
 
 
-def gen(class_name):
+def gen(args):
   # function to generate arbitrary visitor subclass
-  dir = 'visitor/'
-  with open(dir+class_name+'.cxx', 'w') as src, \
+  with open(args.src, 'w') as src, \
           open('visitor/visitor_tmpl.h', 'r') as vis, \
-          open(dir+class_name+'_tmpl.cxx', 'r') as src_tmpl, \
-          open(dir+class_name+'_tmpl.h', 'r') as header_tmpl, \
+          open('visitor/'+args.class_name+'_tmpl.cxx', 'r') as src_tmpl, \
+          open('visitor/'+args.class_name+'_tmpl.h', 'r') as header_tmpl, \
           open('ast/ast_tmpl.h', 'r') as ast_tmpl, \
-          open(dir+class_name+'.h', 'w') as header:
-    assert class_name != 'visitor'
+          open(args.header, 'w') as header:
+    class_name = args.class_name
     class_name = class_name[0].upper() + class_name[1:]
     src_tmpl = Template(src_tmpl.read().replace('//', ''))
     header_tmpl = Template(header_tmpl.read().replace('///', ''))
@@ -54,8 +53,18 @@ def gen(class_name):
 
 
 if __name__ == "__main__":
-  if len(sys.argv) == 1:
-    gen_base()
+  parser = argparse.ArgumentParser(description='Generate visitor class')
+  parser.add_argument('class_name', help='Class name to be generated')
+  parser.add_argument('--src-dst', dest='src',
+                      help='specify the destination of generated source file')
+  parser.add_argument('--header-dst', dest='header',
+                      help='specify the destination of generated header file')
+
+  args = parser.parse_args()
+  if args.class_name == 'base':
+    assert args.header != None
+    gen_base(args)
   else:
-    assert len(sys.argv) == 2
-    gen(sys.argv[1])
+    assert args.header != None
+    assert args.src != None
+    gen(args)

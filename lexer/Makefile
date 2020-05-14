@@ -4,14 +4,16 @@
 # you must run GNU make in the top-level directory.
 #
 
-build/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l ast/ast.h
-	@echo - generating flex file
-	@$<
+OBJ += $(OBJDIR)/lexer.o
 
-build/lexer_gen.yy.cxx: build/lexer_gen.l lexer/gen_lexer.py lexer/lexer_tmpl.l
+$(OBJDIR)/lexer.o: $(GENDIR)/lexer_gen.yy.cxx $(INCDIR)/parser_handwritten.tab.h $(INCDIR)/ast.h
+	@echo - generating $(@F)
+	@g++ -c -o $@ $< -I./
+
+$(GENDIR)/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l
+	@echo - generating flex file
+	@$< $@
+
+$(GENDIR)/lexer_gen.yy.cxx: $(GENDIR)/lexer_gen.l lexer/gen_lexer.py lexer/lexer_tmpl.l
 	@echo - generating lexer source file
 	@flex -+ -o $@ $<
-
-all: build/lexer_gen.yy.cxx
-
-.PHONY: all

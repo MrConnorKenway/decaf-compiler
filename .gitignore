@@ -1,4 +1,4 @@
 .vscode
 .idea
 *.code-workspace
-bin/*
+build/*

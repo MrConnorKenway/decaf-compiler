@@ -4,12 +4,16 @@
 # you must run GNU make in the top-level directory.
 #
 
-TMP_FILE += visitor/visitor.h
+$(SRCDIR)/%_visitor.cxx: visitor/gen_visitor.py
+	@$< $*_visitor --header-dst $(INCDIR)/$*_visitor.h --src-dst $@
 
-visitor/visitor.h: visitor/gen_visitor.py visitor/visitor_tmpl.h
-	@echo - generating ast header file
-	@$<
+$(INCDIR)/%_visitor.h: visitor/gen_visitor.py
+	@$< $*_visitor --header-dst $@ --src-dst $(SRCDIR)/$*_visitor.cxx
 
-all: visitor/visitor.h
+$(OBJDIR)/%.o: $(SRCDIR)/%_visitor.cxx $(INCDIR)/%_visitor.h $(INCDIR)/visitor.h $(INCDIR)/ast.h
+	@echo - generating $(@F)
+	@g++ -c -o $@ $< -I./
 
-.PHONY: all
+$(INCDIR)/visitor.h: visitor/gen_visitor.py visitor/visitor_tmpl.h
+	@echo - generating visitor header file
+	@$< base --header-dst $@

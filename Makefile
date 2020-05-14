@@ -1,25 +1,38 @@
 all:
 
-TMP_FILE := 
+OBJ :=
+
+BUILDDIR := build
+OBJDIR := $(BUILDDIR)/obj
+SRCDIR := $(BUILDDIR)/src
+GENDIR := $(BUILDDIR)/gen
+INCDIR := $(BUILDDIR)/include
+BINDIR := $(BUILDDIR)/bin
+
+.SECONDARY:
 
 include lexer/Makefile
 include parser/Makefile
 include ast/Makefile
 include visitor/Makefile
 
-build: bin/decaf
+dir:
+	@mkdir -p build
+	@mkdir -p build/obj
+	@mkdir -p build/src
+	@mkdir -p build/gen
+	@mkdir -p build/include
+	@mkdir -p build/bin
 
-bin/decaf: build/lexer_gen.yy.cxx build/parser_handwritten.tab.cxx ast/ast.cxx
-	@echo - building compiler
-	@g++ -o $@ $< $(word 2, $^) $(word 3, $^) -ly -std=c++11 -g
+build-%: $(OBJDIR)/%.o $(OBJDIR)/%_main.o $(OBJ)
+	@echo - building $* ast version of compiler
+	@g++ -o $(BINDIR)/decaf $< $(word 2, $^) $(OBJ) -g
 
 clean:
-	@-rm -rf bin/*
-	@-rm -rf build/*
-	@-rm -rf $(TMP_FILE)
+	@find build/ -type f -delete
 
-test-%: bin/decaf
+test-%: $(BINDIR)/decaf
 	@echo - testing using $*.decaf
 	@$< test/$*.decaf
 
-.PHONY: clean build all
+.PHONY: clean build all dir

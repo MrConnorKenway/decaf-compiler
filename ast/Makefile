@@ -4,13 +4,16 @@
 # you must run GNU make in the top-level directory.
 #
 
-TMP_FILE += ast/ast.cxx ast/ast.h
+OBJ += $(OBJDIR)/ast.o
 
-ast/ast.h: ast/gen_ast.py ast/ast_tmpl.h visitor/visitor_tmpl.h
-	@echo - generating ast header file
-	@$<
-	@visitor/gen_visitor.py
+$(OBJDIR)/ast.o: $(SRCDIR)/ast.cxx $(INCDIR)/ast.h $(INCDIR)/visitor.h
+	@echo - generating $(@F)
+	@g++ -c -o $@ $< -I./
 
-all: ast/ast.h
+$(INCDIR)/ast.h: ast/gen_ast.py ast/ast_tmpl.h
+	@echo - generating ast header and source file
+	@$< --header-dst $@ --src-dst $(SRCDIR)/ast.cxx
 
-.PHONY: all
+$(SRCDIR)/ast.cxx: ast/gen_ast.py ast/ast_tmpl.h
+	@echo - generating ast header and source file
+	@$< --header-dst $(INCDIR)/ast.h --src-dst $@

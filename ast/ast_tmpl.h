@@ -1,5 +1,5 @@
 #pragma once
-#include "../ast/ast_base.h"
+#include "ast/ast_base.h"
 
 // $ special mark for python to locate
 // the code above can be copied directly into ast.h

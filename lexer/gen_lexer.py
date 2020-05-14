@@ -1,12 +1,20 @@
 #!/usr/bin/python3
 import re
+import argparse
 from string import Template
+
+parser = argparse.ArgumentParser(
+    description='Generate flex file')
+parser.add_argument(
+    'l_dst', help='specify the destination of generated flex file')
+
+args = parser.parse_args()
 
 rule_list = ''
 with open('lexer/keywords', 'r') as keywords, \
         open('lexer/operators', 'r') as operators, \
         open('lexer/lexer_tmpl.l', 'r') as tmpl, \
-        open('build/lexer_gen.l', 'w') as lexer_gen:
+        open(args.l_dst, 'w') as lexer_gen:
 
   keywords = keywords.read().replace('\n', ' ').split()
   for keyword in keywords:

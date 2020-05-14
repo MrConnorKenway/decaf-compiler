@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import re
+import argparse
 from string import Template
 
 with open('parser/bnf', 'r') as file:
@@ -133,7 +134,14 @@ union_section = ''
 for field in decl_union:
   union_section += field
 
-with open('build/parser_gen.yxx', 'w') as parser, open('parser/parser_tmpl.yxx', 'r') as tmpl:
+parser = argparse.ArgumentParser(
+    description='Generate bison file')
+parser.add_argument(
+    'yxx_dst', help='specify the destination of generated bison file')
+
+args = parser.parse_args()
+
+with open(args.yxx_dst, 'w') as parser, open('parser/parser_tmpl.yxx', 'r') as tmpl:
   t = Template(tmpl.read())
   parser.write(t.substitute(
       decl_section=decl_section, rule_section=rule_section, union_section=union_section))
