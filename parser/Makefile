@@ -10,7 +10,7 @@ $(OBJDIR)/parser.o: $(SRCDIR)/parser_handwritten.tab.cxx $(INCDIR)/ast.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< -ly $(CFLAGS)
 
-$(OBJDIR)/%_main.o: parser/parser_%.cxx $(OBJDIR)/%.o
+$(OBJDIR)/%_main.o: parser/parser_%_main.cxx $(OBJDIR)/%.o
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 

@@ -5,16 +5,12 @@ int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 	yylloc.first_column = yycolumn;	yylloc.last_column = yycolumn + yyleng - 1; \
 	yycolumn += yyleng;
-
-yyFlexLexer lexer;
-
-int yylex() {
-	return lexer.yylex();
-}
 %}
 
 %option yylineno
 %option noyywrap
+%option debug
+%option c++
 
 DIGIT [0-9]
 ID [a-z_][A-Za-z0-9_]*
