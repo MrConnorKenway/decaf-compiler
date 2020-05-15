@@ -46,7 +46,7 @@ def gen(args):
     for subclass_name in subclass_names:
       function_decl += '\n\t/*virtual*/ void visit({0}*);'.format(
           subclass_name)
-      function_def += '\nvoid {0}::visit({1}* {2}) {{\n\tcout << {2}->node_type;\n}}\n'.format(
+      function_def += '\nvoid {0}::visit({1}* {2}) {{\n\tIndent i(current_level);\n\ti.indent({2}->node_type);\n}}\n'.format(
           class_name, subclass_name, subclass_name.lower() + '_ptr')
     header.write(header_tmpl.substitute(decl=function_decl))
     src.write(src_tmpl.substitute(decl=function_def))

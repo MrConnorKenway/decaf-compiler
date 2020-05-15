@@ -1,30 +1,30 @@
-Program : Decl+
-Decl : VariableDecl | FunctionDecl | ClassDecl | InterfaceDecl
-VariableDecl : Variable ;
-Variable : Type t_ident
-Type : t_int | t_double | t_bool | t_string | t_type_ident | Type [ ]
-FunctionDecl : Type t_ident ( Formals ) StmtBlock | \
+Program: Decl+
+Decl: VariableDecl | FunctionDecl | ClassDecl | InterfaceDecl
+VariableDecl: Variable ;
+Variable: Type t_ident
+Type: t_int | t_double | t_bool | t_string | t_type_ident | Type [ ]
+FunctionDecl: Type t_ident ( Formals ) StmtBlock | \
  t_void t_ident ( Formals ) StmtBlock
-Formals : Variable*,
-ClassDecl : t_class t_type_ident Extender? Implementor? { Field* }
-Extender : t_extends t_type_ident
-Implementor : t_implements t_type_ident+,
-Field : VariableDecl | FunctionDecl
-InterfaceDecl : t_interface t_type_ident { Prototype* }
-Prototype : Type t_ident ( Formals ) ; | t_void t_ident ( Formals ) ;
-StmtBlock : { Stmt* }
-Stmt : Expr? ; | IfStmt | WhileStmt | ForStmt | \
+Formals: Variable*,
+ClassDecl: t_class t_type_ident Extender? Implementor? { Field* }
+Extender: t_extends t_type_ident
+Implementor: t_implements t_type_ident+,
+Field: VariableDecl | FunctionDecl
+InterfaceDecl: t_interface t_type_ident { Prototype* }
+Prototype: Type t_ident ( Formals ) ; | t_void t_ident ( Formals ) ;
+StmtBlock: { Stmt* }
+Stmt: Expr? ; | IfStmt | WhileStmt | ForStmt | \
  BreakStmt | ReturnStmt | PrintStmt | StmtBlock | VariableDecl
 
-IfStmt :  t_if ( Expr ) Stmt ElseStmt | t_if ( Expr ) Stmt
-ElseStmt : t_else Stmt
-WhileStmt : t_while ( Expr ) Stmt
-ForStmt : t_for ( Expr? ; Expr ; Expr? ) Stmt
-ReturnStmt : t_return Expr? ;
-BreakStmt : t_break ;
-PrintStmt : t_Print ( Expr+, ) ;
+IfStmt:  t_if ( Expr ) Stmt ElseStmt | t_if ( Expr ) Stmt
+ElseStmt: t_else Stmt
+WhileStmt: t_while ( Expr ) Stmt
+ForStmt: t_for ( Expr? ; Expr ; Expr? ) Stmt
+ReturnStmt: t_return Expr? ;
+BreakStmt: t_break ;
+PrintStmt: t_Print ( Expr+, ) ;
 
-Expr : LValue = Expr | Constant | LValue | t_this | Call | ( Expr ) | \
+Expr: LValue = Expr | Constant | LValue | t_this | Call | ( Expr ) | \
  Expr + Expr | Expr - Expr | Expr * Expr | Expr / Expr | \
  Expr % Expr | - Expr | Expr < Expr | Expr t_less_eq Expr | \
  Expr > Expr | Expr t_greater_eq Expr | Expr t_eq Expr | Expr t_not_eq Expr | \
@@ -32,7 +32,7 @@ Expr : LValue = Expr | Constant | LValue | t_this | Call | ( Expr ) | \
  t_ReadInteger ( ) | t_ReadLine ( ) | t_New ( t_type_ident ) | \
  t_NewArray ( Expr , Type ) 
 
-LValue : t_ident | Expr . t_ident | Expr [ Expr ]
-Call : t_ident ( Actuals ) | Expr . t_ident ( Actuals )
-Actuals : Expr*,
-Constant : c_int | c_double | t_true | t_false | c_string | t_null
+LValue: t_ident | Expr . t_ident | Expr [ Expr ]
+Call: t_ident ( Actuals ) | Expr . t_ident ( Actuals )
+Actuals: Expr*,
+Constant: c_int | c_double | t_true | t_false | c_string | t_null

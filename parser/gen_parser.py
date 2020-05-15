@@ -48,35 +48,35 @@ for rule in rules:
       elif word.endswith('+'):
         word = word[:-1]
         rule_section += '{0}List '.format(word)
-        buffer.add('{0}List : \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
+        buffer.add('{0}List: \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
         non_terminals.add('{0}List'.format(word))
       elif word.endswith('*'):
         word = word[:-1]
         rule_section += '{0}ListOptional '.format(word)
         buffer.add(
-            '{0}ListOptional : \n    %empty\n  | {0}List\n;\n\n'.format(word))
-        buffer.add('{0}List : \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
+            '{0}ListOptional: \n    %empty\n  | {0}List\n;\n\n'.format(word))
+        buffer.add('{0}List: \n    {0}\n | {0}List {0}\n;\n\n'.format(word))
         non_terminals.add('{0}ListOptional'.format(word))
         non_terminals.add('{0}List'.format(word))
       elif word.endswith('+,'):
         word = word[:-2]
         rule_section += '{0}CommaList '.format(word)
         buffer.add(
-            "{0}CommaList : \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
+            "{0}CommaList: \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
         non_terminals.add('{0}CommaList'.format(word))
       elif word.endswith('*,'):
         word = word[:-2]
         rule_section += '{0}CommaListOptional '.format(word)
         buffer.add(
-            "{0}CommaList : \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
+            "{0}CommaList: \n    {0}\n  | {0}CommaList ',' {0}\n;\n\n".format(word))
         buffer.add(
-            '{0}CommaListOptional : \n    %empty\n  | {0}CommaList\n;\n\n'.format(word))
+            '{0}CommaListOptional: \n    %empty\n  | {0}CommaList\n;\n\n'.format(word))
         non_terminals.add('{0}CommaListOptional'.format(word))
         non_terminals.add('{0}CommaList'.format(word))
       elif word.endswith('?'):
         word = word[:-1]
         rule_section += '{0}Optional '.format(word)
-        buffer.add('{0}Optional : \n    %empty\n  | {0}\n;\n\n'.format(word))
+        buffer.add('{0}Optional: \n    %empty\n  | {0}\n;\n\n'.format(word))
         non_terminals.add('{0}Optional'.format(word))
       else:
         rule_section += '{0} '.format(word)
@@ -121,11 +121,7 @@ for non_terminal in non_terminals:
     # new node type
     beg = non_terminal.find('Optional')
     if beg >= 0:
-      if non_terminal[:beg] in base_node:
-        decl_section += '%type <base_node_ptr_t> {0}\n'.format(non_terminal)
-      else:
-        decl_section += '%type <{0}_node_ptr_t> {1}\n'.format(
-            non_terminal[:beg], non_terminal)
+      decl_section += '%type <base_node_ptr_t> {0}\n'.format(non_terminal)
     else:
       decl_section += '%type <{0}_node_ptr_t> {0}\n'.format(non_terminal)
       decl_union.add('\t{0}_node* {0}_node_ptr_t;\n'.format(non_terminal))

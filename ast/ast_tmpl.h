@@ -9,11 +9,13 @@ class List_node : public AST_node_base {
 };
 
 // special node to handle 'this' reference
-class This_node : public AST_node_base {
-};
+class This_node : public AST_node_base {};
 
-class Null_const_node : public AST_node_base {
-};
+class Null_const_node : public AST_node_base {};
+
+// this node is used to handle the case when 
+// an non-terminal produce a empty production
+class Empty_node : public AST_node_base {};
 
 class Type_ident_node : public AST_node_base {
  public:
@@ -52,11 +54,13 @@ class Assignment_node : public AST_node_base {
 class Binary_expr_node : public AST_node_base {
  public:
   ast_node_ptr_t left_operand;
+  int op;
   ast_node_ptr_t right_operand;
 };
 
 class Unary_expr_node : public AST_node_base {
  public:
+  int op;
   ast_node_ptr_t operand;
 };
 
@@ -80,7 +84,7 @@ class New_array_op_node : public AST_node_base {
 class Dot_op_node : public AST_node_base {
  public:
   ast_node_ptr_t obj;
-  Ident_node* id;
+  Ident_node* member_id;
 };
 
 class Index_op_node : public AST_node_base {
@@ -126,8 +130,8 @@ class Implementor_node : public AST_node_base {
 class ClassDecl_node : public AST_node_base {
  public:
   Type_ident_node* type_id;
-  Extender_node* extender;
-  Implementor_node* implementer;
+  ast_node_ptr_t extender_optional;
+  ast_node_ptr_t implementer_optional;
   List_node* field_list_optional;
 };
 
