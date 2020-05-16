@@ -241,6 +241,11 @@ void Display_visitor::visit(BreakStmt_node* breakstmt_node_ptr) {
   i.indent(breakstmt_node_ptr->node_type);
 }
 
+void Display_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
+  Indent i(is_last_bools, is_last);
+  i.indent(continuestmt_node_ptr->node_type);
+}
+
 void Display_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(ifstmt_node_ptr->node_type);

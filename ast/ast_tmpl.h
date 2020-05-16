@@ -13,7 +13,7 @@ class This_node : public AST_node_base {};
 
 class Null_const_node : public AST_node_base {};
 
-// this node is used to handle the case when 
+// this node is used to handle the case when
 // an non-terminal produce a empty production
 class Empty_node : public AST_node_base {};
 
@@ -186,6 +186,11 @@ class Call_node : public AST_node_base {
 };
 
 class BreakStmt_node : public AST_node_base {
+ public:
+  ast_node_ptr_t resident_loop_node;
+};
+
+class ContinueStmt_node : public AST_node_base {
  public:
   ast_node_ptr_t resident_loop_node;
 };

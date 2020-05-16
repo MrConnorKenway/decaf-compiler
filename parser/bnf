@@ -14,7 +14,7 @@ InterfaceDecl: t_interface t_type_ident { Prototype* }
 Prototype: Type t_ident ( Formals ) ; | t_void t_ident ( Formals ) ;
 StmtBlock: { Stmt* }
 Stmt: Expr? ; | IfStmt | WhileStmt | ForStmt | \
- BreakStmt | ReturnStmt | PrintStmt | StmtBlock | VariableDecl
+ BreakStmt | ContinueStmt | ReturnStmt | PrintStmt | StmtBlock | VariableDecl
 
 IfStmt:  t_if ( Expr ) Stmt ElseStmt | t_if ( Expr ) Stmt
 ElseStmt: t_else Stmt
@@ -22,6 +22,7 @@ WhileStmt: t_while ( Expr ) Stmt
 ForStmt: t_for ( Expr? ; Expr ; Expr? ) Stmt
 ReturnStmt: t_return Expr? ;
 BreakStmt: t_break ;
+ContinueStmt: t_continue;
 PrintStmt: t_Print ( Expr+, ) ;
 
 Expr: LValue = Expr | Constant | LValue | t_this | Call | ( Expr ) | \
