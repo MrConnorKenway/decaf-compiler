@@ -31,3 +31,5 @@ $(INCDIR)/parser_handwritten.tab.h: parser/parser_handwritten.yxx
 	@echo - using handwritten bison file
 	@echo - generating parser file
 	@bison --defines=$@ $< -v -Wall -o $(SRCDIR)/parser_handwritten.tab.cxx
+
+	.DELETE_ON_ERROR: $(GENDIR)/parser_gen.yxx

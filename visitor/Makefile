@@ -17,3 +17,5 @@ $(OBJDIR)/%.o: visitor/%_visitor_handwritten.cxx $(INCDIR)/%_visitor.h $(INCDIR)
 $(INCDIR)/visitor.h: visitor/gen_visitor.py visitor/visitor_tmpl.h ast/ast_tmpl.h
 	@echo - generating visitor header file
 	@$< base --header-dst $@
+
+.DELETE_ON_ERROR: $(SRCDIR)/%_visitor.cxx $(INCDIR)/%_visitor.h $(INCDIR)/visitor.h
