@@ -17,3 +17,5 @@ $(INCDIR)/ast.h: ast/gen_ast.py ast/ast_tmpl.h
 $(SRCDIR)/ast.cxx: ast/gen_ast.py ast/ast_tmpl.h
 	@echo - generating ast header and source file
 	@$< --header-dst $(INCDIR)/ast.h --src-dst $@
+
+.DELETE_ON_ERROR: $(INCDIR)/ast.h $(SRCDIR)/ast.cxx
