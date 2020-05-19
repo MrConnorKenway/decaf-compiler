@@ -154,11 +154,11 @@ void Display_visitor::visit(Extender_node* extender_node_ptr) {
            extender_node_ptr->type_id->type_ident_name);
 }
 
-void Display_visitor::visit(Implementor_node* implementor_node_ptr) {
+void Display_visitor::visit(Implementer_node* implementer_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(implementor_node_ptr->node_type);
+  i.indent(implementer_node_ptr->node_type);
   is_last = true;
-  implementor_node_ptr->type_ident_list->accept(*this);
+  implementer_node_ptr->type_ident_list->accept(*this);
 }
 
 void Display_visitor::visit(ClassDecl_node* classdecl_node_ptr) {

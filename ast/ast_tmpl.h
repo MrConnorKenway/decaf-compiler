@@ -122,7 +122,7 @@ class Extender_node : public AST_node_base {
   Type_ident_node* type_id;
 };
 
-class Implementor_node : public AST_node_base {
+class Implementer_node : public AST_node_base {
  public:
   List_node* type_ident_list;
 };
