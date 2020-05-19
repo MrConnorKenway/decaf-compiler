@@ -112,7 +112,7 @@ with open('parser/parser_tmpl.yxx', 'r') as tmpl:
     non_terminals.discard(t)
 
 for non_terminal in non_terminals:
-  if non_terminal.find('List') >= 0:
+  if non_terminal.find('List') >= 0 or non_terminal.find('Implementer') >= 0:
     # treat all List as the same
     decl_section += '%type <List_node_ptr_t> {0}\n'.format(non_terminal)
     decl_union.add('\tList_node *List_node_ptr_t;\n')

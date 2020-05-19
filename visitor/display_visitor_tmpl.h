@@ -16,7 +16,7 @@ class Display_visitor : public Visitor {
 
   Display_visitor(vector<bool> &v, bool &b) : is_last_bools(v), is_last(b) {}
   static string op_code_to_str(int op_code);
-  static string type_code_to_str(int type_code);
+  static string base_type_code_to_str(int type_code);
   ///$decl
 };
 

@@ -51,6 +51,7 @@ $decl_section
 %type <base_node_ptr_t> LValue
 %type <base_node_ptr_t> Constant
 %type <base_node_ptr_t> Type
+%type <base_node_ptr_t> Extender
 
 %right THEN t_else
 %token ';'

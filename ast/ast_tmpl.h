@@ -117,16 +117,6 @@ class Bool_const_node : public AST_node_base {
   int val;
 };
 
-class Extender_node : public AST_node_base {
- public:
-  Type_ident_node* type_id;
-};
-
-class Implementer_node : public AST_node_base {
- public:
-  List_node* type_ident_list;
-};
-
 class ClassDecl_node : public AST_node_base {
  public:
   Type_ident_node* type_id;

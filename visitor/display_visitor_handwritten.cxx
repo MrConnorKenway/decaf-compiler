@@ -45,20 +45,23 @@ string Display_visitor::op_code_to_str(int op_code) {
   }
 }
 
-string Display_visitor::type_code_to_str(int type_code) {
+string Display_visitor::base_type_code_to_str(int type_code) {
   switch (type_code) {
     case t_int:
       return "int";
-    
+
     case t_bool:
       return "bool";
 
     case t_double:
       return "double";
-    
+
     case t_string:
       return "string";
-    
+
+    case t_void:
+      return "void";
+
     default:
       return "unknown type code";
   }
@@ -107,7 +110,7 @@ void Display_visitor::visit(Ident_node* ident_node_ptr) {
 void Display_visitor::visit(Base_type_node* base_type_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(base_type_node_ptr->node_type +
-           " type: " + type_code_to_str(base_type_node_ptr->type));
+           " type: " + base_type_code_to_str(base_type_node_ptr->type));
   ;
 }
 
@@ -215,24 +218,13 @@ void Display_visitor::visit(Bool_const_node* bool_const_node_ptr) {
            " val: " + std::to_string(bool_const_node_ptr->val));
 }
 
-void Display_visitor::visit(Extender_node* extender_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(extender_node_ptr->node_type + ": extends class " +
-           extender_node_ptr->type_id->type_ident_name);
-}
-
-void Display_visitor::visit(Implementer_node* implementer_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(implementer_node_ptr->node_type);
-  is_last = true;
-  implementer_node_ptr->type_ident_list->accept(*this);
-}
-
 void Display_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(classdecl_node_ptr->node_type);
   classdecl_node_ptr->type_id->accept(*this);
+  classdecl_node_ptr->extender_optional->node_type = "Extender node: ";
   classdecl_node_ptr->extender_optional->accept(*this);
+  classdecl_node_ptr->implementer_optional->node_type = "Implementer node: ";
   classdecl_node_ptr->implementer_optional->accept(*this);
   is_last = true;
   classdecl_node_ptr->field_list_optional->node_type = "FieldList_node";

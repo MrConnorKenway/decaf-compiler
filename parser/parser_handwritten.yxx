@@ -23,23 +23,21 @@ ast_node_ptr_t root;
 %locations
 
 %union {
-	Implementer_node* Implementer_node_ptr_t;
+	InterfaceDecl_node* InterfaceDecl_node_ptr_t;
+	FunctionDecl_node* FunctionDecl_node_ptr_t;
 	ContinueStmt_node* ContinueStmt_node_ptr_t;
-	ClassDecl_node* ClassDecl_node_ptr_t;
-	WhileStmt_node* WhileStmt_node_ptr_t;
+	ForStmt_node* ForStmt_node_ptr_t;
+	StmtBlock_node* StmtBlock_node_ptr_t;
+	ReturnStmt_node* ReturnStmt_node_ptr_t;
+	PrintStmt_node* PrintStmt_node_ptr_t;
 	List_node *List_node_ptr_t;
 	Prototype_node* Prototype_node_ptr_t;
-	StmtBlock_node* StmtBlock_node_ptr_t;
-	Extender_node* Extender_node_ptr_t;
 	IfStmt_node* IfStmt_node_ptr_t;
-	Variable_node* Variable_node_ptr_t;
+	WhileStmt_node* WhileStmt_node_ptr_t;
 	BreakStmt_node* BreakStmt_node_ptr_t;
-	ForStmt_node* ForStmt_node_ptr_t;
-	InterfaceDecl_node* InterfaceDecl_node_ptr_t;
-	PrintStmt_node* PrintStmt_node_ptr_t;
-	FunctionDecl_node* FunctionDecl_node_ptr_t;
 	Call_node* Call_node_ptr_t;
-	ReturnStmt_node* ReturnStmt_node_ptr_t;
+	ClassDecl_node* ClassDecl_node_ptr_t;
+	Variable_node* Variable_node_ptr_t;
 
 	ast_node_ptr_t base_node_ptr_t;
 	Ident_node* Ident_node_ptr_t;
@@ -50,71 +48,70 @@ ast_node_ptr_t root;
 	int int_val;
 }
 
-%token <int_val> t_true
-%token <int_val> t_or
-%token <int_val> t_else
-%token <int_val> t_return
-%token <Ident_node_ptr_t> t_ident
-%token <int_val> t_while
-%token <int_val> t_for
-%token <int_val> t_this
-%token <int_val> t_extends
-%token <int_val> t_greater_eq
-%token <int_val> t_double
+%token <int_val> t_implements
 %token <int_val> t_ReadInteger
+%token <int_val> t_interface
+%token <int_val> t_not_eq
+%token <int_val> t_false
+%token <int_val> t_New
+%token <int_val> t_and
+%token <int_val> t_extends
+%token <int_val> t_bool
+%token <int_val> t_true
+%token <Ident_node_ptr_t> t_ident
+%token <int_val> t_less_eq
+%token <int_val> t_null
 %token <int_val> t_string
 %token <int_val> t_eq
-%token <int_val> t_not_eq
-%token <Type_ident_node_ptr_t> t_type_ident
-%token <int_val> t_New
-%token <int_val> t_false
-%token <int_val> t_less_eq
-%token <int_val> t_void
-%token <int_val> t_NewArray
-%token <int_val> t_interface
-%token <int_val> t_break
-%token <int_val> t_null
-%token <int_val> t_Print
-%token <int_val> t_and
-%token <int_val> t_if
-%token <int_val> t_ReadLine
-%token <int_val> t_class
-%token <int_val> t_int
-%token <int_val> t_bool
-%token <int_val> t_implements
 %token <int_val> t_continue;
+%token <int_val> t_NewArray
+%token <int_val> t_else
+%token <int_val> t_if
+%token <int_val> t_Print
+%token <int_val> t_greater_eq
+%token <int_val> t_double
+%token <int_val> t_break
+%token <int_val> t_int
+%token <int_val> t_return
+%token <Type_ident_node_ptr_t> t_type_ident
+%token <int_val> t_this
+%token <int_val> t_class
+%token <int_val> t_or
+%token <int_val> t_while
+%token <int_val> t_void
+%token <int_val> t_ReadLine
+%token <int_val> t_for
 
-%type <Call_node_ptr_t> Call
-%type <List_node_ptr_t> VariableCommaListOptional
-%type <List_node_ptr_t> PrototypeListOptional
-%type <List_node_ptr_t> ExprCommaList
-%type <List_node_ptr_t> FieldList
-%type <IfStmt_node_ptr_t> IfStmt
-%type <Extender_node_ptr_t> Extender
-%type <List_node_ptr_t> StmtListOptional
-%type <FunctionDecl_node_ptr_t> FunctionDecl
-%type <List_node_ptr_t> PrototypeList
-%type <base_node_ptr_t> ExtenderOptional
-%type <Prototype_node_ptr_t> Prototype
-%type <List_node_ptr_t> t_type_identCommaList
-%type <Variable_node_ptr_t> Variable
-%type <base_node_ptr_t> ImplementerOptional
-%type <ReturnStmt_node_ptr_t> ReturnStmt
-%type <List_node_ptr_t> FieldListOptional
-%type <List_node_ptr_t> StmtList
-%type <base_node_ptr_t> ExprOptional
-%type <Implementer_node_ptr_t> Implementer
-%type <List_node_ptr_t> VariableCommaList
-%type <BreakStmt_node_ptr_t> BreakStmt
-%type <PrintStmt_node_ptr_t> PrintStmt
 %type <ClassDecl_node_ptr_t> ClassDecl
+%type <Variable_node_ptr_t> Variable
+%type <List_node_ptr_t> ExprCommaList
+%type <FunctionDecl_node_ptr_t> FunctionDecl
 %type <List_node_ptr_t> DeclList
-%type <StmtBlock_node_ptr_t> StmtBlock
-%type <InterfaceDecl_node_ptr_t> InterfaceDecl
-%type <ForStmt_node_ptr_t> ForStmt
-%type <ContinueStmt_node_ptr_t> ContinueStmt
-%type <List_node_ptr_t> ExprCommaListOptional
+%type <IfStmt_node_ptr_t> IfStmt
 %type <WhileStmt_node_ptr_t> WhileStmt
+%type <List_node_ptr_t> StmtListOptional
+%type <List_node_ptr_t> PrototypeListOptional
+%type <List_node_ptr_t> VariableCommaList
+%type <base_node_ptr_t> ImplementerOptional
+%type <List_node_ptr_t> StmtList
+%type <PrintStmt_node_ptr_t> PrintStmt
+%type <Call_node_ptr_t> Call
+%type <ContinueStmt_node_ptr_t> ContinueStmt
+%type <InterfaceDecl_node_ptr_t> InterfaceDecl
+%type <List_node_ptr_t> VariableCommaListOptional
+%type <List_node_ptr_t> FieldList
+%type <Prototype_node_ptr_t> Prototype
+%type <List_node_ptr_t> Implementer
+%type <List_node_ptr_t> PrototypeList
+%type <ForStmt_node_ptr_t> ForStmt
+%type <base_node_ptr_t> ExprOptional
+%type <BreakStmt_node_ptr_t> BreakStmt
+%type <List_node_ptr_t> FieldListOptional
+%type <base_node_ptr_t> ExtenderOptional
+%type <List_node_ptr_t> t_type_identCommaList
+%type <StmtBlock_node_ptr_t> StmtBlock
+%type <ReturnStmt_node_ptr_t> ReturnStmt
+%type <List_node_ptr_t> ExprCommaListOptional
 
 
 %token <Int_const_node_ptr_t> c_int
@@ -133,6 +130,7 @@ ast_node_ptr_t root;
 %type <base_node_ptr_t> LValue
 %type <base_node_ptr_t> Constant
 %type <base_node_ptr_t> Type
+%type <base_node_ptr_t> Extender
 
 %right THEN t_else
 %token ';'
@@ -195,11 +193,11 @@ ClassDecl:
 ;
 
 Extender: 
-    t_extends t_type_ident { $$ = new Extender_node($2); }
+    t_extends t_type_ident { $$ = $2; }
 ;
 
 Implementer: 
-    t_implements t_type_identCommaList { $$ = new Implementer_node($2); }
+    t_implements t_type_identCommaList { $$ = $2; }
 ;
 
 Field: 
@@ -344,7 +342,7 @@ DeclList:
 ;
 
 ImplementerOptional: 
-    %empty { $$ = new Empty_node(); }
+    %empty { $$ = new List_node(); }
   | Implementer
 ;
 
