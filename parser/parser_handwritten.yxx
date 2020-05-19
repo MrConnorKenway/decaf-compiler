@@ -23,7 +23,7 @@ ast_node_ptr_t root;
 %locations
 
 %union {
-	Implementor_node* Implementor_node_ptr_t;
+	Implementer_node* Implementer_node_ptr_t;
 	ContinueStmt_node* ContinueStmt_node_ptr_t;
 	ClassDecl_node* ClassDecl_node_ptr_t;
 	WhileStmt_node* WhileStmt_node_ptr_t;
@@ -98,12 +98,12 @@ ast_node_ptr_t root;
 %type <Prototype_node_ptr_t> Prototype
 %type <List_node_ptr_t> t_type_identCommaList
 %type <Variable_node_ptr_t> Variable
-%type <base_node_ptr_t> ImplementorOptional
+%type <base_node_ptr_t> ImplementerOptional
 %type <ReturnStmt_node_ptr_t> ReturnStmt
 %type <List_node_ptr_t> FieldListOptional
 %type <List_node_ptr_t> StmtList
 %type <base_node_ptr_t> ExprOptional
-%type <Implementor_node_ptr_t> Implementor
+%type <Implementer_node_ptr_t> Implementer
 %type <List_node_ptr_t> VariableCommaList
 %type <BreakStmt_node_ptr_t> BreakStmt
 %type <PrintStmt_node_ptr_t> PrintStmt
@@ -189,7 +189,7 @@ Formals:
 ;
 
 ClassDecl: 
-    t_class t_type_ident ExtenderOptional ImplementorOptional '{' FieldListOptional '}' { 
+    t_class t_type_ident ExtenderOptional ImplementerOptional '{' FieldListOptional '}' { 
       $$ = new ClassDecl_node($2, $3, $4, $6); 
     }
 ;
@@ -198,8 +198,8 @@ Extender:
     t_extends t_type_ident { $$ = new Extender_node($2); }
 ;
 
-Implementor: 
-    t_implements t_type_identCommaList { $$ = new Implementor_node($2); }
+Implementer: 
+    t_implements t_type_identCommaList { $$ = new Implementer_node($2); }
 ;
 
 Field: 
@@ -343,9 +343,9 @@ DeclList:
   | DeclList Decl { $$ = $1; $$->list.push_back($2); }
 ;
 
-ImplementorOptional: 
+ImplementerOptional: 
     %empty { $$ = new Empty_node(); }
-  | Implementor
+  | Implementer
 ;
 
 ExprOptional: 

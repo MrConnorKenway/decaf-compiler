@@ -6,9 +6,9 @@ Type: t_int | t_double | t_bool | t_string | t_type_ident | Type [ ]
 FunctionDecl: Type t_ident ( Formals ) StmtBlock | \
  t_void t_ident ( Formals ) StmtBlock
 Formals: Variable*,
-ClassDecl: t_class t_type_ident Extender? Implementor? { Field* }
+ClassDecl: t_class t_type_ident Extender? Implementer? { Field* }
 Extender: t_extends t_type_ident
-Implementor: t_implements t_type_ident+,
+Implementer: t_implements t_type_ident+,
 Field: VariableDecl | FunctionDecl
 InterfaceDecl: t_interface t_type_ident { Prototype* }
 Prototype: Type t_ident ( Formals ) ; | t_void t_ident ( Formals ) ;
