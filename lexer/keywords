@@ -17,6 +17,7 @@ else
 for
 return
 break
+continue
 Print
 ReadInteger
 ReadLine
