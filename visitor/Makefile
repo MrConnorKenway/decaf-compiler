@@ -4,6 +4,8 @@
 # you must run GNU make in the top-level directory.
 #
 
+OBJ += $(OBJDIR)/display.o
+
 $(SRCDIR)/%_visitor.cxx: visitor/gen_visitor.py ast/ast_tmpl.h
 	@$< $*_visitor --header-dst $(INCDIR)/$*_visitor.h --src-dst $@
 

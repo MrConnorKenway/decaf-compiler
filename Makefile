@@ -9,7 +9,7 @@ GENDIR := $(BUILDDIR)/gen
 INCDIR := $(BUILDDIR)/include
 BINDIR := $(BUILDDIR)/bin
 
-CFLAGS := -g -std=c++11 -I./
+CFLAGS := -g -std=c++17 -I./
 
 .SECONDARY:
 
@@ -17,6 +17,7 @@ include lexer/Makefile
 include parser/Makefile
 include ast/Makefile
 include visitor/Makefile
+include kern/Makefile
 
 dir:
 	@mkdir -p build
@@ -26,9 +27,9 @@ dir:
 	@mkdir -p build/include
 	@mkdir -p build/bin
 
-build-%: $(OBJDIR)/%.o $(OBJDIR)/%_main.o $(OBJ)
-	@echo - building $* ast version of compiler
-	@g++ -o $(BINDIR)/decaf $< $(word 2, $^) $(OBJ) $(CFLAGS)
+build: $(OBJ)
+	@echo - building compiler
+	@g++ -o $(BINDIR)/decaf $(OBJ) $(CFLAGS)
 
 gdb-%: 
 	@gdb --args $(BINDIR)/decaf test/$*.decaf
