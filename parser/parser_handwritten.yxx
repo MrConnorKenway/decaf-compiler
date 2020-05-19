@@ -226,6 +226,7 @@ Stmt:
   | WhileStmt 
   | ForStmt 
   | BreakStmt 
+  | ContinueStmt
   | ReturnStmt 
   | PrintStmt 
   | StmtBlock 
