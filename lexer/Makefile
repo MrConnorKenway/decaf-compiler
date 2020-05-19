@@ -10,7 +10,7 @@ $(OBJDIR)/lexer.o: $(SRCDIR)/lexer_gen.yy.cxx $(INCDIR)/parser_handwritten.tab.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 
-$(GENDIR)/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l
+$(GENDIR)/lexer_gen.l: lexer/gen_lexer.py lexer/lexer_tmpl.l lexer/keywords lexer/operators
 	@echo - generating flex file
 	@$< $@
 
