@@ -1,4 +1,68 @@
 #include "build/include/display_visitor.h"
+#include "build/include/parser_handwritten.tab.h"
+
+string Display_visitor::op_code_to_str(int op_code) {
+  switch (op_code) {
+    case '+':
+
+    case '-':
+
+    case '*':
+
+    case '/':
+
+    case '<':
+
+    case '>':
+
+    case '=':
+
+    case '%':
+
+    case '!':
+      return string(1, op_code);
+
+    case t_eq:
+      return "==";
+
+    case t_greater_eq:
+      return ">=";
+
+    case t_less_eq:
+      return "<=";
+
+    case t_not_eq:
+      return "!=";
+
+    case t_and:
+      return "&&";
+
+    case t_or:
+      return "||";
+
+    default:
+      return "unknown op code";
+  }
+}
+
+string Display_visitor::type_code_to_str(int type_code) {
+  switch (type_code) {
+    case t_int:
+      return "int";
+    
+    case t_bool:
+      return "bool";
+
+    case t_double:
+      return "double";
+    
+    case t_string:
+      return "string";
+    
+    default:
+      return "unknown type code";
+  }
+}
 
 void Display_visitor::visit(List_node* list_node_ptr) {
   Indent i(is_last_bools, is_last);
@@ -43,7 +107,7 @@ void Display_visitor::visit(Ident_node* ident_node_ptr) {
 void Display_visitor::visit(Base_type_node* base_type_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(base_type_node_ptr->node_type +
-           " type: " + std::to_string(base_type_node_ptr->type));
+           " type: " + type_code_to_str(base_type_node_ptr->type));
   ;
 }
 
@@ -72,7 +136,7 @@ void Display_visitor::visit(Assignment_node* assignment_node_ptr) {
 void Display_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(binary_expr_node_ptr->node_type +
-           " op: " + std::to_string(binary_expr_node_ptr->op));
+           " op: " + op_code_to_str(binary_expr_node_ptr->op));
   binary_expr_node_ptr->left_operand->accept(*this);
   is_last = true;
   binary_expr_node_ptr->right_operand->accept(*this);
@@ -81,15 +145,18 @@ void Display_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
 void Display_visitor::visit(Unary_expr_node* unary_expr_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(unary_expr_node_ptr->node_type +
-           " op: " + std::to_string(unary_expr_node_ptr->op));
+           " op: " + op_code_to_str(unary_expr_node_ptr->op));
   is_last = true;
   unary_expr_node_ptr->operand->accept(*this);
 }
 
 void Display_visitor::visit(Read_op_node* read_op_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(read_op_node_ptr->node_type +
-           " Read type: " + std::to_string(read_op_node_ptr->read_type));
+  if (read_op_node_ptr->read_type == t_ReadInteger) {
+    i.indent(read_op_node_ptr->node_type + " Read type: Read Integer");
+  } else {
+    i.indent(read_op_node_ptr->node_type + " Read type: Read Line");
+  }
 }
 
 void Display_visitor::visit(New_op_node* new_op_node_ptr) {
