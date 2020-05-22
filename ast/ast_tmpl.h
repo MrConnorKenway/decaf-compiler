@@ -121,7 +121,7 @@ class ClassDecl_node : public AST_node_base {
  public:
   Type_ident_node* type_id;
   ast_node_ptr_t extender_optional;
-  ast_node_ptr_t implementer_optional;
+  List_node* implementer_optional;
   List_node* field_list_optional;
 };
 

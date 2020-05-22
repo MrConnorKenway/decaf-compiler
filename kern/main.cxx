@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "build/include/create_symbol_table_visitor.h"
 #include "build/include/display_visitor.h"
 
 extern ast_node_ptr_t root;
@@ -31,10 +32,13 @@ int main(int argc, char** argv) {
 
   vector<bool> is_last_bools;
   bool is_last = true;
-  Display_visitor v(is_last_bools, is_last);
+  Display_visitor display_visitor(is_last_bools, is_last);
 
   cout << "Program" << endl;
-  root->accept(v);
+  root->accept(display_visitor);
+
+  Create_symbol_table_visitor create_symbol_table_visitor;
+  root->accept(create_symbol_table_visitor);
 
   return 0;
 }
