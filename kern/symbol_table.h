@@ -23,7 +23,7 @@ using interface_entry = unordered_map<string, func_entry>;
 struct class_entry {
   unordered_map<string, func_entry> func_table;
   var_table field_table;
-  string parent_class;
+  string parent_class_id;
   std::unordered_set<string> implemented_interface_set;
 };
 
