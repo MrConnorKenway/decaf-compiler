@@ -61,7 +61,7 @@ void Create_symbol_table_visitor::visit(Base_type_node* base_type_node_ptr) {
 
 void Create_symbol_table_visitor::visit(Array_type_node* array_type_node_ptr) {
   visit_and_get_id_of(array_type_node_ptr->base_type);
-  current_id = "array of " + current_id;
+  current_id += "[]";
 }
 
 void Create_symbol_table_visitor::visit(
@@ -98,7 +98,7 @@ void Create_symbol_table_visitor::visit(Bool_const_node* bool_const_node_ptr) {}
 
 void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
   auto tmp_id = classdecl_node_ptr->type_id->type_ident_name;
-  ss_assert(global_symbol_table.find(tmp_id) == global_symbol_table.end(),
+  ss_assert(global_symbol_table.count(tmp_id) == 0,
             "Multiple definition for class \"%s\"\n", tmp_id.c_str());
 
   call_trace.push_back(node_type::CLASS);
@@ -129,18 +129,16 @@ void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
   visit_and_get_id_of(variable_node_ptr->type_node);
 
   // this function may be called by a classdecl node or a functiondecl node
-  switch (*call_trace.end()) {
+  switch (call_trace[call_trace.size() - 1]) {
     case node_type::CLASS:
-      ss_assert(current_class_entry.field_table.find(tmp_id) ==
-                    current_class_entry.field_table.end(),
+      ss_assert(current_class_entry.field_table.count(tmp_id) == 0,
                 "Multiple definition for variable \"%s\"\n", tmp_id.c_str());
       current_class_entry.field_table.emplace(tmp_id, current_id);
       break;
 
     case node_type::FUNC:
     case node_type::PROTOTYPE:
-      ss_assert(current_func_entry.formal_table.find(tmp_id) ==
-                    current_func_entry.formal_table.end(),
+      ss_assert(current_func_entry.formal_table.count(tmp_id) == 0,
                 "Multiple definition for variable \"%s\"\n", tmp_id.c_str());
       current_func_entry.formal_table.emplace(tmp_id, current_id);
       break;
@@ -158,8 +156,7 @@ void Create_symbol_table_visitor::visit(StmtBlock_node* stmtblock_node_ptr) {}
 void Create_symbol_table_visitor::visit(
     FunctionDecl_node* functiondecl_node_ptr) {
   auto tmp_id = functiondecl_node_ptr->function_id->ident_name;
-  ss_assert(current_class_entry.func_table.find(tmp_id) ==
-                current_class_entry.func_table.end(),
+  ss_assert(current_class_entry.func_table.count(tmp_id) == 0,
             "Multiple definition for function \"%s\"\n", tmp_id.c_str());
 
   call_trace.push_back(node_type::FUNC);
@@ -168,6 +165,8 @@ void Create_symbol_table_visitor::visit(
       visit_and_get_id_of(functiondecl_node_ptr->return_type);
 
   functiondecl_node_ptr->formals->accept(*this);
+
+  current_func_entry.func_body = functiondecl_node_ptr->block;
 
   current_class_entry.func_table.emplace(
       functiondecl_node_ptr->function_id->ident_name,
@@ -179,9 +178,8 @@ void Create_symbol_table_visitor::visit(
 
 void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
   auto tmp_id = prototype_node_ptr->prototype_id->ident_name;
-  ss_assert(
-      current_interface_entry.find(tmp_id) == current_interface_entry.end(),
-      "Multiple definition for prototype \"%s\"\n", tmp_id.c_str());
+  ss_assert(current_interface_entry.count(tmp_id) == 0,
+            "Multiple definition for prototype \"%s\"\n", tmp_id.c_str());
 
   call_trace.push_back(node_type::PROTOTYPE);
 
@@ -189,6 +187,8 @@ void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
       visit_and_get_id_of(prototype_node_ptr->return_type);
 
   prototype_node_ptr->formals->accept(*this);
+
+  current_func_entry.func_body = {};
 
   current_interface_entry.emplace(prototype_node_ptr->prototype_id->ident_name,
                                   std::move(current_func_entry));
@@ -200,8 +200,8 @@ void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
 void Create_symbol_table_visitor::visit(
     InterfaceDecl_node* interfacedecl_node_ptr) {
   auto tmp_id = interfacedecl_node_ptr->type_id->type_ident_name;
-  ss_assert(global_symbol_table.find(tmp_id) == global_symbol_table.end(),
-            "Multiple definition for interface \"%s\"\n", tmp_id);
+  ss_assert(global_symbol_table.count(tmp_id) == 0,
+            "Multiple definition for interface \"%s\"\n", tmp_id.c_str());
 
   interfacedecl_node_ptr->prototype_list_optional->accept(*this);
 

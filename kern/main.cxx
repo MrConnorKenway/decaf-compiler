@@ -5,6 +5,8 @@
 
 #include "build/include/create_symbol_table_visitor.h"
 #include "build/include/display_visitor.h"
+#include "build/include/static_semantic_analysis_visitor.h"
+#include "kern/static_semantic_analyser.h"
 
 extern ast_node_ptr_t root;
 yyFlexLexer* lexer_ptr = nullptr;
@@ -30,15 +32,22 @@ int main(int argc, char** argv) {
 
   yyparse();
 
-  vector<bool> is_last_bools;
-  bool is_last = true;
-  Display_visitor display_visitor(is_last_bools, is_last);
+  Create_symbol_table_visitor cv;
+  root->accept(cv);
 
-  cout << "Program" << endl;
-  root->accept(display_visitor);
+  auto global_symbol_table = std::move(cv.global_symbol_table);
 
-  Create_symbol_table_visitor create_symbol_table_visitor;
-  root->accept(create_symbol_table_visitor);
+  static_semantic_analyser analyser(global_symbol_table);
+  analyser.analyse();
+
+  if (false) {
+    vector<bool> is_last_bools;
+    bool is_last = true;
+    Display_visitor dv(is_last_bools, is_last);
+
+    cout << "Program" << endl;
+    root->accept(dv);
+  }
 
   return 0;
 }

@@ -327,7 +327,7 @@ t_type_identCommaList:
 ;
 
 ExprCommaList: 
-    Expr
+    Expr { $$ = new List_node(); $$->list.push_back($1); }
   | ExprCommaList ',' Expr { $$ = $1; $$->list.push_back($3); }
 ;
 
@@ -361,7 +361,7 @@ FieldListOptional:
 ;
 
 VariableCommaList: 
-    Variable
+    Variable { $$ = new List_node(); $$->list.push_back($1); }
   | VariableCommaList ',' Variable { $$ = $1; $$->list.push_back($3); }
 ;
 
