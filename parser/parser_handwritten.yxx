@@ -41,7 +41,7 @@ ast_node_ptr_t root;
 
 	ast_node_ptr_t base_node_ptr_t;
 	Ident_node* Ident_node_ptr_t;
-	Type_ident_node* Type_ident_node_ptr_t;
+  User_defined_type_node* User_defined_type_node_ptr_t;
 	Int_const_node* Int_const_node_ptr_t;
 	Double_const_node* Double_const_node_ptr_t;
 	Str_const_node* Str_const_node_ptr_t;
@@ -73,7 +73,7 @@ ast_node_ptr_t root;
 %token <int_val> t_return
 %token <int_val> t_for
 %token <int_val> t_interface
-%token <Type_ident_node_ptr_t> t_type_ident
+%token <User_defined_type_node_ptr_t> t_type_ident
 %token <int_val> t_eq
 %token <int_val> t_null
 %token <int_val> t_class
@@ -173,7 +173,7 @@ Type:
   | t_double { $$ = new Base_type_node(t_double); }
   | t_bool { $$ = new Base_type_node(t_bool); }
   | t_string { $$ = new Base_type_node(t_string); }
-  | t_type_ident { $$ = new User_defined_type_node($1->type_ident_name); }
+  | t_type_ident 
   | Type '[' ']' { $$ = new Array_type_node($1); }
 ;
 

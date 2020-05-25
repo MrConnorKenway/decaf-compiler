@@ -26,7 +26,7 @@ ast_node_ptr_t root;
 $union_section
 	ast_node_ptr_t base_node_ptr_t;
 	Ident_node* Ident_node_ptr_t;
-	Type_ident_node* Type_ident_node_ptr_t;
+	User_defined_type_node* User_defined_type_node_ptr_t;
 	Int_const_node* Int_const_node_ptr_t;
 	Double_const_node* Double_const_node_ptr_t;
 	Str_const_node* Str_const_node_ptr_t;

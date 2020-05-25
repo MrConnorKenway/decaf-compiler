@@ -9,9 +9,6 @@ void Static_semantic_analysis_visitor::visit(
 
 void Static_semantic_analysis_visitor::visit(Empty_node* empty_node_ptr) {}
 
-void Static_semantic_analysis_visitor::visit(
-    Type_ident_node* type_ident_node_ptr) {}
-
 void Static_semantic_analysis_visitor::visit(Ident_node* ident_node_ptr) {}
 
 void Static_semantic_analysis_visitor::visit(

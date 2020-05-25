@@ -23,10 +23,6 @@ void Create_symbol_table_visitor::visit(Null_const_node* null_const_node_ptr) {}
 
 void Create_symbol_table_visitor::visit(Empty_node* empty_node_ptr) {}
 
-void Create_symbol_table_visitor::visit(Type_ident_node* type_ident_node_ptr) {
-  current_id = type_ident_node_ptr->type_ident_name;
-}
-
 void Create_symbol_table_visitor::visit(Ident_node* ident_node_ptr) {
   current_id = ident_node_ptr->ident_name;
 }

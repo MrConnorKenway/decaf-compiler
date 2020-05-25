@@ -38,7 +38,7 @@ $rule_list
 }
 
 {TYPE_ID} {
-	yylval.Type_ident_node_ptr_t = new Type_ident_node(yytext);
+	yylval.User_defined_type_node_ptr_t = new User_defined_type_node(yytext);
 	return t_type_ident;
 }
 

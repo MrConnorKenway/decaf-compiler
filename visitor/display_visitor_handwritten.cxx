@@ -96,12 +96,6 @@ void Display_visitor::visit(Empty_node* empty_node_ptr) {
   i.indent(empty_node_ptr->node_type);
 }
 
-void Display_visitor::visit(Type_ident_node* type_ident_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(type_ident_node_ptr->node_type + " " +
-           type_ident_node_ptr->type_ident_name);
-}
-
 void Display_visitor::visit(Ident_node* ident_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(ident_node_ptr->node_type + " " + ident_node_ptr->ident_name);

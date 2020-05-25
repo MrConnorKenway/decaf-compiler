@@ -17,11 +17,6 @@ class Null_const_node : public AST_node_base {};
 // an non-terminal produce a empty production
 class Empty_node : public AST_node_base {};
 
-class Type_ident_node : public AST_node_base {
- public:
-  string type_ident_name;
-};
-
 class Ident_node : public AST_node_base {
  public:
   string ident_name;
@@ -119,7 +114,7 @@ class Bool_const_node : public AST_node_base {
 
 class ClassDecl_node : public AST_node_base {
  public:
-  Type_ident_node* type_id;
+  User_defined_type_node* type_id;
   ast_node_ptr_t extender_optional;
   List_node* implementer_optional;
   List_node* field_list_optional;
@@ -153,7 +148,7 @@ class Prototype_node : public AST_node_base {
 
 class InterfaceDecl_node : public AST_node_base {
  public:
-  Type_ident_node* type_id;
+  User_defined_type_node* type_id;
   List_node* prototype_list_optional;
 };
 
