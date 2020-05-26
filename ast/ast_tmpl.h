@@ -190,7 +190,7 @@ class IfStmt_node : public AST_node_base {
 class ForStmt_node : public AST_node_base {
  public:
   ast_node_ptr_t init_expr_optional;
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t step_expr_optional;
   ast_node_ptr_t stmt;
 };

@@ -312,7 +312,7 @@ void Display_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(forstmt_node_ptr->node_type);
   forstmt_node_ptr->init_expr_optional->accept(*this);
-  forstmt_node_ptr->condition->accept(*this);
+  forstmt_node_ptr->condition_expr->accept(*this);
   forstmt_node_ptr->step_expr_optional->accept(*this);
   is_last = true;
   forstmt_node_ptr->stmt->accept(*this);
