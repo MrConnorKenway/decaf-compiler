@@ -89,7 +89,7 @@ class Static_semantic_analysis_visitor : public Visitor {
     return node_ptr->expr_type.value();
   }
 
-  stack<string>& decl_type_list(List_node* list_node_ptr) {
+  vector<string>& decl_type_list(List_node* list_node_ptr) {
     call_trace.push(action_type::GET_ARGS_TYPE);
     list_node_ptr->accept(*this);
     call_trace.pop();
