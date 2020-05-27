@@ -1,12 +1,5 @@
 #pragma once
-#include <iostream>
-#include <vector>
-
 #include "build/include/visitor.h"
-
-using std::cout;
-using std::endl;
-using std::vector;
 
 // this class is used for display ast tree
 class Display_visitor : public Visitor {
