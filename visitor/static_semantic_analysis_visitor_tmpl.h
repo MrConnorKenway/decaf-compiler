@@ -21,7 +21,7 @@ class scope {
       if (iter->local_symbol_table.count(vid)) {
         return iter->local_symbol_table.at(vid);
       }
-      iter = parent_scope_ptr;
+      iter = iter->parent_scope_ptr;
     }
 
     ss_assert(false, "Undefined reference to variable \"%s\"\n", vid.c_str());
