@@ -10,7 +10,9 @@ $(OBJDIR)/main.o: kern/main.cxx $(INCDIR)/display_visitor.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 
-$(OBJDIR)/static_semantic_analyser.o: kern/static_semantic_analyser.cxx kern/symbol_table.h kern/error.h
+$(OBJDIR)/static_semantic_analyser.o: kern/static_semantic_analyser.cxx \
+		kern/symbol_table.h kern/error.h \
+		$(INCDIR)/static_semantic_analysis_visitor.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 

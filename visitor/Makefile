@@ -13,10 +13,11 @@ $(INCDIR)/%_visitor.h: visitor/gen_visitor.py visitor/%_visitor_tmpl.h ast/ast_t
 	@$< $*_visitor --header-dst $@ --src-dst $(SRCDIR)/$*_visitor.cxx
 
 $(OBJDIR)/%.o: visitor/%_visitor_handwritten.cxx \
-	$(INCDIR)/%_visitor.h \
-	$(INCDIR)/visitor.h $(INCDIR)/ast.h \
-	$(INCDIR)/parser_handwritten.tab.h \
-	kern/error.h
+		$(INCDIR)/%_visitor.h \
+		visitor/%_visitor_tmpl.h \
+		$(INCDIR)/visitor.h $(INCDIR)/ast.h \
+		$(INCDIR)/parser_handwritten.tab.h \
+		kern/error.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 
