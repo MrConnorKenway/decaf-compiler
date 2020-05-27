@@ -2,19 +2,6 @@
 
 int scope::next_tid = 0;
 
-void static_semantic_analyser::visit(string id, symbol_table_entry& entry) {
-  if (std::holds_alternative<class_entry>(entry)) {
-    analyse(id, std::get<class_entry>(entry));
-  } else {
-    analyse(id, std::get<interface_entry>(entry));
-  }
-}
-
-void static_semantic_analyser::analyse(
-    string iid, interface_entry& current_interface_entry) {
-  // TODO
-}
-
 void static_semantic_analyser::analyse(string cid,
                                        class_entry& current_class_entry) {
   if (is_visited.count(cid) == 0) {
@@ -51,9 +38,10 @@ void static_semantic_analyser::analyse(string cid,
       auto decl_class_id = current_class_entry.inheritance.func_decl_class[fid];
       auto& prototype = global_symbol_table.try_fetch_func(decl_class_id, fid);
       ss_assert(fe == prototype,
-                "Overloading inherited function \"%s\" from parent class "
+                "Class \"%s\": overloading inherited function \"%s\" from "
+                "parent class "
                 "\"%s\" is not allowed\n",
-                fid.c_str(), decl_class_id.c_str());
+                cid.c_str(), fid.c_str(), decl_class_id.c_str());
     }
 
     // update or insert the declare class of fid into inheritance
@@ -89,8 +77,10 @@ void static_semantic_analyser::analyse(string cid,
 }
 
 void static_semantic_analyser::analyse() {
-  for (auto [id, entry] : global_symbol_table) {
-    visit(id, entry);
+  for (auto& [id, entry] : global_symbol_table) {
+    if (std::holds_alternative<class_entry>(entry)) {
+      analyse(id, std::get<class_entry>(entry));
+    }
   }
 
   vector<bool> is_last_bools;

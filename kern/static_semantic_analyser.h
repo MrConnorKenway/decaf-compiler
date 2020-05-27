@@ -10,8 +10,6 @@ struct static_semantic_analyser {
   std::unordered_map<string, bool> is_visited;
   symbol_table& global_symbol_table;
 
-  void visit(string id, symbol_table_entry& entry);
-  void analyse(string id, interface_entry& entry);
   void analyse(string id, class_entry& entry);
   void analyse();
 
