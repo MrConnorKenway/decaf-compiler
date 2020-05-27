@@ -1,5 +1,5 @@
 Program: Decl+
-Decl: VariableDecl | FunctionDecl | ClassDecl | InterfaceDecl
+Decl: ClassDecl | InterfaceDecl
 VariableDecl: Variable ;
 Variable: Type t_ident
 Type: t_int | t_double | t_bool | t_string | t_type_ident | Type [ ]
