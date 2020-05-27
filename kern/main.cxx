@@ -35,9 +35,7 @@ int main(int argc, char** argv) {
   Create_symbol_table_visitor cv;
   root->accept(cv);
 
-  auto global_symbol_table = std::move(cv.global_symbol_table);
-
-  static_semantic_analyser analyser(global_symbol_table);
+  static_semantic_analyser analyser(cv.global_symbol_table);
   analyser.analyse();
 
   if (false) {
@@ -45,7 +43,7 @@ int main(int argc, char** argv) {
     bool is_last = true;
     Display_visitor dv(is_last_bools, is_last);
 
-    cout << "Program" << endl;
+    cout << endl << "Program" << endl;
     root->accept(dv);
   }
 
