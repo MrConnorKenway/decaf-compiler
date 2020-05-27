@@ -33,13 +33,6 @@ def main(src, header, tmpl):
           'class {0} : public AST_node_base {{\n public:\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}();\n}};\n\n'.format(subclass_name))
       src.write(
           'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}() {{ node_type = "{0}"; }}\n\n'.format(subclass_name))
-    elif subclass_name == 'List_node':
-      # we want List_node use default constructor
-      src.write(
-          'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}() {{ node_type = "{0}"; }}\n\n'.format(subclass_name))
-      header.write(
-          'class {0} : public AST_node_base {{\n public:\n\t{1}\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}();\n}};\n\n'.format(
-              subclass_name, fields_decl[0]))
     else:
       fields = re.findall(r"([\s\S]*?)\n", fields_decl[0], re.MULTILINE)
       parameter_list_str = ''
