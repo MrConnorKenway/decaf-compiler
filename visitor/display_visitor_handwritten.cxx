@@ -302,7 +302,7 @@ void Display_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
 void Display_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(ifstmt_node_ptr->node_type);
-  ifstmt_node_ptr->condition->accept(*this);
+  ifstmt_node_ptr->condition_expr->accept(*this);
   ifstmt_node_ptr->stmt->accept(*this);
   is_last = true;
   ifstmt_node_ptr->else_stmt_optional->accept(*this);

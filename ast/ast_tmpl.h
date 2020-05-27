@@ -187,7 +187,7 @@ class ContinueStmt_node : public AST_node_base {
 
 class IfStmt_node : public AST_node_base {
  public:
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t stmt;
   ast_node_ptr_t else_stmt_optional;
 };
