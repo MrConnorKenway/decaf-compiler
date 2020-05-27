@@ -70,15 +70,11 @@ string Display_visitor::base_type_code_to_str(int type_code) {
 void Display_visitor::visit(List_node* list_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(list_node_ptr->node_type);
-  if (list_node_ptr->list.empty()) {
-    return;
+  for (auto iter = list_node_ptr->list.cbegin();
+       iter != list_node_ptr->list.cend(); ++iter) {
+    is_last = iter == std::prev(list_node_ptr->list.cend());
+    (*iter)->accept(*this);
   }
-  auto it = list_node_ptr->list.cbegin();
-  for (; it != --list_node_ptr->list.cend(); ++it) {
-    (*it)->accept(*this);
-  }
-  is_last = true;
-  (*it)->accept(*this);
 }
 
 void Display_visitor::visit(This_node* this_node_ptr) {
