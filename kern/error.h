@@ -1,5 +1,4 @@
 #pragma once
-#include <cassert>
 
 #define ss_assert(expr, fmt...)                                             \
   if (!(expr)) {                                                            \

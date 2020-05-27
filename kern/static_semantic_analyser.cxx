@@ -1,26 +1,6 @@
 #include "kern/static_semantic_analyser.h"
 
-class_entry& static_semantic_analyser::try_fetch_class(string cid) {
-  ss_assert(global_symbol_table.count(cid),
-            "Undefined reference to class \"%s\"\n", cid.c_str());
-  return std::get<class_entry>(global_symbol_table[cid]);
-}
-
-func_entry& static_semantic_analyser::try_fetch_func(string cid, string fid) {
-  ss_assert(global_symbol_table.count(cid),
-            "Undefined reference to class \"%s\"\n", cid.c_str());
-  auto& ce = std::get<class_entry>(global_symbol_table[cid]);
-  ss_assert(ce.func_table.count(fid),
-            "Undefined reference to function \"%s\" in class \"%s\"\n",
-            fid.c_str(), cid.c_str());
-  return ce.func_table[fid];
-}
-
-interface_entry& static_semantic_analyser::try_fetch_interface(string iid) {
-  ss_assert(global_symbol_table.count(iid),
-            "Undefined reference to interface \"%s\"\n", iid.c_str());
-  return std::get<interface_entry>(global_symbol_table[iid]);
-}
+int scope::next_tid = 0;
 
 void static_semantic_analyser::visit(string id, symbol_table_entry& entry) {
   if (std::holds_alternative<class_entry>(entry)) {
@@ -51,8 +31,8 @@ void static_semantic_analyser::analyse(string cid,
   }
 
   if (current_class_entry.parent_class_id != "") {
-    auto& parent_class_entry =
-        try_fetch_class(current_class_entry.parent_class_id);
+    auto& parent_class_entry = global_symbol_table.try_fetch_class(
+        current_class_entry.parent_class_id);
     analyse(current_class_entry.parent_class_id, parent_class_entry);
 
     // inherit everything from parent class
@@ -60,16 +40,16 @@ void static_semantic_analyser::analyse(string cid,
   }
 
   // try insert variables that are declared in current class into inheritance
-  for (auto [vid, ve] : current_class_entry.field_table) {
+  for (auto [vid, vt] : current_class_entry.field_table) {
     current_class_entry.inheritance.field_table.try_emplace(std::move(vid),
-                                                            std::move(ve));
+                                                            std::move(vt));
   }
 
   for (auto& [fid, fe] : current_class_entry.func_table) {
     if (current_class_entry.inheritance.func_decl_class.count(fid)) {
       // if current class tries to override an inherited function
       auto decl_class_id = current_class_entry.inheritance.func_decl_class[fid];
-      auto& prototype = try_fetch_func(decl_class_id, fid);
+      auto& prototype = global_symbol_table.try_fetch_func(decl_class_id, fid);
       ss_assert(fe == prototype,
                 "Overloading inherited function \"%s\" from parent class "
                 "\"%s\" is not allowed\n",
@@ -89,12 +69,12 @@ void static_semantic_analyser::analyse(string cid,
       continue;
     }
 
-    auto& ie = try_fetch_interface(iid);
+    auto& ie = global_symbol_table.try_fetch_interface(iid);
     // for every prototype declaration in interface entry ie,
     // there should be corresponding function declaration in
     // current class' function table
     for (auto& [fid, prototype] : ie) {
-      auto& fe = try_fetch_func(cid, fid);
+      auto& fe = global_symbol_table.try_fetch_func(cid, fid);
       ss_assert(fe == prototype,
                 "Prototype of function \"%s\" mismatches interface \"%s\"\n",
                 fid.c_str(), iid.c_str());
@@ -113,12 +93,17 @@ void static_semantic_analyser::analyse() {
     visit(id, entry);
   }
 
-  Static_semantic_analysis_visitor sv(global_symbol_table);
   for (auto& [eid, e] : global_symbol_table) {
     if (std::holds_alternative<class_entry>(e)) {
       auto& ce = std::get<class_entry>(e);
+      Static_semantic_analysis_visitor sv(global_symbol_table, ce,
+                                          std::move(eid));
       for (auto& [fid, fe] : ce.func_table) {
-        sv.visit(fe.func_body.value());
+        ss_assert(fe.func_body.has_value(), "function \"%s\" has no body\n",
+                  fid.c_str());
+        auto& func_body_ptr = fe.func_body.value();
+        func_body_ptr->scope_ptr = new scope(fe);
+        sv.visit(func_body_ptr);
       }
     }
   }

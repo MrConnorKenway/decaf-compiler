@@ -1,11 +1,14 @@
 #pragma once
 #include "ast/ast_base.h"
 
+class scope;
+
 // $ special mark for python to locate
 // the code above can be copied directly into ast.h
 class List_node : public AST_node_base {
  public:
-  vector<ast_node_ptr_t> list;
+  vector<ast_node_ptr_t> list;                  // default
+  optional<vector<string>> elements_type_list;  // default
 };
 
 // special node to handle 'this' reference
@@ -20,6 +23,7 @@ class Empty_node : public AST_node_base {};
 class Ident_node : public AST_node_base {
  public:
   string ident_name;
+  int tid;  // -1
 };
 
 // we declare type_node as ast_node_base in bison union
@@ -129,6 +133,7 @@ class Variable_node : public AST_node_base {
 class StmtBlock_node : public AST_node_base {
  public:
   List_node* stmt_list_optional;
+  scope* scope_ptr;  // default
 };
 
 class FunctionDecl_node : public AST_node_base {

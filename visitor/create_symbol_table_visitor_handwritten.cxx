@@ -1,15 +1,6 @@
 #include <cassert>
 
 #include "build/include/create_symbol_table_visitor.h"
-#include "build/include/parser_handwritten.tab.h"
-#include "kern/error.h"
-
-string Create_symbol_table_visitor::visit_and_get_id_of(
-    ast_node_ptr_t node_ptr) {
-  current_id = "";
-  node_ptr->accept(*this);
-  return current_id;
-}
 
 void Create_symbol_table_visitor::visit(List_node* list_node_ptr) {
   for (auto node_ptr : list_node_ptr->list) {
@@ -97,7 +88,7 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
   ss_assert(global_symbol_table.count(tmp_id) == 0,
             "Multiple definition for class \"%s\"\n", tmp_id.c_str());
 
-  call_trace.push_back(node_type::CLASS);
+  call_trace.push(node_type::CLASS);
 
   current_class_entry.parent_class_id =
       visit_and_get_id_of(classdecl_node_ptr->extender_optional);
@@ -116,7 +107,7 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
                               std::move(current_class_entry));
   current_class_entry = class_entry();
 
-  call_trace.pop_back();
+  call_trace.pop();
 }
 
 void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
@@ -125,7 +116,7 @@ void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
   visit_and_get_id_of(variable_node_ptr->type_node);
 
   // this function may be called by a classdecl node or a functiondecl node
-  switch (call_trace[call_trace.size() - 1]) {
+  switch (call_trace.top()) {
     case node_type::CLASS:
       ss_assert(current_class_entry.field_table.count(tmp_id) == 0,
                 "Multiple definition for variable \"%s\"\n", tmp_id.c_str());
@@ -155,7 +146,7 @@ void Create_symbol_table_visitor::visit(
   ss_assert(current_class_entry.func_table.count(tmp_id) == 0,
             "Multiple definition for function \"%s\"\n", tmp_id.c_str());
 
-  call_trace.push_back(node_type::FUNC);
+  call_trace.push(node_type::FUNC);
 
   current_func_entry.return_type =
       visit_and_get_id_of(functiondecl_node_ptr->return_type);
@@ -169,7 +160,7 @@ void Create_symbol_table_visitor::visit(
       std::move(current_func_entry));
   current_func_entry = func_entry();
 
-  call_trace.pop_back();
+  call_trace.pop();
 }
 
 void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
@@ -177,7 +168,7 @@ void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
   ss_assert(current_interface_entry.count(tmp_id) == 0,
             "Multiple definition for prototype \"%s\"\n", tmp_id.c_str());
 
-  call_trace.push_back(node_type::PROTOTYPE);
+  call_trace.push(node_type::PROTOTYPE);
 
   current_func_entry.return_type =
       visit_and_get_id_of(prototype_node_ptr->return_type);
@@ -190,7 +181,7 @@ void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
                                   std::move(current_func_entry));
   current_func_entry = func_entry();
 
-  call_trace.pop_back();
+  call_trace.pop();
 }
 
 void Create_symbol_table_visitor::visit(

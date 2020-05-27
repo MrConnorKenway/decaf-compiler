@@ -15,9 +15,6 @@ struct static_semantic_analyser {
   void analyse(string id, class_entry& entry);
   void analyse();
 
-  class_entry& try_fetch_class(string cid);
-  func_entry& try_fetch_func(string cid, string fid);
-  interface_entry& try_fetch_interface(string iid);
-
-  static_semantic_analyser(symbol_table& st) : global_symbol_table(st) {}
+  static_semantic_analyser(symbol_table& st)
+      : global_symbol_table(st), is_visited() {}
 };
