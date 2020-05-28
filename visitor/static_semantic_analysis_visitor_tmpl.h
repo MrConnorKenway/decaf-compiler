@@ -13,8 +13,33 @@ class scope {
   using var_entry = std::pair<int, var_type>;
   std::unordered_map<var_id, var_entry> local_symbol_table;
   scope* parent_scope_ptr;
+  vector<scope*> children_scope_ptr;
 
   static int next_tid;
+
+  void display(vector<bool>& is_last_bools, bool& is_last) const {
+    {
+      for (auto iter = local_symbol_table.cbegin();
+           iter != local_symbol_table.cend(); ++iter) {
+        auto [vid, ve] = *iter;
+        auto [tid, vt] = ve;
+        is_last = (std::next(iter) == local_symbol_table.cend()) &&
+                  children_scope_ptr.empty();
+        Indent i(is_last_bools, is_last);
+        i.indent(vid + " " + std::to_string(tid) + " " + vt);
+      }
+    }
+    if (children_scope_ptr.empty()) {
+      return;
+    }
+    for (auto iter = children_scope_ptr.cbegin();
+         iter != children_scope_ptr.cend(); ++iter) {
+      is_last = std::next(iter) == children_scope_ptr.cend();
+      Indent i(is_last_bools, is_last);
+      i.indent("Scope");
+      (*iter)->display(is_last_bools, is_last);
+    }
+  }
 
   var_entry lookup(var_id vid) const {
     auto iter = this;

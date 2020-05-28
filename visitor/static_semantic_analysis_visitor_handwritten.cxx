@@ -269,6 +269,8 @@ void Static_semantic_analysis_visitor::visit(
     stmtblock_node_ptr->scope_ptr = new scope();
   }
   stmtblock_node_ptr->scope_ptr->parent_scope_ptr = current_scope_ptr;
+  current_scope_ptr->children_scope_ptr.push_back(
+      stmtblock_node_ptr->scope_ptr);
   current_scope_ptr = stmtblock_node_ptr->scope_ptr;
   stmtblock_node_ptr->stmt_list_optional->accept(*this);
   current_scope_ptr = stmtblock_node_ptr->scope_ptr->parent_scope_ptr;

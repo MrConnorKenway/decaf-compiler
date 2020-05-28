@@ -81,10 +81,6 @@ void static_semantic_analyser::analyse() {
     }
   }
 
-  vector<bool> is_last_bools;
-  bool is_last;
-  global_symbol_table.display(is_last_bools, is_last);
-
   for (auto& [eid, e] : global_symbol_table) {
     if (std::holds_alternative<class_entry>(e)) {
       auto& ce = std::get<class_entry>(e);
@@ -99,4 +95,8 @@ void static_semantic_analyser::analyse() {
       }
     }
   }
+
+  vector<bool> is_last_bools;
+  bool is_last;
+  global_symbol_table.display(is_last_bools, is_last);
 }

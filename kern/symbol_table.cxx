@@ -1,5 +1,7 @@
 #include "kern/symbol_table.h"
 
+#include "build/include/static_semantic_analysis_visitor.h"
+
 void func_entry::display(string fid, vector<bool>& is_last_bools,
                          bool& is_last) const {
   Indent i(is_last_bools, is_last);
@@ -20,6 +22,11 @@ void func_entry::display(string fid, vector<bool>& is_last_bools,
         i.indent(vid + ": " + vt);
       }
     }
+  }
+  if (func_body.has_value()) {
+    Indent i(is_last_bools, is_last);
+    i.indent("Function body");
+    func_body.value()->scope_ptr->display(is_last_bools, is_last);
   }
   is_last = true;
   {
