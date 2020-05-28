@@ -271,7 +271,7 @@ void Display_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
 void Display_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(whilestmt_node_ptr->node_type);
-  whilestmt_node_ptr->condition->accept(*this);
+  whilestmt_node_ptr->condition_expr->accept(*this);
   is_last = true;
   whilestmt_node_ptr->stmt->accept(*this);
 }

@@ -164,7 +164,7 @@ class ReturnStmt_node : public AST_node_base {
 
 class WhileStmt_node : public AST_node_base {
  public:
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t stmt;
 };
 
