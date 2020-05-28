@@ -83,9 +83,26 @@ void Static_semantic_analysis_visitor::visit(
   auto left_type = decl_type(assignment_node_ptr->LHS);
   auto right_type = decl_type(assignment_node_ptr->RHS);
   if (left_type != right_type) {
-    global_symbol_table.try_fetch_class(left_type);
-    ss_assert(left_type == "null" || right_type == "null", "LHS type \"",
-              left_type, "\" and RHS type \"", right_type, "\" mismatch\n");
+    // the grammar of decaf guarantees that left_type != "null"
+    // check whether the RHS is the derived class of LHS
+    if (right_type != "null") {
+      bool is_derived = false;
+      auto& right_ce = global_symbol_table.try_fetch_class(right_type);
+      while (right_ce.parent_class_id != "") {
+        if (right_ce.parent_class_id == left_type) {
+          is_derived = true;
+          break;
+        }
+        right_ce =
+            global_symbol_table.try_fetch_class(right_ce.parent_class_id);
+      }
+      ss_assert(is_derived, "LHS type ", left_type, " and RHS type ",
+                right_type, " mismatch");
+    } else {
+      ss_assert(left_type != "int" && left_type != "double" &&
+                    left_type != "string" && left_type != "bool",
+                "LHS type ", left_type, " and RHS type null mismatch");
+    }
   }
   assignment_node_ptr->expr_type = left_type;
 }
