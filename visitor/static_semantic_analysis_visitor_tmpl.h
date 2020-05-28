@@ -1,8 +1,9 @@
 #pragma once
 #include "build/include/parser_handwritten.tab.h"
 #include "build/include/visitor.h"
-#include "kern/error.h"
 #include "kern/symbol_table.h"
+#include "utils/common.h"
+#include "utils/error.h"
 
 // "scope" encapsulates necessary information for
 // static semantic analysis

@@ -3,8 +3,8 @@
 #include <variant>
 
 #include "build/include/static_semantic_analysis_visitor.h"
-#include "kern/error.h"
 #include "kern/symbol_table.h"
+#include "utils/error.h"
 
 struct static_semantic_analyser {
   std::unordered_map<string, bool> is_visited;

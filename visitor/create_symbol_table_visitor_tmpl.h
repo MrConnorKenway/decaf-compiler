@@ -1,7 +1,7 @@
 #pragma once
 #include "build/include/parser_handwritten.tab.h"
 #include "build/include/visitor.h"
-#include "kern/error.h"
+#include "utils/error.h"
 #include "kern/symbol_table.h"
 
 // This visitor defines operations to build

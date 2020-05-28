@@ -1,13 +1,10 @@
 #pragma once
-#include <optional>
-#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <variant>
 
 #include "build/include/ast.h"
-#include "kern/error.h"
-#include "kern/indent.h"
+#include "utils/error.h"
+#include "utils/indent.h"
 
 using std::ostream;
 using std::string;

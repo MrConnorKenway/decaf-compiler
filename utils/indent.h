@@ -1,5 +1,5 @@
 #pragma once
-#include "ast/ast_base.h"
+#include "utils/common.h"
 
 // this class is used to control indentation when
 // printing the AST
