@@ -65,17 +65,41 @@ struct class_entry {
 using symbol_table_entry = std::variant<class_entry, interface_entry>;
 
 struct symbol_table : unordered_map<string, symbol_table_entry> {
+  void check_return_type(string rt) {
+    auto pos = rt.find("[");
+    if (pos != string::npos) {
+      // this is an array type
+      rt = rt.substr(0, pos);
+    }
+    if (unordered_set<string>({"int", "double", "string", "bool", "void"})
+            .count(rt) != 0) {
+      // is base type
+      return;
+    } else {
+      try_fetch_class(rt);
+    }
+  }
+
+  void check_var_type(string vt) {
+    auto pos = vt.find("[");
+    if (pos != string::npos) {
+      // this is an array type
+      vt = vt.substr(0, pos);
+    }
+    if (unordered_set<string>({"int", "double", "string", "bool"}).count(vt) !=
+        0) {
+      // is base type
+      return;
+    } else {
+      try_fetch_class(vt);
+    }
+  }
+
   class_entry& try_fetch_class(string cid) {
     auto pos = cid.find("[");
     if (pos != string::npos) {
       // this is an array type
-      cid = cid.substr(0, pos - 1);
-    }
-    if (unordered_set<string>({"int", "double", "string", "bool"}).count(cid) !=
-        0) {
-      // cid is base type
-      try_emplace(cid, class_entry());
-      return std::get<class_entry>(at(cid));
+      cid = cid.substr(0, pos);
     }
     if (count(cid) == 0 || std::holds_alternative<interface_entry>(at(cid))) {
       ss_assert(false, "Undefined reference to class ", cid);

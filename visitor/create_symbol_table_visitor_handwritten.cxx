@@ -118,7 +118,7 @@ void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
   // note that current_id has become "children's id" after the following line
   visit_and_get_id_of(variable_node_ptr->type_node);
 
-  global_symbol_table.try_fetch_class(current_id);
+  global_symbol_table.check_var_type(current_id);
 
   // this function may be called by a classdecl node or a functiondecl node
   switch (call_trace.top()) {
@@ -156,6 +156,8 @@ void Create_symbol_table_visitor::visit(
 
   current_func_entry.return_type =
       visit_and_get_id_of(functiondecl_node_ptr->return_type);
+
+  global_symbol_table.check_return_type(current_func_entry.return_type);
 
   functiondecl_node_ptr->formals->accept(*this);
 

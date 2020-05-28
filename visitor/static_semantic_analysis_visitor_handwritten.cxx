@@ -251,9 +251,9 @@ void Static_semantic_analysis_visitor::visit(
 
 void Static_semantic_analysis_visitor::visit(Variable_node* variable_node_ptr) {
   yylloc_manager y(variable_node_ptr);
-  current_scope_ptr->try_insert(
-      variable_node_ptr->id->ident_name,
-      visit_and_get_id_of(variable_node_ptr->type_node));
+  current_id = visit_and_get_id_of(variable_node_ptr->type_node);
+  global_symbol_table.check_var_type(current_id);
+  current_scope_ptr->try_insert(variable_node_ptr->id->ident_name, current_id);
 }
 
 void Static_semantic_analysis_visitor::visit(

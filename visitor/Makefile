@@ -17,6 +17,7 @@ $(OBJDIR)/%.o: visitor/%_visitor_handwritten.cxx \
 		visitor/%_visitor_tmpl.h \
 		$(INCDIR)/visitor.h $(INCDIR)/ast.h \
 		$(INCDIR)/parser_handwritten.tab.h \
+		kern/symbol_table.h \
 		utils/error.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
