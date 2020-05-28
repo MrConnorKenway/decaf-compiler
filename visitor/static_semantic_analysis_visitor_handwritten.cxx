@@ -380,4 +380,11 @@ void Static_semantic_analysis_visitor::visit(ForStmt_node* forstmt_node_ptr) {
 }
 
 void Static_semantic_analysis_visitor::visit(
-    PrintStmt_node* printstmt_node_ptr) {}
+    PrintStmt_node* printstmt_node_ptr) {
+  yylloc_manager y(printstmt_node_ptr);
+  auto& type_list = decl_type_list(printstmt_node_ptr->expr_list);
+  unordered_set<string> base_type = {"int", "double", "string", "bool"};
+  for (auto vt : type_list) {
+    ss_assert(base_type.count(vt) != 0, "Cannot print non-base type");
+  }
+}

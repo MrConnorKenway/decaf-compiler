@@ -94,9 +94,9 @@ class Static_semantic_analysis_visitor : public Visitor {
     call_trace.push(action_type::GET_ARGS_TYPE);
     list_node_ptr->accept(*this);
     call_trace.pop();
-    ss_assert(list_node_ptr->elements_type_list.has_value(),
-              "Current node \"%s\" has no type list\n",
-              list_node_ptr->node_type.c_str());
+    if (!list_node_ptr->elements_type_list.has_value()) {
+      list_node_ptr->elements_type_list = vector<string>();
+    }
     return list_node_ptr->elements_type_list.value();
   }
 

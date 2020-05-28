@@ -21,21 +21,21 @@ extern string src_file_name;
 %locations
 
 %union {
-	ReturnStmt_node* ReturnStmt_node_ptr_t;
-	WhileStmt_node* WhileStmt_node_ptr_t;
-	BreakStmt_node* BreakStmt_node_ptr_t;
-	InterfaceDecl_node* InterfaceDecl_node_ptr_t;
+	List_node *List_node_ptr_t;
+	ClassDecl_node* ClassDecl_node_ptr_t;
+	FunctionDecl_node* FunctionDecl_node_ptr_t;
 	IfStmt_node* IfStmt_node_ptr_t;
-	ContinueStmt_node* ContinueStmt_node_ptr_t;
 	StmtBlock_node* StmtBlock_node_ptr_t;
 	Call_node* Call_node_ptr_t;
-	ClassDecl_node* ClassDecl_node_ptr_t;
-	ForStmt_node* ForStmt_node_ptr_t;
-	Variable_node* Variable_node_ptr_t;
-	List_node *List_node_ptr_t;
+	InterfaceDecl_node* InterfaceDecl_node_ptr_t;
 	Prototype_node* Prototype_node_ptr_t;
-	FunctionDecl_node* FunctionDecl_node_ptr_t;
 	PrintStmt_node* PrintStmt_node_ptr_t;
+	ContinueStmt_node* ContinueStmt_node_ptr_t;
+	WhileStmt_node* WhileStmt_node_ptr_t;
+	BreakStmt_node* BreakStmt_node_ptr_t;
+	ForStmt_node* ForStmt_node_ptr_t;
+	ReturnStmt_node* ReturnStmt_node_ptr_t;
+	Variable_node* Variable_node_ptr_t;
 
 	ast_node_ptr_t base_node_ptr_t;
 	Ident_node* Ident_node_ptr_t;
@@ -46,70 +46,70 @@ extern string src_file_name;
 	int int_val;
 }
 
-%token <base_node_ptr_t> t_implements
 %token <base_node_ptr_t> t_this
-%token <base_node_ptr_t> t_return
-%token <base_node_ptr_t> t_eq
-%token <base_node_ptr_t> t_bool
-%token <base_node_ptr_t> t_double
-%token <base_node_ptr_t> t_false
-%token <base_node_ptr_t> t_null
 %token <base_node_ptr_t> t_greater_eq
-%token <base_node_ptr_t> t_int
-%token <base_node_ptr_t> t_else
-%token <base_node_ptr_t> t_while
-%token <base_node_ptr_t> t_for
-%token <base_node_ptr_t> t_class
-%token <base_node_ptr_t> t_string
-%token <base_node_ptr_t> t_extends
-%token <User_defined_type_node_ptr_t> t_type_ident
-%token <base_node_ptr_t> t_void
-%token <base_node_ptr_t> t_not_eq
-%token <base_node_ptr_t> t_or
-%token <base_node_ptr_t> t_NewArray
-%token <base_node_ptr_t> t_if
-%token <base_node_ptr_t> t_and
 %token <base_node_ptr_t> t_break
-%token <base_node_ptr_t> t_New
-%token <base_node_ptr_t> t_Print
-%token <base_node_ptr_t> t_ReadInteger
-%token <base_node_ptr_t> t_continue;
-%token <Ident_node_ptr_t> t_ident
+%token <base_node_ptr_t> t_null
 %token <base_node_ptr_t> t_less_eq
-%token <base_node_ptr_t> t_true
-%token <base_node_ptr_t> t_interface
+%token <base_node_ptr_t> t_double
+%token <User_defined_type_node_ptr_t> t_type_ident
+%token <base_node_ptr_t> t_for
+%token <base_node_ptr_t> t_and
+%token <base_node_ptr_t> t_NewArray
+%token <base_node_ptr_t> t_not_eq
+%token <base_node_ptr_t> t_class
+%token <base_node_ptr_t> t_extends
 %token <base_node_ptr_t> t_ReadLine
+%token <Ident_node_ptr_t> t_ident
+%token <base_node_ptr_t> t_eq
+%token <base_node_ptr_t> t_Print
+%token <base_node_ptr_t> t_true
+%token <base_node_ptr_t> t_if
+%token <base_node_ptr_t> t_else
+%token <base_node_ptr_t> t_void
+%token <base_node_ptr_t> t_return
+%token <base_node_ptr_t> t_bool
+%token <base_node_ptr_t> t_while
+%token <base_node_ptr_t> t_false
+%token <base_node_ptr_t> t_implements
+%token <base_node_ptr_t> t_continue;
+%token <base_node_ptr_t> t_or
+%token <base_node_ptr_t> t_New
+%token <base_node_ptr_t> t_ReadInteger
+%token <base_node_ptr_t> t_int
+%token <base_node_ptr_t> t_string
+%token <base_node_ptr_t> t_interface
 
-%type <Prototype_node_ptr_t> Prototype
-%type <List_node_ptr_t> Implementer
-%type <List_node_ptr_t> FieldList
 %type <FunctionDecl_node_ptr_t> FunctionDecl
-%type <List_node_ptr_t> StmtList
-%type <Call_node_ptr_t> Call
-%type <IfStmt_node_ptr_t> IfStmt
-%type <base_node_ptr_t> ExtenderOptional
-%type <List_node_ptr_t> t_type_identCommaList
-%type <WhileStmt_node_ptr_t> WhileStmt
-%type <ClassDecl_node_ptr_t> ClassDecl
-%type <List_node_ptr_t> VariableCommaListOptional
-%type <List_node_ptr_t> PrototypeList
-%type <ContinueStmt_node_ptr_t> ContinueStmt
-%type <List_node_ptr_t> DeclList
-%type <InterfaceDecl_node_ptr_t> InterfaceDecl
-%type <List_node_ptr_t> FieldListOptional
-%type <List_node_ptr_t> ExprCommaList
-%type <List_node_ptr_t> ExprCommaListOptional
 %type <ForStmt_node_ptr_t> ForStmt
-%type <base_node_ptr_t> ExprOptional
-%type <Variable_node_ptr_t> Variable
-%type <StmtBlock_node_ptr_t> StmtBlock
-%type <BreakStmt_node_ptr_t> BreakStmt
+%type <base_node_ptr_t> ExtenderOptional
 %type <List_node_ptr_t> StmtListOptional
-%type <List_node_ptr_t> VariableCommaList
-%type <List_node_ptr_t> ImplementerOptional
-%type <PrintStmt_node_ptr_t> PrintStmt
-%type <ReturnStmt_node_ptr_t> ReturnStmt
+%type <Variable_node_ptr_t> Variable
 %type <List_node_ptr_t> PrototypeListOptional
+%type <List_node_ptr_t> VariableCommaList
+%type <List_node_ptr_t> ExprCommaListOptional
+%type <List_node_ptr_t> ExprCommaList
+%type <ClassDecl_node_ptr_t> ClassDecl
+%type <PrintStmt_node_ptr_t> PrintStmt
+%type <List_node_ptr_t> FieldListOptional
+%type <List_node_ptr_t> DeclList
+%type <ReturnStmt_node_ptr_t> ReturnStmt
+%type <StmtBlock_node_ptr_t> StmtBlock
+%type <base_node_ptr_t> ExprOptional
+%type <WhileStmt_node_ptr_t> WhileStmt
+%type <List_node_ptr_t> VariableCommaListOptional
+%type <Call_node_ptr_t> Call
+%type <InterfaceDecl_node_ptr_t> InterfaceDecl
+%type <List_node_ptr_t> Implementer
+%type <Prototype_node_ptr_t> Prototype
+%type <List_node_ptr_t> PrototypeList
+%type <List_node_ptr_t> ImplementerOptional
+%type <List_node_ptr_t> FieldList
+%type <BreakStmt_node_ptr_t> BreakStmt
+%type <ContinueStmt_node_ptr_t> ContinueStmt
+%type <List_node_ptr_t> t_type_identCommaList
+%type <List_node_ptr_t> StmtList
+%type <IfStmt_node_ptr_t> IfStmt
 
 
 %token <Int_const_node_ptr_t> c_int
@@ -242,7 +242,7 @@ WhileStmt:
 ;
 
 ForStmt: 
-    t_for '(' ExprOptional ';' Expr ';' ExprOptional ')' Stmt { $$ = new ForStmt_node($3, $5, $7, $9); }
+    t_for '(' ExprOptional ';' Expr ';' ExprOptional ')' Stmt { $$ = new ForStmt_node($3, $5, $7, $9); $$->yylloc_ptr = $1->yylloc_ptr; }
 ;
 
 ReturnStmt: 
@@ -250,15 +250,15 @@ ReturnStmt:
 ;
 
 BreakStmt: 
-    t_break ';' { $$ = new BreakStmt_node(nullptr); }
+    t_break ';' { $$ = new BreakStmt_node(nullptr); $$->yylloc_ptr = $1->yylloc_ptr; }
 ;
 
 ContinueStmt:
-    t_continue ';' { $$ = new ContinueStmt_node(nullptr); }
+    t_continue ';' { $$ = new ContinueStmt_node(nullptr); $$->yylloc_ptr = $1->yylloc_ptr; }
 ;
 
 PrintStmt: 
-    t_Print '(' ExprCommaList ')' ';' { $$ = new PrintStmt_node($3); }
+    t_Print '(' ExprCommaList ')' ';' { $$ = new PrintStmt_node($3); $$->yylloc_ptr = $1->yylloc_ptr; }
 ;
 
 Expr: 
@@ -393,6 +393,5 @@ PrototypeListOptional:
 
 void yyerror(const char *s) {
   fprintf(stderr, "%s:%d:%d %s\n", src_file_name.c_str(), yylloc.first_line, yylloc.first_column, s);
-  std::cerr << "yytext: " << get_yytext() << endl;
   exit(-1);
 }

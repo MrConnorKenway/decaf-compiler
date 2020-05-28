@@ -73,5 +73,6 @@ $rule_section
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "line:%d Col:%d %s\n", yylloc.first_line, yylloc.first_column, s);
+  fprintf(stderr, "%s:%d:%d %s\n", src_file_name.c_str(), yylloc.first_line, yylloc.first_column, s);
+  exit(-1);
 }
