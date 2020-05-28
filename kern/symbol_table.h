@@ -66,15 +66,26 @@ using symbol_table_entry = std::variant<class_entry, interface_entry>;
 
 struct symbol_table : unordered_map<string, symbol_table_entry> {
   class_entry& try_fetch_class(string cid) {
+    auto pos = cid.find("[");
+    if (pos != string::npos) {
+      // this is an array type
+      cid = cid.substr(0, pos - 1);
+    }
+    if (unordered_set<string>({"int", "double", "string", "bool"}).count(cid) !=
+        0) {
+      // cid is base type
+      try_emplace(cid, class_entry());
+      return std::get<class_entry>(at(cid));
+    }
     if (count(cid) == 0 || std::holds_alternative<interface_entry>(at(cid))) {
-      ss_assert(false, "Undefined reference to class \"%s\"\n", cid.c_str());
+      ss_assert(false, "Undefined reference to class ", cid);
     }
     return std::get<class_entry>(at(cid));
   }
 
   const class_entry& try_fetch_class(string cid) const {
     if (count(cid) == 0 || std::holds_alternative<interface_entry>(at(cid))) {
-      ss_assert(false, "Undefined reference to class \"%s\"\n", cid.c_str());
+      ss_assert(false, "Undefined reference to class ", cid);
     }
     return std::get<class_entry>(at(cid));
   }

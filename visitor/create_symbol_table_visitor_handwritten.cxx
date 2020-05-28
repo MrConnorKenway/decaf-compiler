@@ -1,8 +1,7 @@
-#include <cassert>
-
 #include "build/include/create_symbol_table_visitor.h"
 
 void Create_symbol_table_visitor::visit(List_node* list_node_ptr) {
+  yylloc_manager y(list_node_ptr);
   for (auto node_ptr : list_node_ptr->list) {
     node_ptr->accept(*this);
   }
@@ -47,6 +46,7 @@ void Create_symbol_table_visitor::visit(Base_type_node* base_type_node_ptr) {
 }
 
 void Create_symbol_table_visitor::visit(Array_type_node* array_type_node_ptr) {
+  yylloc_manager y(array_type_node_ptr);
   visit_and_get_id_of(array_type_node_ptr->base_type);
   current_id += "[]";
 }
@@ -84,9 +84,10 @@ void Create_symbol_table_visitor::visit(Str_const_node* str_const_node_ptr) {}
 void Create_symbol_table_visitor::visit(Bool_const_node* bool_const_node_ptr) {}
 
 void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
+  yylloc_manager y(classdecl_node_ptr);
   auto tmp_id = classdecl_node_ptr->type_id->type_ident_name;
   ss_assert(global_symbol_table.count(tmp_id) == 0,
-            "Multiple definition for class \"%s\"\n", tmp_id.c_str());
+            "Multiple definition for class \"%s\"\n", tmp_id);
 
   call_trace.push(node_type::CLASS);
 
@@ -94,7 +95,7 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
       visit_and_get_id_of(classdecl_node_ptr->extender_optional);
 
   ss_assert(tmp_id != current_class_entry.parent_class_id,
-            "Trying to self-extend \"%s\"\n", tmp_id.c_str());
+            "Trying to self-extend \"%s\"\n", tmp_id);
 
   for (auto node_ptr : classdecl_node_ptr->implementer_optional->list) {
     current_class_entry.implemented_interface_set.insert(
@@ -111,28 +112,31 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
 }
 
 void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
+  yylloc_manager y(variable_node_ptr);
   auto tmp_id = variable_node_ptr->id->ident_name;
   // note that current_id has become "children's id" after the following line
   visit_and_get_id_of(variable_node_ptr->type_node);
+
+  global_symbol_table.try_fetch_class(current_id);
 
   // this function may be called by a classdecl node or a functiondecl node
   switch (call_trace.top()) {
     case node_type::CLASS:
       ss_assert(current_class_entry.field_table.count(tmp_id) == 0,
-                "Multiple definition for variable \"%s\"\n", tmp_id.c_str());
+                "Multiple definition for variable \"%s\"\n", tmp_id);
       current_class_entry.field_table.emplace(tmp_id, current_id);
       break;
 
     case node_type::FUNC:
     case node_type::PROTOTYPE:
       ss_assert(current_func_entry.formal_table.count(tmp_id) == 0,
-                "Multiple definition for variable \"%s\"\n", tmp_id.c_str());
+                "Multiple definition for variable \"%s\"\n", tmp_id);
       current_func_entry.formal_table.emplace(tmp_id, current_id);
       break;
 
     default:
       // there shouldn't be other node type
-      assert(0);
+      ss_assert(false, "");
   }
 
   current_id = tmp_id;
@@ -142,9 +146,10 @@ void Create_symbol_table_visitor::visit(StmtBlock_node* stmtblock_node_ptr) {}
 
 void Create_symbol_table_visitor::visit(
     FunctionDecl_node* functiondecl_node_ptr) {
+  yylloc_manager y(functiondecl_node_ptr);
   auto tmp_id = functiondecl_node_ptr->function_id->ident_name;
   ss_assert(current_class_entry.func_table.count(tmp_id) == 0,
-            "Multiple definition for function \"%s\"\n", tmp_id.c_str());
+            "Multiple definition for function \"%s\"\n", tmp_id);
 
   call_trace.push(node_type::FUNC);
 
@@ -164,9 +169,10 @@ void Create_symbol_table_visitor::visit(
 }
 
 void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
+  yylloc_manager y(prototype_node_ptr);
   auto tmp_id = prototype_node_ptr->prototype_id->ident_name;
   ss_assert(current_interface_entry.count(tmp_id) == 0,
-            "Multiple definition for prototype \"%s\"\n", tmp_id.c_str());
+            "Multiple definition for prototype \"%s\"\n", tmp_id);
 
   call_trace.push(node_type::PROTOTYPE);
 
@@ -186,9 +192,10 @@ void Create_symbol_table_visitor::visit(Prototype_node* prototype_node_ptr) {
 
 void Create_symbol_table_visitor::visit(
     InterfaceDecl_node* interfacedecl_node_ptr) {
+  yylloc_manager y(interfacedecl_node_ptr);
   auto tmp_id = interfacedecl_node_ptr->type_id->type_ident_name;
   ss_assert(global_symbol_table.count(tmp_id) == 0,
-            "Multiple definition for interface \"%s\"\n", tmp_id.c_str());
+            "Multiple definition for interface \"%s\"\n", tmp_id);
 
   interfacedecl_node_ptr->prototype_list_optional->accept(*this);
 

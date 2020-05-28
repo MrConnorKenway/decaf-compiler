@@ -9,14 +9,12 @@
 
 #define YYERROR_VERBOSE
 
-using std::cout;
-using std::cin;
-
 int yylex();
 string get_yytext();
 void yyerror(const char *s);
 
 ast_node_ptr_t root;
+extern string src_file_name;
 %}
 
 %define parse.error verbose
@@ -163,7 +161,7 @@ VariableDecl:
 ;
 
 Variable: 
-    Type t_ident { $$ = new Variable_node($1, $2); }
+    Type t_ident { $$ = new Variable_node($1, $2); $$->yylloc_ptr = $1->yylloc_ptr; }
 ;
 
 Type: 
@@ -176,8 +174,8 @@ Type:
 ;
 
 FunctionDecl: 
-    Type t_ident '(' Formals ')' StmtBlock { $$ = new FunctionDecl_node($1, $2, $4, $6); }
-  | t_void t_ident '(' Formals ')' StmtBlock { $$ = new FunctionDecl_node(new Base_type_node(t_void), $2, $4, $6); }
+    Type t_ident '(' Formals ')' StmtBlock { $$ = new FunctionDecl_node($1, $2, $4, $6); $$->yylloc_ptr = $2->yylloc_ptr; }
+  | t_void t_ident '(' Formals ')' StmtBlock { $$ = new FunctionDecl_node(new Base_type_node(t_void), $2, $4, $6); $$->yylloc_ptr = $2->yylloc_ptr; }
 ;
 
 Formals: 
@@ -187,6 +185,7 @@ Formals:
 ClassDecl: 
     t_class t_type_ident ExtenderOptional ImplementerOptional '{' FieldListOptional '}' { 
       $$ = new ClassDecl_node($2, $3, $4, $6); 
+      $$->yylloc_ptr = $2->yylloc_ptr;
     }
 ;
 
@@ -204,12 +203,12 @@ Field:
 ;
 
 InterfaceDecl: 
-    t_interface t_type_ident '{' PrototypeListOptional '}' { $$ = new InterfaceDecl_node($2, $4); }
+    t_interface t_type_ident '{' PrototypeListOptional '}' { $$ = new InterfaceDecl_node($2, $4); $$->yylloc_ptr = $2->yylloc_ptr; }
 ;
 
 Prototype: 
-    Type t_ident '(' Formals ')' ';' { $$ = new Prototype_node($1, $2, $4); }
-  | t_void t_ident '(' Formals ')' ';' { $$ = new Prototype_node(new Base_type_node(t_void), $2, $4); }
+    Type t_ident '(' Formals ')' ';' { $$ = new Prototype_node($1, $2, $4); $$->yylloc_ptr = $2->yylloc_ptr; }
+  | t_void t_ident '(' Formals ')' ';' { $$ = new Prototype_node(new Base_type_node(t_void), $2, $4); $$->yylloc_ptr = $2->yylloc_ptr; }
 ;
 
 StmtBlock: 
@@ -297,8 +296,8 @@ LValue:
 ;
 
 Call: 
-    t_ident '(' Actuals ')' { $$ = new Call_node($3, $1, new Empty_node()); }
-  | Expr '.' t_ident '(' Actuals ')' { $$ = new Call_node($5, $3, $1); }
+    t_ident '(' Actuals ')' { $$ = new Call_node($3, $1, new Empty_node()); $$->yylloc_ptr = $1->yylloc_ptr; }
+  | Expr '.' t_ident '(' Actuals ')' { $$ = new Call_node($5, $3, $1); $$->yylloc_ptr = $3->yylloc_ptr; }
 ;
 
 Actuals: 
@@ -393,7 +392,7 @@ PrototypeListOptional:
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "line:%d Col:%d %s\n", yylloc.first_line, yylloc.first_column, s);
+  fprintf(stderr, "%s:%d:%d %s\n", src_file_name.c_str(), yylloc.first_line, yylloc.first_column, s);
   std::cerr << "yytext: " << get_yytext() << endl;
   exit(-1);
 }

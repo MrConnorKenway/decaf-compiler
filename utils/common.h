@@ -7,6 +7,7 @@
 #include <vector>
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::optional;
 using std::stack;

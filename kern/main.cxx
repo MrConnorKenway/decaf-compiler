@@ -11,6 +11,8 @@
 
 extern ast_node_ptr_t root;
 yyFlexLexer* lexer_ptr = nullptr;
+YYLTYPE* yylloc_ptr;
+string src_file_name;
 
 int yyparse();
 int yylex() { return lexer_ptr->yylex(); }
@@ -42,6 +44,7 @@ int main(int argc, char** argv) {
   }
 
   std::ifstream f(argv[optind]);
+  src_file_name = argv[optind];
   if (!f.is_open()) {
     std::cerr << "Failed to open file: " << argv[optind] << endl;
     exit(-1);
