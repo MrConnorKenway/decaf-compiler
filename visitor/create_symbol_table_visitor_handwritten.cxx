@@ -106,6 +106,7 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
 
   classdecl_node_ptr->field_list_optional->accept(*this);
 
+  current_class_entry.classdecl_node_ptr = classdecl_node_ptr;
   global_symbol_table[tmp_id] = std::move(current_class_entry);
   current_class_entry = class_entry();
 

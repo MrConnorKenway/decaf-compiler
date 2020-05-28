@@ -51,6 +51,7 @@ struct class_entry {
   class_id parent_class_id;
   Inheritance inheritance;
   unordered_set<interface_id> implemented_interface_set;
+  ClassDecl_node* classdecl_node_ptr;
 
   var_type try_fetch_variable(var_id vid) {
     ss_assert(field_table.count(vid) != 0, "Undefined reference to variable ",

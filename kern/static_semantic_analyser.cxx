@@ -4,6 +4,7 @@ int scope::next_tid = 0;
 
 void static_semantic_analyser::analyse(string cid,
                                        class_entry& current_class_entry) {
+  yylloc_manager y(current_class_entry.classdecl_node_ptr);
   if (is_visited.count(cid) == 0) {
     is_visited[cid] = false;
   } else {
