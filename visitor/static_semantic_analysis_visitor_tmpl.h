@@ -66,6 +66,7 @@ class Static_semantic_analysis_visitor : public Visitor {
 
   symbol_table& global_symbol_table;
   string current_id;
+  string current_func_id;
   string current_class_id;
   enum class action_type { GET_ARGS_TYPE };
   stack<action_type> call_trace;
@@ -106,6 +107,7 @@ class Static_semantic_analysis_visitor : public Visitor {
         class_scope(ce),
         current_scope_ptr(&class_scope),
         current_class_id(cid),
+        current_func_id(),
         current_id(),
         call_trace(),
         current_loop_node() {}

@@ -95,6 +95,7 @@ void static_semantic_analyser::analyse() {
       for (auto& [fid, fe] : ce.func_table) {
         ss_assert(fe.func_body.has_value(), "function \"%s\" has no body\n",
                   fid.c_str());
+        sv.current_func_id = fid;
         auto& func_body_ptr = fe.func_body.value();
         func_body_ptr->scope_ptr = new scope(fe);
         sv.visit(func_body_ptr);
