@@ -9,14 +9,12 @@
 
 #define YYERROR_VERBOSE
 
-using std::cout;
-using std::cin;
-
 int yylex();
 string get_yytext();
 void yyerror(const char *s);
 
 ast_node_ptr_t root;
+extern string src_file_name;
 %}
 
 %define parse.error verbose

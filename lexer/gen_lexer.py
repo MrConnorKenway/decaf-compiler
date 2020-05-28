@@ -18,7 +18,7 @@ with open('lexer/keywords', 'r') as keywords, \
 
   keywords = keywords.read().replace('\n', ' ').split()
   for keyword in keywords:
-    rule_list += '\"{0}\" {{ return t_{0}; }}\n'.format(keyword)
+    rule_list += '\"{0}\" {{\n\tyylval.base_node_ptr_t = new Empty_node();\n\tyylval.base_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);\n\treturn t_{0};\n}}\n'.format(keyword)
 
   operators = operators.read().split('\n')
   for operator in operators:

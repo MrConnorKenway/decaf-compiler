@@ -99,7 +99,7 @@ for token in tokens:
   elif token == 't_type_ident':
     decl_section += '%token <User_defined_type_node_ptr_t> {0}\n'.format(token)
   else:
-    decl_section += '%token <int_val> {0}\n'.format(token)
+    decl_section += '%token <base_node_ptr_t> {0}\n'.format(token)
 
 decl_section += '\n'
 
