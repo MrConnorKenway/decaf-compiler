@@ -4,18 +4,21 @@
 # you must run GNU make in the top-level directory.
 #
 
-OBJ += $(OBJDIR)/display.o
+OBJ += $(OBJDIR)/display.o $(OBJDIR)/create_symbol_table.o $(OBJDIR)/static_semantic_analysis.o
 
-$(SRCDIR)/%_visitor.cxx: visitor/gen_visitor.py ast/ast_tmpl.h
+$(SRCDIR)/%_visitor.cxx: visitor/gen_visitor.py visitor/%_visitor_tmpl.cxx ast/ast_tmpl.h
 	@$< $*_visitor --header-dst $(INCDIR)/$*_visitor.h --src-dst $@
 
 $(INCDIR)/%_visitor.h: visitor/gen_visitor.py visitor/%_visitor_tmpl.h ast/ast_tmpl.h
 	@$< $*_visitor --header-dst $@ --src-dst $(SRCDIR)/$*_visitor.cxx
 
 $(OBJDIR)/%.o: visitor/%_visitor_handwritten.cxx \
-	$(INCDIR)/%_visitor.h \
-	$(INCDIR)/visitor.h $(INCDIR)/ast.h \
-	$(INCDIR)/parser_handwritten.tab.h
+		$(INCDIR)/%_visitor.h \
+		visitor/%_visitor_tmpl.h \
+		$(INCDIR)/visitor.h $(INCDIR)/ast.h \
+		$(INCDIR)/parser_handwritten.tab.h \
+		kern/symbol_table.h \
+		utils/error.h
 	@echo - generating $(@F)
 	@g++ -c -o $@ $< $(CFLAGS)
 

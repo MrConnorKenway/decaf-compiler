@@ -9,14 +9,12 @@
 
 #define YYERROR_VERBOSE
 
-using std::cout;
-using std::cin;
-
 int yylex();
 string get_yytext();
 void yyerror(const char *s);
 
 ast_node_ptr_t root;
+extern string src_file_name;
 %}
 
 %define parse.error verbose
@@ -26,7 +24,7 @@ ast_node_ptr_t root;
 $union_section
 	ast_node_ptr_t base_node_ptr_t;
 	Ident_node* Ident_node_ptr_t;
-	Type_ident_node* Type_ident_node_ptr_t;
+	User_defined_type_node* User_defined_type_node_ptr_t;
 	Int_const_node* Int_const_node_ptr_t;
 	Double_const_node* Double_const_node_ptr_t;
 	Str_const_node* Str_const_node_ptr_t;
@@ -51,6 +49,7 @@ $decl_section
 %type <base_node_ptr_t> LValue
 %type <base_node_ptr_t> Constant
 %type <base_node_ptr_t> Type
+%type <base_node_ptr_t> Extender
 
 %right THEN t_else
 %token ';'
@@ -74,17 +73,6 @@ $rule_section
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "line:%d Col:%d %s\n", yylloc.first_line, yylloc.first_column, s);
-}
-
-int main(int argc, char **argv) {
-	++argv, --argc;  /* skip over program name */
-	if (argc > 0) {
-		assert(argc == 1);
-    freopen(argv[0], "r", stdin);
-	}
-
-	yyparse();
-
-	return 0;
+  fprintf(stderr, "%s:%d:%d %s\n", src_file_name.c_str(), yylloc.first_line, yylloc.first_column, s);
+  exit(-1);
 }

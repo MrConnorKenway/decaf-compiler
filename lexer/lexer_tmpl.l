@@ -22,11 +22,13 @@ TYPE_ID [A-Z][A-Za-z0-9_]*
 
 {DIGIT}+ {
 	yylval.Int_const_node_ptr_t = new Int_const_node(std::stoi(yytext));
+	yylval.Int_const_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);
 	return c_int;
 }
 
 [-+]?{DIGIT}+"."{DIGIT}*([eE][-+]?{DIGIT}+)? {
 	yylval.Double_const_node_ptr_t = new Double_const_node(std::stod(yytext));
+	yylval.Double_const_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);
 	return c_double;
 }
 
@@ -34,11 +36,13 @@ $rule_list
 
 {ID} {
 	yylval.Ident_node_ptr_t = new Ident_node(yytext);
+	yylval.Ident_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);
 	return t_ident;
 }
 
 {TYPE_ID} {
-	yylval.Type_ident_node_ptr_t = new Type_ident_node(yytext);
+	yylval.User_defined_type_node_ptr_t = new User_defined_type_node(yytext);
+	yylval.User_defined_type_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);
 	return t_type_ident;
 }
 

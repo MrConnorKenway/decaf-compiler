@@ -1,11 +1,14 @@
 #pragma once
 #include "ast/ast_base.h"
 
+class scope;
+
 // $ special mark for python to locate
 // the code above can be copied directly into ast.h
 class List_node : public AST_node_base {
  public:
-  vector<ast_node_ptr_t> list;
+  vector<ast_node_ptr_t> list;                  // default
+  optional<vector<string>> elements_type_list;  // default
 };
 
 // special node to handle 'this' reference
@@ -17,14 +20,10 @@ class Null_const_node : public AST_node_base {};
 // an non-terminal produce a empty production
 class Empty_node : public AST_node_base {};
 
-class Type_ident_node : public AST_node_base {
- public:
-  string type_ident_name;
-};
-
 class Ident_node : public AST_node_base {
  public:
   string ident_name;
+  int tid;  // -1
 };
 
 // we declare type_node as ast_node_base in bison union
@@ -117,21 +116,11 @@ class Bool_const_node : public AST_node_base {
   int val;
 };
 
-class Extender_node : public AST_node_base {
- public:
-  Type_ident_node* type_id;
-};
-
-class Implementer_node : public AST_node_base {
- public:
-  List_node* type_ident_list;
-};
-
 class ClassDecl_node : public AST_node_base {
  public:
-  Type_ident_node* type_id;
+  User_defined_type_node* type_id;
   ast_node_ptr_t extender_optional;
-  ast_node_ptr_t implementer_optional;
+  List_node* implementer_optional;
   List_node* field_list_optional;
 };
 
@@ -144,6 +133,7 @@ class Variable_node : public AST_node_base {
 class StmtBlock_node : public AST_node_base {
  public:
   List_node* stmt_list_optional;
+  scope* scope_ptr;  // default
 };
 
 class FunctionDecl_node : public AST_node_base {
@@ -163,7 +153,7 @@ class Prototype_node : public AST_node_base {
 
 class InterfaceDecl_node : public AST_node_base {
  public:
-  Type_ident_node* type_id;
+  User_defined_type_node* type_id;
   List_node* prototype_list_optional;
 };
 
@@ -174,7 +164,7 @@ class ReturnStmt_node : public AST_node_base {
 
 class WhileStmt_node : public AST_node_base {
  public:
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t stmt;
 };
 
@@ -197,7 +187,7 @@ class ContinueStmt_node : public AST_node_base {
 
 class IfStmt_node : public AST_node_base {
  public:
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t stmt;
   ast_node_ptr_t else_stmt_optional;
 };
@@ -205,7 +195,7 @@ class IfStmt_node : public AST_node_base {
 class ForStmt_node : public AST_node_base {
  public:
   ast_node_ptr_t init_expr_optional;
-  ast_node_ptr_t condition;
+  ast_node_ptr_t condition_expr;
   ast_node_ptr_t step_expr_optional;
   ast_node_ptr_t stmt;
 };

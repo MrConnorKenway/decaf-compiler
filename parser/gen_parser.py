@@ -97,9 +97,9 @@ for token in tokens:
   if token == 't_ident':
     decl_section += '%token <Ident_node_ptr_t> {0}\n'.format(token)
   elif token == 't_type_ident':
-    decl_section += '%token <Type_ident_node_ptr_t> {0}\n'.format(token)
+    decl_section += '%token <User_defined_type_node_ptr_t> {0}\n'.format(token)
   else:
-    decl_section += '%token <int_val> {0}\n'.format(token)
+    decl_section += '%token <base_node_ptr_t> {0}\n'.format(token)
 
 decl_section += '\n'
 
@@ -112,7 +112,7 @@ with open('parser/parser_tmpl.yxx', 'r') as tmpl:
     non_terminals.discard(t)
 
 for non_terminal in non_terminals:
-  if non_terminal.find('List') >= 0:
+  if non_terminal.find('List') >= 0 or non_terminal.find('Implementer') >= 0:
     # treat all List as the same
     decl_section += '%type <List_node_ptr_t> {0}\n'.format(non_terminal)
     decl_union.add('\tList_node *List_node_ptr_t;\n')

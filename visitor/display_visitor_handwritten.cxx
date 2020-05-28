@@ -45,20 +45,23 @@ string Display_visitor::op_code_to_str(int op_code) {
   }
 }
 
-string Display_visitor::type_code_to_str(int type_code) {
+string Display_visitor::base_type_code_to_str(int type_code) {
   switch (type_code) {
     case t_int:
       return "int";
-    
+
     case t_bool:
       return "bool";
 
     case t_double:
       return "double";
-    
+
     case t_string:
       return "string";
-    
+
+    case t_void:
+      return "void";
+
     default:
       return "unknown type code";
   }
@@ -67,15 +70,11 @@ string Display_visitor::type_code_to_str(int type_code) {
 void Display_visitor::visit(List_node* list_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(list_node_ptr->node_type);
-  if (list_node_ptr->list.empty()) {
-    return;
+  for (auto iter = list_node_ptr->list.cbegin();
+       iter != list_node_ptr->list.cend(); ++iter) {
+    is_last = iter == std::prev(list_node_ptr->list.cend());
+    (*iter)->accept(*this);
   }
-  auto it = list_node_ptr->list.cbegin();
-  for (; it != --list_node_ptr->list.cend(); ++it) {
-    (*it)->accept(*this);
-  }
-  is_last = true;
-  (*it)->accept(*this);
 }
 
 void Display_visitor::visit(This_node* this_node_ptr) {
@@ -93,12 +92,6 @@ void Display_visitor::visit(Empty_node* empty_node_ptr) {
   i.indent(empty_node_ptr->node_type);
 }
 
-void Display_visitor::visit(Type_ident_node* type_ident_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(type_ident_node_ptr->node_type + " " +
-           type_ident_node_ptr->type_ident_name);
-}
-
 void Display_visitor::visit(Ident_node* ident_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(ident_node_ptr->node_type + " " + ident_node_ptr->ident_name);
@@ -107,7 +100,7 @@ void Display_visitor::visit(Ident_node* ident_node_ptr) {
 void Display_visitor::visit(Base_type_node* base_type_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(base_type_node_ptr->node_type +
-           " type: " + type_code_to_str(base_type_node_ptr->type));
+           " type: " + base_type_code_to_str(base_type_node_ptr->type));
   ;
 }
 
@@ -215,24 +208,13 @@ void Display_visitor::visit(Bool_const_node* bool_const_node_ptr) {
            " val: " + std::to_string(bool_const_node_ptr->val));
 }
 
-void Display_visitor::visit(Extender_node* extender_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(extender_node_ptr->node_type + ": extends class " +
-           extender_node_ptr->type_id->type_ident_name);
-}
-
-void Display_visitor::visit(Implementer_node* implementer_node_ptr) {
-  Indent i(is_last_bools, is_last);
-  i.indent(implementer_node_ptr->node_type);
-  is_last = true;
-  implementer_node_ptr->type_ident_list->accept(*this);
-}
-
 void Display_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(classdecl_node_ptr->node_type);
   classdecl_node_ptr->type_id->accept(*this);
+  classdecl_node_ptr->extender_optional->node_type = "Extender node: ";
   classdecl_node_ptr->extender_optional->accept(*this);
+  classdecl_node_ptr->implementer_optional->node_type = "Implementer node: ";
   classdecl_node_ptr->implementer_optional->accept(*this);
   is_last = true;
   classdecl_node_ptr->field_list_optional->node_type = "FieldList_node";
@@ -289,7 +271,7 @@ void Display_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
 void Display_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(whilestmt_node_ptr->node_type);
-  whilestmt_node_ptr->condition->accept(*this);
+  whilestmt_node_ptr->condition_expr->accept(*this);
   is_last = true;
   whilestmt_node_ptr->stmt->accept(*this);
 }
@@ -316,7 +298,7 @@ void Display_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
 void Display_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(ifstmt_node_ptr->node_type);
-  ifstmt_node_ptr->condition->accept(*this);
+  ifstmt_node_ptr->condition_expr->accept(*this);
   ifstmt_node_ptr->stmt->accept(*this);
   is_last = true;
   ifstmt_node_ptr->else_stmt_optional->accept(*this);
@@ -326,7 +308,7 @@ void Display_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(forstmt_node_ptr->node_type);
   forstmt_node_ptr->init_expr_optional->accept(*this);
-  forstmt_node_ptr->condition->accept(*this);
+  forstmt_node_ptr->condition_expr->accept(*this);
   forstmt_node_ptr->step_expr_optional->accept(*this);
   is_last = true;
   forstmt_node_ptr->stmt->accept(*this);

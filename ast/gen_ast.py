@@ -21,65 +21,59 @@ def main(src, header, tmpl):
     header.write('class {0};\n'.format(subclass_name))
 
   header.write('\n')
-
-  for subclass_name in subclass_names:
-    fields_decl = re.findall(
-        r"class {0}.*\n^.*public:.*\n\s*([\s\S]*?)}};".format(subclass_name), tmpl, re.MULTILINE)
-
-    if len(fields_decl) == 0:
-      # if the class does not have any fields
-      header.write(
-          'class {0} : public AST_node_base {{\n public:\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}();\n}};\n\n'.format(subclass_name))
-    elif subclass_name == 'List_node':
-      # we want List_node use default constructor
-      header.write(
-          'class {0} : public AST_node_base {{\n public:\n\t{1}\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}();\n}};\n\n'.format(
-              subclass_name, fields_decl[0]))
-    else:
-      fields = fields_decl[0][:-2].replace('\n', '').split(';')
-      parameter_list_str = ''
-      assignment_list_str = ''
-      is_first = True
-      for field in fields:
-        type_name, id_name = field.split()
-        if is_first:
-          parameter_list_str += '{0} _{1}'.format(type_name, id_name)
-          assignment_list_str += '{0}(_{0})'.format(id_name)
-          is_first = False
-        else:
-          parameter_list_str += ', {0} _{1}'.format(type_name, id_name)
-          assignment_list_str += ', {0}(_{0})'.format(id_name)
-      header.write(
-          'class {0} : public AST_node_base {{\n public:\n\t{3}\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}({1});\n}};\n\n'.format(
-              subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
-
   src.write('#include "build/include/ast.h"\n#include "build/include/visitor.h"\n\n')
 
   for subclass_name in subclass_names:
-    fields_decl = re.findall(
-        r"class {0}.*\n^.*public:.*\n\s*([\s\S]*?)}};".format(subclass_name), tmpl, re.MULTILINE)
+    members_decl = re.findall(
+        r"class {0}.*\n^.*public:.*\n\s*([\s\S]*?)\n(\n[\s\S]*?)?}};".format(subclass_name), tmpl, re.MULTILINE)
+    if (len(members_decl) != 0):
+      # use zip in conjunction with the * operator to unzip declarations
+      fields_decl, funcs_decl = zip(*members_decl)
+    else:
+      fields_decl, funcs_decl = [], []
 
-    if len(fields_decl) == 0 or subclass_name == 'List_node':
-      # if the class does not have any fields or the class is List_node
-      # we want List_node use default constructor
+    header.write(
+        'class {0} : public AST_node_base {{\n public:\n\t'.format(subclass_name))
+    if len(fields_decl) == 0:
+      # if the class does not have any fields
+      header.write(
+          '/*virtual*/ void accept(Visitor& v);\n\t{0}();\n'.format(subclass_name))
       src.write(
           'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}() {{ node_type = "{0}"; }}\n\n'.format(subclass_name))
     else:
-      fields = fields_decl[0][:-2].replace('\n', '').split(';')
+      fields = re.findall(
+          r"\s*(\S+)\s*(\S+);(?:\s*//\s*(.*))?\n?", fields_decl[0], re.M)
       parameter_list_str = ''
       assignment_list_str = ''
       is_first = True
       for field in fields:
-        type_name, id_name = field.split()
-        if is_first:
-          parameter_list_str += '{0} _{1}'.format(type_name, id_name)
-          assignment_list_str += '{0}(_{0})'.format(id_name)
-          is_first = False
+        type_name, id_name, init_value = field
+        if init_value != '':
+          # if we specify the initial value of this field
+          if init_value == 'default':
+            init_value = ''
+          if is_first:
+            assignment_list_str += '{0}({1})'.format(id_name, init_value)
+            is_first = False
+          else:
+            assignment_list_str += ', {0}({1})'.format(id_name, init_value)
         else:
-          parameter_list_str += ', {0} _{1}'.format(type_name, id_name)
-          assignment_list_str += ', {0}(_{0})'.format(id_name)
+          if is_first:
+            parameter_list_str += '{0} _{1}'.format(type_name, id_name)
+            assignment_list_str += '{0}(_{0})'.format(id_name)
+            is_first = False
+          else:
+            parameter_list_str += ', {0} _{1}'.format(type_name, id_name)
+            assignment_list_str += ', {0}(_{0})'.format(id_name)
+      header.write(
+          '{3}\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}({1});\n'.format(
+              subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
       src.write(
           'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}({1}) : {2} {{ node_type = "{0}"; }}\n\n'.format(subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+    for func in funcs_decl:
+      if func != '':
+        header.write('{0}'.format(func))
+    header.write('};\n\n')
 
 
 if __name__ == "__main__":
