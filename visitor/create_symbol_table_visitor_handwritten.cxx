@@ -89,6 +89,8 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
   ss_assert(global_symbol_table.count(tmp_id) == 0,
             "Multiple definition for class \"%s\"\n", tmp_id);
 
+  global_symbol_table.emplace(tmp_id, class_entry());
+
   call_trace.push(node_type::CLASS);
 
   current_class_entry.parent_class_id =
@@ -104,8 +106,7 @@ void Create_symbol_table_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
 
   classdecl_node_ptr->field_list_optional->accept(*this);
 
-  global_symbol_table.emplace(classdecl_node_ptr->type_id->type_ident_name,
-                              std::move(current_class_entry));
+  global_symbol_table[tmp_id] = std::move(current_class_entry);
   current_class_entry = class_entry();
 
   call_trace.pop();
