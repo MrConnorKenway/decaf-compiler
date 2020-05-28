@@ -53,8 +53,8 @@ struct class_entry {
   unordered_set<interface_id> implemented_interface_set;
 
   var_type try_fetch_variable(var_id vid) {
-    ss_assert(field_table.count(vid) != 0,
-              "Undefined reference to variable \"%s\"\n", vid.c_str());
+    ss_assert(field_table.count(vid) != 0, "Undefined reference to variable ",
+              vid);
     return field_table[vid];
   }
 
@@ -116,24 +116,21 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
 
   func_entry& try_fetch_func(string cid, string fid) {
     auto& ce = try_fetch_class(cid);
-    ss_assert(ce.func_table.count(fid),
-              "Undefined reference to function \"%s\" in class \"%s\"\n",
-              fid.c_str(), cid.c_str());
+    ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
+              " in class ", cid);
     return ce.func_table[fid];
   }
 
   const func_entry& try_fetch_func(string cid, string fid) const {
     auto const& ce = try_fetch_class(cid);
-    ss_assert(ce.func_table.count(fid),
-              "Undefined reference to function \"%s\" in class \"%s\"\n",
-              fid.c_str(), cid.c_str());
+    ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
+              " in class ", cid);
     return ce.func_table.at(fid);
   }
 
   interface_entry& try_fetch_interface(string iid) {
     if (count(iid) == 0 || std::holds_alternative<class_entry>(at(iid))) {
-      ss_assert(false, "Undefined reference to interface \"%s\"\n",
-                iid.c_str());
+      ss_assert(false, "Undefined reference to interface ", iid);
     }
     return std::get<interface_entry>(at(iid));
   }

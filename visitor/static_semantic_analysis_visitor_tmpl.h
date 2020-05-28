@@ -25,7 +25,7 @@ class scope {
       iter = iter->parent_scope_ptr;
     }
 
-    ss_assert(false, "Undefined reference to variable \"%s\"\n", vid.c_str());
+    ss_assert(false, "Undefined reference to variable ", vid);
   }
 
   void load_symbol_table_from_class(const class_entry& ce) {
@@ -43,7 +43,7 @@ class scope {
 
   void try_insert(var_id vid, var_type vt) {
     ss_assert(local_symbol_table.count(vid) == 0,
-              "Multiple definition of variable \"%s\"\n", vid.c_str());
+              "Multiple definition of variable ", vid);
     local_symbol_table.try_emplace(vid, next_tid++, vt);
   }
 
@@ -85,9 +85,8 @@ class Static_semantic_analysis_visitor : public Visitor {
   // report error if node_ptr has no expr type
   string decl_type(ast_node_ptr_t node_ptr) {
     node_ptr->accept(*this);
-    ss_assert(node_ptr->expr_type.has_value(),
-              "Current node \"%s\" has no expr type\n",
-              node_ptr->node_type.c_str());
+    ss_assert(node_ptr->expr_type.has_value(), "Current node ",
+              node_ptr->node_type, " has no expr type\n");
     return node_ptr->expr_type.value();
   }
 

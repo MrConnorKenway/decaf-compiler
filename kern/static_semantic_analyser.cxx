@@ -14,7 +14,7 @@ void static_semantic_analyser::analyse(string cid,
     // means that the visiting of cid is not finished yet, so we have to
     // visit the parent class of cid first. However, while visiting the
     // ancestors, we encounter cid again, which leads to a cyclic inheritance
-    ss_assert(false, "Found cyclic inheritance in class \"%s\"\n", cid.c_str());
+    ss_assert(false, "Found cyclic inheritance in class ", cid);
   }
 
   if (current_class_entry.parent_class_id != "") {
@@ -37,11 +37,9 @@ void static_semantic_analyser::analyse(string cid,
       // if current class tries to override an inherited function
       auto decl_class_id = current_class_entry.inheritance.func_decl_class[fid];
       auto& prototype = global_symbol_table.try_fetch_func(decl_class_id, fid);
-      ss_assert(fe == prototype,
-                "Class \"%s\": overloading inherited function \"%s\" from "
-                "parent class "
-                "\"%s\" is not allowed\n",
-                cid.c_str(), fid.c_str(), decl_class_id.c_str());
+      ss_assert(fe == prototype, "Class ", cid,
+                ": overloading inherited function ", fid, " from parent class ",
+                decl_class_id, " is not allowed\n");
     }
 
     // update or insert the declare class of fid into inheritance
@@ -63,9 +61,8 @@ void static_semantic_analyser::analyse(string cid,
     // current class' function table
     for (auto& [fid, prototype] : ie) {
       auto& fe = global_symbol_table.try_fetch_func(cid, fid);
-      ss_assert(fe == prototype,
-                "Prototype of function \"%s\" mismatches interface \"%s\"\n",
-                fid.c_str(), iid.c_str());
+      ss_assert(fe == prototype, "Prototype of function ", fid,
+                " mismatches interface ", iid);
     }
 
     // insert the implemented interface into inheritance
@@ -93,8 +90,7 @@ void static_semantic_analyser::analyse() {
       Static_semantic_analysis_visitor sv(global_symbol_table, ce,
                                           std::move(eid));
       for (auto& [fid, fe] : ce.func_table) {
-        ss_assert(fe.func_body.has_value(), "function \"%s\" has no body\n",
-                  fid.c_str());
+        ss_assert(fe.func_body.has_value(), "function ", fid, " has no body");
         sv.current_func_id = fid;
         auto& func_body_ptr = fe.func_body.value();
         func_body_ptr->scope_ptr = new scope(fe);

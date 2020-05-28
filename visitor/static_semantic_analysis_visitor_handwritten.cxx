@@ -97,13 +97,12 @@ void Static_semantic_analysis_visitor::visit(
   auto right_type = decl_type(binary_expr_node_ptr->right_operand);
   switch (binary_expr_node_ptr->op) {
     case '+': {
-      ss_assert(left_type == right_type,
-                "LHS type \"%s\" and RHS type \"%s\" mismatch\n",
-                left_type.c_str(), right_type.c_str());
+      ss_assert(left_type == right_type, "LHS type ", left_type,
+                " and RHS type ", right_type, " mismatch");
       ss_assert(
           left_type == "double" || left_type == "int" || left_type == "string",
-          "The type of left operand \"%s\" does not support \"%c\" operation\n",
-          left_type.c_str(), binary_expr_node_ptr->op);
+          "The type of left operand ", left_type, " does not support ",
+          binary_expr_node_ptr->op, " operation");
       binary_expr_node_ptr->expr_type = left_type;
       break;
     }
@@ -111,13 +110,11 @@ void Static_semantic_analysis_visitor::visit(
     case '-':
     case '*':
     case '/': {
-      ss_assert(left_type == right_type,
-                "LHS type \"%s\" and RHS type \"%s\" mismatch\n",
-                left_type.c_str(), right_type.c_str());
-      ss_assert(
-          left_type == "double" || left_type == "int",
-          "The type of left operand \"%s\" does not support \"%c\" operation\n",
-          left_type.c_str(), binary_expr_node_ptr->op);
+      ss_assert(left_type == right_type, "LHS type ", left_type,
+                " and RHS type ", right_type, " mismatch");
+      ss_assert(left_type == "double" || left_type == "int",
+                "The type of left operand ", left_type, " does not support ",
+                binary_expr_node_ptr->op, " operation");
       binary_expr_node_ptr->expr_type = left_type;
       break;
     }
@@ -125,13 +122,11 @@ void Static_semantic_analysis_visitor::visit(
     case '>':
     case t_greater_eq:
     case t_less_eq: {
-      ss_assert(left_type == right_type,
-                "LHS type \"%s\" and RHS type \"%s\" mismatch\n",
-                left_type.c_str(), right_type.c_str());
-      ss_assert(
-          left_type == "double" || left_type == "int",
-          "The type of left operand \"%s\" does not support comparation\n",
-          left_type.c_str());
+      ss_assert(left_type == right_type, "LHS type ", left_type,
+                " and RHS type ", right_type, " mismatch");
+      ss_assert(left_type == "double" || left_type == "int",
+                "The type of left operand ", left_type,
+                " does not support comparation");
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }
@@ -139,22 +134,19 @@ void Static_semantic_analysis_visitor::visit(
     case t_not_eq:
     case t_eq: {
       if (left_type != right_type) {
-        ss_assert(left_type == "null" || right_type == "null",
-                  "LHS type \"%s\" and RHS type \"%s\" mismatch\n",
-                  left_type.c_str(), right_type.c_str());
+        ss_assert(left_type == "null" || right_type == "null", "LHS type ",
+                  left_type, " and RHS type ", right_type, " mismatch");
       }
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }
     case t_and:
     case t_or: {
-      ss_assert(left_type == right_type,
-                "LHS type \"%s\" and RHS type \"%s\" mismatch\n",
-                left_type.c_str(), right_type.c_str());
-      ss_assert(
-          left_type == "double" || left_type == "int",
-          "The type of left operand \"%s\" does not support comparation\n",
-          left_type.c_str());
+      ss_assert(left_type == right_type, "LHS type ", left_type,
+                " and RHS type ", right_type, " mismatch");
+      ss_assert(left_type == "double" || left_type == "int",
+                "The type of left operand ", left_type,
+                " does not support comparation");
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }
@@ -167,25 +159,22 @@ void Static_semantic_analysis_visitor::visit(
   auto operand_type = decl_type(unary_expr_node_ptr->operand);
   switch (unary_expr_node_ptr->op) {
     case '-': {
-      ss_assert(
-          operand_type == "double" || operand_type == "int",
-          "The type of operand \"%s\" does not support unary minus operation\n",
-          operand_type.c_str());
+      ss_assert(operand_type == "double" || operand_type == "int",
+                "The type of operand ", operand_type,
+                " does not support unary minus operation\n");
       unary_expr_node_ptr->expr_type = operand_type;
       break;
     }
 
     case '!': {
-      ss_assert(operand_type == "bool",
-                "The type of operand \"%s\" does not support logical negation "
-                "operation\n",
-                operand_type.c_str());
+      ss_assert(operand_type == "bool", "The type of operand ", operand_type,
+                " does not support logical negation operation");
       unary_expr_node_ptr->expr_type = "bool";
       break;
     }
 
     default:
-      ss_assert(false, "Unknown operator\n");
+      ss_assert(false, "Unknown operator");
   }
 }
 
@@ -217,11 +206,10 @@ void Static_semantic_analysis_visitor::visit(Index_op_node* index_op_node_ptr) {
   yylloc_manager y(index_op_node_ptr);
   auto array_type = decl_type(index_op_node_ptr->array);
   auto pos = array_type.find("[");
-  ss_assert(pos != string::npos, "The left of dot is not an array type\n");
+  ss_assert(pos != string::npos, "The left of index is not an array type");
   auto index_type = decl_type(index_op_node_ptr->index_expr);
   ss_assert(index_type == "int",
-            "Index of an array should be \"int\" rather than \"%s\"\n",
-            index_type);
+            "Index of an array should be \"int\" rather than ", index_type);
   // array_type must be "int[][][]...[]" form
   index_op_node_ptr->expr_type = array_type.substr(0, array_type.size() - 2);
 }
@@ -285,14 +273,19 @@ void Static_semantic_analysis_visitor::visit(
       decl_type(returnstmt_node_ptr->expr_optional) ==
           global_symbol_table.try_fetch_func(current_class_id, current_func_id)
               .return_type,
-      "Return type mismatch function \"%s\" in class \"%s\"\n",
-      current_func_id.c_str(), current_class_id.c_str());
+      "Return type mismatch function ", current_func_id, " in class ",
+      current_class_id);
 }
 
 void Static_semantic_analysis_visitor::visit(
     WhileStmt_node* whilestmt_node_ptr) {
   yylloc_manager y(whilestmt_node_ptr);
+  auto parent_loop_node = current_loop_node;
   current_loop_node = whilestmt_node_ptr;
+  ss_assert(decl_type(whilestmt_node_ptr->condition_expr) == "bool",
+            "Cannot convert while condition_expr to bool");
+  whilestmt_node_ptr->stmt->accept(*this);
+  current_loop_node = parent_loop_node;
 }
 
 // examine whether the call obey the function prototype
@@ -300,7 +293,7 @@ void Static_semantic_analysis_visitor::visit(
 void Static_semantic_analysis_visitor::visit(Call_node* call_node_ptr) {
   yylloc_manager y(call_node_ptr);
   auto obj_type = decl_type(call_node_ptr->obj_optional);
-  char mismatch_info[] = "Function call mismatches its definition\n";
+  char mismatch_info[] = "Function call mismatches its definition";
 
   string cid;
   if (obj_type.empty()) {
@@ -314,11 +307,10 @@ void Static_semantic_analysis_visitor::visit(Call_node* call_node_ptr) {
   auto const& fetched_fe = global_symbol_table.try_fetch_func(
       cid, call_node_ptr->function_id->ident_name);
   auto actual_list = dynamic_cast<List_node*>(call_node_ptr->actuals);
-  ss_assert(actual_list != nullptr, "Cast failed\n");
+  ss_assert(actual_list != nullptr, "Cast failed");
   auto const& type_list = decl_type_list(actual_list);
 
-  ss_assert(type_list.size() == fetched_fe.formal_table.size(), "%s",
-            mismatch_info);
+  ss_assert(type_list.size() == fetched_fe.formal_table.size(), mismatch_info);
   bool is_matched = true;
   int cnt = 0;
   for (auto [_, vt] : fetched_fe.formal_table) {
@@ -328,15 +320,14 @@ void Static_semantic_analysis_visitor::visit(Call_node* call_node_ptr) {
     }
     ++cnt;
   }
-  ss_assert(is_matched, "%s", mismatch_info);
+  ss_assert(is_matched, mismatch_info);
   call_node_ptr->expr_type = fetched_fe.return_type;
 }
 
 void Static_semantic_analysis_visitor::visit(
     BreakStmt_node* breakstmt_node_ptr) {
   yylloc_manager y(breakstmt_node_ptr);
-  ss_assert(current_loop_node != nullptr,
-            "Use break statement outside a loop\n");
+  ss_assert(current_loop_node != nullptr, "Use break statement outside a loop");
   breakstmt_node_ptr->resident_loop_node = current_loop_node;
 }
 
@@ -344,14 +335,14 @@ void Static_semantic_analysis_visitor::visit(
     ContinueStmt_node* continuestmt_node_ptr) {
   yylloc_manager y(continuestmt_node_ptr);
   ss_assert(current_loop_node != nullptr,
-            "Use continue statement outside a loop\n");
+            "Use continue statement outside a loop");
   continuestmt_node_ptr->resident_loop_node = current_loop_node;
 }
 
 void Static_semantic_analysis_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   yylloc_manager y(ifstmt_node_ptr);
   ss_assert(decl_type(ifstmt_node_ptr->condition_expr) == "bool",
-            "Cannot convert if condition_expr to bool\n");
+            "Cannot convert if condition_expr to bool");
   ifstmt_node_ptr->stmt->accept(*this);
   ifstmt_node_ptr->else_stmt_optional->accept(*this);
 }
@@ -363,7 +354,7 @@ void Static_semantic_analysis_visitor::visit(ForStmt_node* forstmt_node_ptr) {
 
   forstmt_node_ptr->init_expr_optional->accept(*this);
   ss_assert(decl_type(forstmt_node_ptr->condition_expr) == "bool",
-            "Cannot convert for condition_expr to bool\n");
+            "Cannot convert for condition_expr to bool");
 
   forstmt_node_ptr->step_expr_optional->accept(*this);
   forstmt_node_ptr->stmt->accept(*this);
