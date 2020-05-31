@@ -1,5 +1,4 @@
-#include "build/include/display_visitor.h"
-#include "build/include/parser_handwritten.tab.h"
+#include "build/display_visitor.h"
 
 string Display_visitor::op_code_to_str(int op_code) {
   switch (op_code) {

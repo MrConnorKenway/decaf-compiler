@@ -1,5 +1,5 @@
 #pragma once
-#include "build/include/parser_handwritten.tab.h"
+#include "build/parser.tab.h"
 #include "utils/common.h"
 
 extern YYLTYPE* yylloc_ptr;

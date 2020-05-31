@@ -1,6 +1,6 @@
 #pragma once
-#include "build/include/parser_handwritten.tab.h"
-#include "build/include/visitor.h"
+#include "build/parser.tab.h"
+#include "build/visitor.h"
 #include "utils/error.h"
 #include "kern/symbol_table.h"
 

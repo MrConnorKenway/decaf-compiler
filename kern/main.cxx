@@ -4,9 +4,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "build/include/create_symbol_table_visitor.h"
-#include "build/include/display_visitor.h"
-#include "build/include/static_semantic_analysis_visitor.h"
+#include "build/create_symbol_table_visitor.h"
+#include "build/display_visitor.h"
 #include "kern/static_semantic_analyser.h"
 
 extern ast_node_ptr_t root;

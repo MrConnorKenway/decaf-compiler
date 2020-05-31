@@ -1,4 +1,4 @@
-#include "build/include/create_symbol_table_visitor.h"
+#include "build/create_symbol_table_visitor.h"
 
 void Create_symbol_table_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
