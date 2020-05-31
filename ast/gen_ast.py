@@ -37,7 +37,7 @@ def main(src, header, tmpl):
     if len(fields_decl) == 0:
       # if the class does not have any fields
       header.write(
-          '/*virtual*/ void accept(Visitor& v);\n\t{0}();\n'.format(subclass_name))
+          '/*virtual*/ void accept(Visitor& v) override;\n\t{0}();\n'.format(subclass_name))
       src.write(
           'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}() {{ node_type = "{0}"; }}\n\n'.format(subclass_name))
     else:
@@ -65,11 +65,18 @@ def main(src, header, tmpl):
           else:
             parameter_list_str += ', {0} _{1}'.format(type_name, id_name)
             assignment_list_str += ', {0}(_{0})'.format(id_name)
-      header.write(
-          '{3}\n\t/*virtual*/ void accept(Visitor& v);\n\t{0}({1});\n'.format(
-              subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+      if parameter_list_str.find(',') == -1:
+        header.write(
+          '{3}\n\t/*virtual*/ void accept(Visitor& v) override;\n\texplicit {0}({1});\n'.format(
+            subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+      else:
+        header.write(
+          '{3}\n\t/*virtual*/ void accept(Visitor& v) override;\n\t{0}({1});\n'.format(
+            subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+
       src.write(
-          'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}({1}) : {2} {{ node_type = "{0}"; }}\n\n'.format(subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+        'void {0}::accept(Visitor& v) {{ v.visit(this); }}\n{0}::{0}({1}) : {2} {{ node_type = "{0}"; }}\n\n'.format(subclass_name, parameter_list_str, assignment_list_str, fields_decl[0]))
+
     for func in funcs_decl:
       if func != '':
         header.write('{0}'.format(func))

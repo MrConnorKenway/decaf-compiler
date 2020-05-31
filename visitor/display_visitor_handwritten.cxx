@@ -100,7 +100,6 @@ void Display_visitor::visit(Base_type_node* base_type_node_ptr) {
   Indent i(is_last_bools, is_last);
   i.indent(base_type_node_ptr->node_type +
            " type: " + base_type_code_to_str(base_type_node_ptr->type));
-  ;
 }
 
 void Display_visitor::visit(Array_type_node* array_type_node_ptr) {

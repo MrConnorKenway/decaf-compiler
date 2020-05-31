@@ -12,7 +12,7 @@ class scope {
   // this symbol table only contains variable symbols
   using var_entry = std::pair<int, var_type>;
   std::unordered_map<var_id, var_entry> local_symbol_table;
-  scope* parent_scope_ptr;
+  scope* parent_scope_ptr{};
   vector<scope*> children_scope_ptr;
 
   static int next_tid;
@@ -41,7 +41,7 @@ class scope {
     }
   }
 
-  var_entry lookup(var_id vid) const {
+  var_entry lookup(const var_id& vid) const {
     auto iter = this;
     while (iter) {
       if (iter->local_symbol_table.count(vid)) {
@@ -66,7 +66,7 @@ class scope {
     }
   }
 
-  void try_insert(var_id vid, var_type vt) {
+  void try_insert(const var_id& vid, var_type vt) {
     ss_assert(local_symbol_table.count(vid) == 0,
               "Multiple definition of variable ", vid);
     local_symbol_table.try_emplace(vid, next_tid++, vt);
@@ -74,11 +74,11 @@ class scope {
 
   scope() = default;
 
-  scope(const func_entry& fe) : local_symbol_table(), parent_scope_ptr() {
+  explicit scope(const func_entry& fe) {
     load_symbol_table_from_func(fe);
   }
 
-  scope(const class_entry& ce) : local_symbol_table(), parent_scope_ptr() {
+  explicit scope(const class_entry& ce) {
     load_symbol_table_from_class(ce);
   }
 };
@@ -130,7 +130,7 @@ class Static_semantic_analysis_visitor : public Visitor {
       : global_symbol_table(st),
         class_scope(ce),
         current_scope_ptr(&class_scope),
-        current_class_id(cid),
+        current_class_id(std::move(cid)),
         current_func_id(),
         current_id(),
         call_trace(),

@@ -29,11 +29,11 @@ struct func_entry {
   }
   bool operator!=(const func_entry& that) const { return !(*this == that); }
 
-  void display(string fid, vector<bool>& is_last_bools, bool& is_last) const;
+  void display(const string& fid, vector<bool>& is_last_bools, bool& is_last) const;
 };
 
 struct interface_entry : unordered_map<func_id, func_entry> {
-  void display(string iid, vector<bool>& is_last_bools, bool& is_last) const;
+  void display(const string& iid, vector<bool>& is_last_bools, bool& is_last) const;
 };
 
 struct Inheritance {
@@ -59,7 +59,7 @@ struct class_entry {
     return field_table[vid];
   }
 
-  void display(const symbol_table& global_symbol_table, string cid,
+  void display(const symbol_table& global_symbol_table, const string& cid,
                vector<bool>& is_last_bools, bool& is_last) const;
 };
 

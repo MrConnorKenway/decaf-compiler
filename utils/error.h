@@ -14,7 +14,7 @@ extern string src_file_name;
     ss_assert_helper(args);                                               \
     cerr << endl;                                                         \
     exit(-1);                                                             \
-  }
+  } static_assert(true, "")
 
 template <typename T, typename... Args>
 inline void ss_assert_helper(T&& t, Args&&... args);

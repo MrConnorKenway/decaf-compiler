@@ -2,7 +2,7 @@
 
 #include "build/static_semantic_analysis_visitor.h"
 
-void func_entry::display(string fid, vector<bool>& is_last_bools,
+void func_entry::display(const string& fid, vector<bool>& is_last_bools,
                          bool& is_last) const {
   Indent i(is_last_bools, is_last);
   i.indent("Function: " + fid);
@@ -35,7 +35,7 @@ void func_entry::display(string fid, vector<bool>& is_last_bools,
   }
 }
 
-void interface_entry::display(string iid, vector<bool>& is_last_bools,
+void interface_entry::display(const string& iid, vector<bool>& is_last_bools,
                               bool& is_last) const {
   Indent i(is_last_bools, is_last);
   i.indent("Interface: " + iid);
@@ -46,7 +46,7 @@ void interface_entry::display(string iid, vector<bool>& is_last_bools,
   }
 }
 
-void class_entry::display(const symbol_table& global_symbol_table, string cid,
+void class_entry::display(const symbol_table& global_symbol_table, const string& cid,
                           vector<bool>& is_last_bools, bool& is_last) const {
   Indent i(is_last_bools, is_last);
   i.indent("Class: " + cid);
