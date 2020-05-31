@@ -1,3 +1,3 @@
-#include "build/include/static_semantic_analysis_visitor.h"
+#include "build/static_semantic_analysis_visitor.h"
 
 //$decl

@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "build/include/ast.h"
+#include "build/ast.h"
 #include "utils/error.h"
 #include "utils/indent.h"
 

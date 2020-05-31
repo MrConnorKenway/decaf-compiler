@@ -1,5 +1,6 @@
 #pragma once
-#include "build/include/visitor.h"
+#include "build/visitor.h"
+#include "build/parser.tab.h"
 #include "utils/indent.h"
 
 // this class is used for display ast tree

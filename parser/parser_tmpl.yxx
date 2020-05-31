@@ -1,11 +1,11 @@
 %code requires {
-#include "build/include/ast.h"
+#include "build/ast.h"
 }
 
 %{
 #include <iostream>
 #include <cassert>
-#include "build/include/ast.h"
+#include "build/ast.h"
 
 #define YYERROR_VERBOSE
 

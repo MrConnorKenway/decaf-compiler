@@ -1,4 +1,4 @@
-#include "build/include/static_semantic_analysis_visitor.h"
+#include "build/static_semantic_analysis_visitor.h"
 
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
