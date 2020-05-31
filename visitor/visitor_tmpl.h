@@ -1,5 +1,5 @@
 #pragma once
-#include "build/include/ast.h"
+#include "build/ast.h"
 #include "utils/yylloc_manager.h"
 
 class Visitor {

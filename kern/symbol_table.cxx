@@ -1,6 +1,6 @@
 #include "kern/symbol_table.h"
 
-#include "build/include/static_semantic_analysis_visitor.h"
+#include "build/static_semantic_analysis_visitor.h"
 
 void func_entry::display(string fid, vector<bool>& is_last_bools,
                          bool& is_last) const {

@@ -21,7 +21,7 @@ def main(src, header, tmpl):
     header.write('class {0};\n'.format(subclass_name))
 
   header.write('\n')
-  src.write('#include "build/include/ast.h"\n#include "build/include/visitor.h"\n\n')
+  src.write('#include "build/ast.h"\n#include "build/visitor.h"\n\n')
 
   for subclass_name in subclass_names:
     members_decl = re.findall(

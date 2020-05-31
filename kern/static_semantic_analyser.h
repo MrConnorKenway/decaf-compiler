@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <variant>
 
-#include "build/include/static_semantic_analysis_visitor.h"
+#include "build/static_semantic_analysis_visitor.h"
 #include "kern/symbol_table.h"
 #include "utils/error.h"
 
