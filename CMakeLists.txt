@@ -52,7 +52,7 @@ add_custom_command(
         COMMENT "generating base visitor"
 )
 
-set(VISITOR_HEADER create_symbol_table_visitor.h display_visitor.h static_semantic_analysis_visitor.h)
+set(VISITOR_HEADER create_symbol_table_visitor.h display_visitor.h static_semantic_analysis_visitor.h codegen_visitor.h)
 foreach (header ${VISITOR_HEADER})
     string(REPLACE ".h" "" target ${header})
     string(REPLACE ".h" "_tmpl.h" tmpl_header ${header})
@@ -95,6 +95,7 @@ include_directories(${ROOT})
 
 add_library(ast SHARED ast.cxx)
 add_library(visitors SHARED
+        visitor/codegen_visitor_handwritten.cxx
         visitor/create_symbol_table_visitor_handwritten.cxx
         visitor/display_visitor_handwritten.cxx
         visitor/static_semantic_analysis_visitor_handwritten.cxx
@@ -110,4 +111,3 @@ set(ALL_LIB ast visitors static_analyser symbol_table parser lexer)
 
 add_executable(decaf kern/main.cxx)
 target_link_libraries(decaf ${ALL_LIB})
-
