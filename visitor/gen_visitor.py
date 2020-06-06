@@ -44,7 +44,7 @@ def gen(args):
     function_decl = ''
     function_def = ''
     for subclass_name in subclass_names:
-      function_decl += '\n\t/*virtual*/ void visit({0}*);'.format(
+      function_decl += '\n\t/*virtual*/ void visit({0}*) override;'.format(
           subclass_name)
       function_def += '\nvoid {0}::visit({1}* {2}) {{\n}}\n'.format(
           class_name, subclass_name, subclass_name.lower() + '_ptr')

@@ -13,6 +13,6 @@ struct static_semantic_analyser {
   void analyse(string id, class_entry& entry);
   void analyse();
 
-  static_semantic_analyser(symbol_table& st)
+  explicit static_semantic_analyser(symbol_table& st)
       : global_symbol_table(st), is_visited() {}
 };

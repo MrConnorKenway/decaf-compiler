@@ -88,7 +88,7 @@ void Static_semantic_analysis_visitor::visit(
     if (right_type != "null") {
       bool is_derived = false;
       auto& right_ce = global_symbol_table.try_fetch_class(right_type);
-      while (right_ce.parent_class_id != "") {
+      while (!right_ce.parent_class_id.empty()) {
         if (right_ce.parent_class_id == left_type) {
           is_derived = true;
           break;
@@ -222,7 +222,7 @@ void Static_semantic_analysis_visitor::visit(Dot_op_node* dot_op_node_ptr) {
 void Static_semantic_analysis_visitor::visit(Index_op_node* index_op_node_ptr) {
   yylloc_manager y(index_op_node_ptr);
   auto array_type = decl_type(index_op_node_ptr->array);
-  auto pos = array_type.find("[");
+  auto pos = array_type.find('[');
   ss_assert(pos != string::npos, "The left of index is not an array type");
   auto index_type = decl_type(index_op_node_ptr->index_expr);
   ss_assert(index_type == "int",
@@ -386,7 +386,7 @@ void Static_semantic_analysis_visitor::visit(
   yylloc_manager y(printstmt_node_ptr);
   auto& type_list = decl_type_list(printstmt_node_ptr->expr_list);
   unordered_set<string> base_type = {"int", "double", "string", "bool"};
-  for (auto vt : type_list) {
+  for (const auto& vt : type_list) {
     ss_assert(base_type.count(vt) != 0, "Cannot print non-base type");
   }
 }
