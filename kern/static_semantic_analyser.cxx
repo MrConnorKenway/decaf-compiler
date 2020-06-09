@@ -64,6 +64,11 @@ void static_semantic_analyser::analyse(string cid,
       auto& fe = global_symbol_table.try_fetch_func(cid, fid);
       ss_assert(fe == prototype, "Prototype of function ", fid,
                 " mismatches interface ", iid);
+      ss_assert(current_class_entry.inheritance.proto_decl_interface.count(fid) == 0,
+                "Implements multiple prototype with same id ",
+                fid,
+                " in interface ", iid, " and ", current_class_entry.inheritance.proto_decl_interface[fid]);
+      current_class_entry.inheritance.proto_decl_interface.try_emplace(fid, iid);
     }
 
     // insert the implemented interface into inheritance
