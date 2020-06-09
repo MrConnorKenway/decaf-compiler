@@ -30,14 +30,6 @@ add_custom_command(
 )
 
 add_custom_command(
-        OUTPUT parser_gen.yxx
-        COMMAND parser/gen_parser.py ${CMAKE_CURRENT_BINARY_DIR}/parser_gen.yxx
-        DEPENDS ${ROOT}/parser/*
-        WORKING_DIRECTORY ${ROOT}
-        COMMENT "generating bison file"
-)
-
-add_custom_command(
         OUTPUT parser.tab.cxx parser.tab.h
         COMMAND bison ${ROOT}/parser/parser_handwritten.yxx --defines=parser.tab.h --output=parser.tab.cxx -v
         DEPENDS ${ROOT}/parser/parser_handwritten.yxx
@@ -52,11 +44,14 @@ add_custom_command(
         COMMENT "generating base visitor"
 )
 
-set(VISITOR_HEADER create_symbol_table_visitor.h display_visitor.h static_semantic_analysis_visitor.h codegen_visitor.h)
-foreach (header ${VISITOR_HEADER})
+set(VISITOR_HEADERS create_symbol_table_visitor.h display_visitor.h static_semantic_analysis_visitor.h codegen_visitor.h)
+set(VISITOR_SRCS)
+foreach (header ${VISITOR_HEADERS})
     string(REPLACE ".h" "" target ${header})
     string(REPLACE ".h" "_tmpl.h" tmpl_header ${header})
     string(REPLACE ".h" "_gen.cxx" gen_src ${header})
+    string(REGEX REPLACE "(.*).h" "visitor/\\1_handwritten.cxx" src ${header})
+    list(APPEND VISITOR_SRCS ${src})
     add_custom_command(
             OUTPUT ${header} ${gen_src}
             COMMAND visitor/gen_visitor.py --header-dst ${CMAKE_CURRENT_BINARY_DIR}/${header} --src-dst ${CMAKE_CURRENT_BINARY_DIR}/${gen_src} ${target}
@@ -66,12 +61,18 @@ foreach (header ${VISITOR_HEADER})
     )
 endforeach ()
 
-string(PREPEND "visitor.h" VISITOR_HEADER)
-
+set(GEN_PARSER_DEPS ${ROOT}/parser/bnf ${ROOT}/parser/gen_parser.py ${ROOT}/parser/merge_hand_and_gen.py ${ROOT}/parser/parser_tmpl.yxx)
+add_custom_command(
+        OUTPUT parser_gen.yxx
+        COMMAND parser/gen_parser.py ${CMAKE_CURRENT_BINARY_DIR}/parser_gen.yxx
+        DEPENDS ${GEN_PARSER_DEPS}
+        WORKING_DIRECTORY ${ROOT}
+        COMMENT "generating bison file"
+)
 add_custom_command(
         OUTPUT ${ROOT}/parser/parser_handwritten.yxx
         COMMAND parser/merge_hand_and_gen.py ${CMAKE_CURRENT_BINARY_DIR}/parser_gen.yxx
-        DEPENDS ${ROOT}/parser/bnf ${ROOT}/parser/merge_hand_and_gen.py ${ROOT}/parser/gen_parser.py ${ROOT}/parser/parser_tmpl.yxx
+        DEPENDS ${GEN_PARSER_DEPS} parser_gen.yxx
         WORKING_DIRECTORY ${ROOT}
         COMMENT "merging handwritten and generated bison file"
 )
@@ -85,29 +86,35 @@ add_custom_command(
 
 add_custom_command(
         OUTPUT ast.h ast.cxx
-        COMMAND ${ROOT}/ast/gen_ast.py --header-dst ${CMAKE_CURRENT_BINARY_DIR}/ast.h --src-dst ${CMAKE_CURRENT_BINARY_DIR}/ast.cxx
+        COMMAND ast/gen_ast.py --header-dst ${CMAKE_CURRENT_BINARY_DIR}/ast.h --src-dst ${CMAKE_CURRENT_BINARY_DIR}/ast.cxx
         DEPENDS ${ROOT}/ast/* visitor.h
         WORKING_DIRECTORY ${ROOT}
         COMMENT "generating ast header and source file"
 )
 
+add_custom_command(
+        OUTPUT runtime_lib.bc
+        COMMAND clang -c ${ROOT}/kern/runtime_lib.c -emit-llvm
+        DEPENDS ${ROOT}/kern/runtime_lib.c
+        COMMENT "generating runtime library"
+)
+
 include_directories(${ROOT})
 
 add_library(ast SHARED ast.cxx)
-add_library(visitors SHARED
-        visitor/codegen_visitor_handwritten.cxx
-        visitor/create_symbol_table_visitor_handwritten.cxx
-        visitor/display_visitor_handwritten.cxx
-        visitor/static_semantic_analysis_visitor_handwritten.cxx
-        ${VISITOR_HEADER})
+add_library(visitors SHARED ${VISITOR_SRCS} ${VISITOR_HEADERS})
 add_library(static_analyser SHARED kern/static_semantic_analyser.cxx)
 add_library(symbol_table SHARED kern/symbol_table.cxx)
 add_library(parser SHARED parser.tab.cxx ast.h)
 add_library(lexer SHARED lexer.cxx parser.tab.h ast.h)
+add_library(llvm_driver SHARED kern/llvm_driver.cxx)
+target_link_libraries(llvm_driver ${llvm_libs})
+
+set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.bc)
 add_dependencies(symbol_table ast visitors)
 add_dependencies(static_analyser ast visitors)
 
-set(ALL_LIB ast visitors static_analyser symbol_table parser lexer)
+set(ALL_LIB ast visitors static_analyser symbol_table parser lexer llvm_driver)
 
 add_executable(decaf kern/main.cxx)
 target_link_libraries(decaf ${ALL_LIB})
