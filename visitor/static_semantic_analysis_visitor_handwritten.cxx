@@ -163,7 +163,7 @@ void Static_semantic_analysis_visitor::visit(
                 " and RHS type ", right_type, " mismatch");
       ss_assert(left_type == "double" || left_type == "int",
                 "The type of left operand ", left_type,
-                " does not support comparation");
+                " does not support comparision");
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }
