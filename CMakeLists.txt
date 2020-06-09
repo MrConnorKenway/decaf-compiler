@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(DecafCompiler)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "--coverage -g")
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(LLVM REQUIRED CONFIG)
@@ -101,13 +102,13 @@ add_custom_command(
 
 include_directories(${ROOT})
 
-add_library(ast SHARED ast.cxx)
-add_library(visitors SHARED ${VISITOR_SRCS} ${VISITOR_HEADERS})
-add_library(static_analyser SHARED kern/static_semantic_analyser.cxx)
-add_library(symbol_table SHARED kern/symbol_table.cxx)
-add_library(parser SHARED parser.tab.cxx ast.h)
-add_library(lexer SHARED lexer.cxx parser.tab.h ast.h)
-add_library(llvm_driver SHARED kern/llvm_driver.cxx)
+add_library(ast OBJECT ast.cxx)
+add_library(visitors OBJECT ${VISITOR_SRCS} ${VISITOR_HEADERS})
+add_library(static_analyser OBJECT kern/static_semantic_analyser.cxx)
+add_library(symbol_table OBJECT kern/symbol_table.cxx)
+add_library(parser OBJECT parser.tab.cxx ast.h)
+add_library(lexer OBJECT lexer.cxx parser.tab.h ast.h)
+add_library(llvm_driver OBJECT kern/llvm_driver.cxx)
 target_link_libraries(llvm_driver ${llvm_libs})
 
 set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.bc)
