@@ -81,11 +81,18 @@ void static_semantic_analyser::analyse() {
     }
   }
 
+  bool contains_Main = false;
+
   for (auto& [eid, e] : global_symbol_table) {
     if (std::holds_alternative<class_entry>(e)) {
       auto& ce = std::get<class_entry>(e);
-      Static_semantic_analysis_visitor sv(global_symbol_table, ce,
-                                          std::move(eid));
+      Static_semantic_analysis_visitor sv(global_symbol_table, ce, eid);
+      if (eid == "Main") {
+        yylloc_manager y(ce.classdecl_node_ptr);
+        contains_Main = true;
+        ss_assert(ce.field_table.empty() && ce.func_table.size() == 1 && ce.func_table.count("main") == 1,
+                  "\"Main\" class is not allowed to have member variables or any member function except \"main\"");
+      }
       for (auto& [fid, fe] : ce.func_table) {
         ss_assert(fe.func_body.has_value(), "function ", fid, " has no body");
         sv.current_func_id = fid;
@@ -95,6 +102,12 @@ void static_semantic_analyser::analyse() {
       }
     }
   }
+
+  YYLTYPE* old_yylloc_ptr = yylloc_ptr;
+  YYLTYPE yylloc = {0, 0, 0, 0};
+  yylloc_ptr = &yylloc;
+  ss_assert(contains_Main, "Program doesn't contain \"Main\" class");
+  yylloc_ptr = old_yylloc_ptr;
 
   vector<bool> is_last_bools;
   bool is_last;
