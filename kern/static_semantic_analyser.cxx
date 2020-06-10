@@ -2,7 +2,7 @@
 
 int scope::next_tid = 0;
 
-void static_semantic_analyser::analyse(string cid,
+void static_semantic_analyser::analyse(const string& cid,
                                        class_entry& current_class_entry) {
   yylloc_manager y(current_class_entry.classdecl_node_ptr);
   if (is_visited.count(cid) == 0) {
@@ -18,7 +18,7 @@ void static_semantic_analyser::analyse(string cid,
     ss_assert(false, "Found cyclic inheritance in class ", cid);
   }
 
-  if (current_class_entry.parent_class_id != "") {
+  if (!current_class_entry.parent_class_id.empty()) {
     auto& parent_class_entry = global_symbol_table.try_fetch_class(
         current_class_entry.parent_class_id);
     analyse(current_class_entry.parent_class_id, parent_class_entry);
@@ -29,8 +29,7 @@ void static_semantic_analyser::analyse(string cid,
 
   // try insert variables that are declared in current class into inheritance
   for (auto [vid, vt] : current_class_entry.field_table) {
-    current_class_entry.inheritance.field_table.try_emplace(std::move(vid),
-                                                            std::move(vt));
+    current_class_entry.inheritance.field_table.try_emplace(vid, std::move(vt));
   }
 
   for (auto& [fid, fe] : current_class_entry.func_table) {
@@ -48,7 +47,7 @@ void static_semantic_analyser::analyse(string cid,
   }
 
   // check whether this class does implement target interface
-  for (auto iid : current_class_entry.implemented_interface_set) {
+  for (const auto& iid : current_class_entry.implemented_interface_set) {
     if (current_class_entry.inheritance.interface_ids.count(iid)) {
       // if parent class implements the same interface, since
       // we always analyse parent class first, so it must be
@@ -104,8 +103,8 @@ void static_semantic_analyser::analyse() {
   }
 
   YYLTYPE* old_yylloc_ptr = yylloc_ptr;
-  YYLTYPE yylloc = {0, 0, 0, 0};
-  yylloc_ptr = &yylloc;
+  YYLTYPE tmp = {0, 0, 0, 0};
+  yylloc_ptr = &tmp;
   ss_assert(contains_Main, "Program doesn't contain \"Main\" class");
   yylloc_ptr = old_yylloc_ptr;
 
