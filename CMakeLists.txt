@@ -94,8 +94,8 @@ add_custom_command(
 )
 
 add_custom_command(
-        OUTPUT runtime_lib.bc
-        COMMAND clang -c ${ROOT}/kern/runtime_lib.c -emit-llvm
+        OUTPUT runtime_lib.ll
+        COMMAND clang -S ${ROOT}/kern/runtime_lib.c -emit-llvm
         DEPENDS ${ROOT}/kern/runtime_lib.c
         COMMENT "generating runtime library"
 )
@@ -111,7 +111,7 @@ add_library(lexer OBJECT lexer.cxx parser.tab.h ast.h)
 add_library(llvm_driver OBJECT kern/llvm_driver.cxx)
 target_link_libraries(llvm_driver ${llvm_libs})
 
-set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.bc)
+set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.ll)
 add_dependencies(symbol_table ast visitors)
 add_dependencies(static_analyser ast visitors)
 
