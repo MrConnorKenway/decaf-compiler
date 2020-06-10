@@ -89,6 +89,7 @@ void static_semantic_analyser::analyse() {
       if (eid == "Main") {
         yylloc_manager y(ce.classdecl_node_ptr);
         contains_Main = true;
+        ss_assert(ce.parent_class_id.empty(), "\"Main\" class is not allowed to extend another class");
         ss_assert(ce.field_table.empty() && ce.func_table.size() == 1 && ce.func_table.count("main") == 1,
                   "\"Main\" class is not allowed to have member variables or any member function except \"main\"");
       }
