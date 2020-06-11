@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <map>
 #include <unordered_set>
 
 #include "build/ast.h"
@@ -39,7 +40,7 @@ struct interface_entry : unordered_map<func_id, func_entry> {
 struct Inheritance {
   unordered_set<interface_id> interface_ids;
   // map from a function to the id of the class that declares it
-  std::unordered_map<func_id, class_id> func_decl_class;
+  std::map<func_id, class_id> func_decl_class;
   var_table field_table;
 };
 

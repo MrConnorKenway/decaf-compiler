@@ -7,13 +7,13 @@
 #include "build/create_symbol_table_visitor.h"
 #include "build/display_visitor.h"
 #include "kern/static_semantic_analyser.h"
+#include "kern/llvm_driver.h"
 
 extern ast_node_ptr_t root;
 yyFlexLexer* lexer_ptr = nullptr;
 YYLTYPE* yylloc_ptr;
 string src_file_name;
 
-int yyparse();
 int yylex() { return lexer_ptr->yylex(); }
 string get_yytext() { return lexer_ptr->YYText(); }
 
@@ -57,6 +57,9 @@ int main(int argc, char** argv) {
 
   static_semantic_analyser analyser(cv.global_symbol_table);
   analyser.analyse();
+
+  llvm_driver ld(cv.global_symbol_table);
+  ld.gen_llvm_ir();
 
   if (verbose) {
     vector<bool> is_last_bools;
