@@ -85,15 +85,18 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   assert(extern_module);
 
   decaf_str_t = extern_module->getTypeByName("struct.decaf_str");
+  decaf_arr_t = extern_module->getTypeByName("struct.decaf_arr");
   v_entry_t = extern_module->getTypeByName("struct.v_entry");
   v_table_t = extern_module->getTypeByName("struct.v_table");
 
   assert(decaf_str_t);
+  assert(decaf_arr_t);
   assert(v_entry_t);
   assert(v_table_t);
 
   // string is special primitive type, we access it by reference
   builtin_types["string"] = decaf_str_t->getPointerTo();
+  builtin_types["array"] = decaf_arr_t->getPointerTo();
   builtin_types["int"] = builder.getInt32Ty();
   builtin_types["double"] = builder.getDoubleTy();
   builtin_types["bool"] = builder.getInt1Ty();
@@ -101,7 +104,8 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   builtin_types["nullptr"] = builder.getInt8PtrTy();
 
   constexpr std::string_view
-      extern_funcs[] = {"print_str", "print_bool", "print_int", "print_double", "read_int", "read_line", "lookup_fptr"};
+      extern_funcs[] =
+      {"print_str", "print_bool", "print_int", "print_double", "read_int", "read_line", "alloc_arr", "lookup_fptr"};
 
   // declare external library functions
   for (auto& fid : extern_funcs) {
@@ -209,7 +213,7 @@ void llvm_driver::init_all_virtual_tables() {
     // the type of the two member variables of v_table is int32 and v_entry*
     // TODO: we need to convert v_entry array type to v_entry pointer type
     auto v_table =
-        llvm::ConstantStruct::get(v_table_t, {builder.getInt32(entry_num), v_entry_arr});
+        llvm::ConstantStruct::get(v_table_t, {builder.getInt64(entry_num), v_entry_arr});
 
     // declare virtual table as a global variable in llvm IR
     auto var = new llvm::GlobalVariable(*current_module,

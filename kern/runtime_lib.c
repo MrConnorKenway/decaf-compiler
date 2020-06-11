@@ -5,9 +5,14 @@
 #include <string.h>
 
 typedef struct {
-  unsigned len;
+  size_t len;
   char* c_str;
 } decaf_str;
+
+typedef struct {
+  size_t len;
+  void* elements;
+} decaf_arr;
 
 typedef struct {
   unsigned fid;
@@ -15,12 +20,12 @@ typedef struct {
 } v_entry;
 
 typedef struct {
-  unsigned len;
+  size_t len;
   v_entry* table;
 } v_table;
 
 void print_str(decaf_str* str) {
-  printf("(%d)%s", str->len, str->c_str);
+  printf("(%zd)%s", str->len, str->c_str);
 }
 
 void print_bool(bool a_bool) {
@@ -50,6 +55,13 @@ decaf_str* read_line() {
   // len counts '\n'
   str->len = strlen(buf);
   return str;
+}
+
+decaf_arr* alloc_arr(size_t len, size_t element_size) {
+  decaf_arr* arr = (decaf_arr*) malloc(sizeof(decaf_arr));
+  arr->len = len;
+  arr->elements = malloc(len * element_size);
+  return arr;
 }
 
 void* lookup_fptr(v_table* vtbl, unsigned fid) {

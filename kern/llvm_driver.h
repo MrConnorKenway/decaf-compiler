@@ -26,6 +26,7 @@ class llvm_driver {
   llvm::StructType* v_entry_t;
   llvm::StructType* v_table_t;
   llvm::StructType* decaf_str_t;
+  llvm::StructType* decaf_arr_t;
 
   unordered_map<var_type, llvm::Type*> builtin_types;
   unordered_map<var_type, llvm::StructType*> user_defined_types;
@@ -52,11 +53,18 @@ class llvm_driver {
   void init_all_virtual_tables();
 
   llvm::Type* get_llvm_type(const var_type& type) {
-    if (builtin_types.count(type) != 0) {
-      return builtin_types[type];
+    auto pos = type.find('[');
+    if (pos == string::npos) {
+      if (builtin_types.count(type) != 0) {
+        return builtin_types[type];
+      }
+      assert(user_defined_types.count(type) != 0);
+      // all decaf object is accessed by reference
+      return user_defined_types[type]->getPointerTo();
+    } else {
+      auto base_type = type.substr(0, pos);
+      assert(user_defined_types.count(base_type) != 0 || builtin_types.count(base_type) != 0);
+      return builtin_types["array"];
     }
-    assert(user_defined_types.count(type) != 0);
-    // all decaf object is accessed by reference
-    return user_defined_types[type]->getPointerTo();
   }
 };
