@@ -130,11 +130,18 @@ void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
       break;
 
     case node_type::FUNC:
-    case node_type::PROTOTYPE:
-      ss_assert(current_func_entry.formal_table.count(tmp_id) == 0,
-                "Multiple definition for variable ", tmp_id);
-      current_func_entry.formal_table.emplace(tmp_id, current_id);
+    case node_type::PROTOTYPE: {
+      bool no_redefine = true;
+      for (auto [vid, vt] : current_func_entry.formal_table) {
+        if (vid == tmp_id) {
+          no_redefine = false;
+          break;
+        }
+      }
+      ss_assert(no_redefine, "Multiple definition for variable ", tmp_id);
+      current_func_entry.formal_table.emplace_back(tmp_id, current_id);
       break;
+    }
 
     default:
       // there shouldn't be other node type

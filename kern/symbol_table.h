@@ -21,7 +21,7 @@ using var_table = unordered_map<var_id, var_type>;
 
 struct func_entry {
   string return_type;
-  var_table formal_table;
+  vector<std::pair<var_id, var_type>> formal_table;
   std::optional<StmtBlock_node*> func_body;
 
   bool operator==(const func_entry& that) const {
