@@ -27,8 +27,9 @@ class Indent {
     is_last = false;
   }
 
-  template <typename T>
-  void indent(T t) {
+  template <typename...Args>
+  void indent(Args&&... args) {
+    static_assert(sizeof...(args) > 0);
     auto it = is_last_bools.cbegin();
     for (; it != --is_last_bools.cend(); ++it) {
       if (*it) {
@@ -42,6 +43,6 @@ class Indent {
     } else {
       cout << short_inter_style;
     }
-    cout << t << endl;
+    (cout << ... << args) << endl;
   }
 };

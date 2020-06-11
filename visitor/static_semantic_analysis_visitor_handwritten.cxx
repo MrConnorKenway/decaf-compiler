@@ -30,7 +30,7 @@ void Static_semantic_analysis_visitor::visit(Empty_node* empty_node_ptr) {
 void Static_semantic_analysis_visitor::visit(Ident_node* ident_node_ptr) {
   yylloc_manager y(ident_node_ptr);
   // identifier as an expression
-  std::tie(ident_node_ptr->tid, ident_node_ptr->expr_type) =
+  std::tie(ident_node_ptr->tid, ident_node_ptr->expr_type, std::ignore) =
       current_scope_ptr->lookup(ident_node_ptr->ident_name);
 }
 
