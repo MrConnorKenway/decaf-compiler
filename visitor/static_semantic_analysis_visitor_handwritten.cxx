@@ -41,28 +41,29 @@ void Static_semantic_analysis_visitor::visit(
   switch (base_type_node_ptr->type) {
     case t_int:
       current_id = "int";
-      return;
+      break;
 
     case t_bool:
       current_id = "bool";
-      return;
+      break;
 
     case t_double:
       current_id = "double";
-      return;
+      break;
 
     case t_string:
       current_id = "string";
-      return;
+      break;
 
     case t_void:
       current_id = "void";
-      return;
+      break;
 
     default:
       current_id = "unknown type code";
-      return;
+      break;
   }
+  base_type_node_ptr->expr_type = current_id;
 }
 
 void Static_semantic_analysis_visitor::visit(
