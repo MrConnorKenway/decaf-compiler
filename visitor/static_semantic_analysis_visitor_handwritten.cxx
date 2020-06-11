@@ -86,6 +86,13 @@ void Static_semantic_analysis_visitor::visit(
   auto left_type = decl_type(assignment_node_ptr->LHS);
   auto right_type = decl_type(assignment_node_ptr->RHS);
   if (left_type != right_type) {
+    auto left_base_type = is_array_type(left_type);
+    auto right_base_type = is_array_type(right_type);
+    ss_assert(!(left_base_type.has_value() && right_base_type.has_value()), "LHS type ", left_type, " and RHS type ",
+              right_type, " mismatch");
+    if (left_base_type.has_value()) {
+      // if both side are array type
+    }
     // the grammar of decaf guarantees that left_type != "null"
     // check whether the RHS is the derived class of LHS
     if (right_type != "null") {
