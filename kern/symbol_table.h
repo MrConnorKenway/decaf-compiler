@@ -16,12 +16,13 @@ using var_id = string;
 using interface_id = string;
 using class_id = string;
 using func_id = string;
+using proto_id = string;
 using var_type = string;
 using var_table = unordered_map<var_id, var_type>;
 
 struct func_entry {
   string return_type;
-  var_table formal_table;
+  vector<std::pair<var_id, var_type>> formal_table;
   std::optional<StmtBlock_node*> func_body;
 
   bool operator==(const func_entry& that) const {
@@ -39,6 +40,8 @@ struct interface_entry : unordered_map<func_id, func_entry> {
 
 struct Inheritance {
   unordered_set<interface_id> interface_ids;
+  // map from a prototype to the id of the interface that declares it
+  std::unordered_map<proto_id, interface_id> proto_decl_interface;
   // map from a function to the id of the class that declares it
   std::map<func_id, class_id> func_decl_class;
   var_table field_table;

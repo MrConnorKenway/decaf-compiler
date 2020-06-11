@@ -5,8 +5,8 @@ int scope::next_uid = 0;
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
   if (!call_trace.empty() && call_trace.top() == action_type::GET_ARGS_TYPE) {
+    list_node_ptr->elements_type_list = vector<string>();
     for (auto node_ptr : list_node_ptr->list) {
-      list_node_ptr->elements_type_list = vector<string>();
       list_node_ptr->elements_type_list.value().push_back(decl_type(node_ptr));
     }
   } else {
@@ -145,7 +145,7 @@ void Static_semantic_analysis_visitor::visit(
                 " and RHS type ", right_type, " mismatch");
       ss_assert(left_type == "double" || left_type == "int",
                 "The type of left operand ", left_type,
-                " does not support comparation");
+                " does not support comparision");
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }
@@ -165,7 +165,7 @@ void Static_semantic_analysis_visitor::visit(
                 " and RHS type ", right_type, " mismatch");
       ss_assert(left_type == "double" || left_type == "int",
                 "The type of left operand ", left_type,
-                " does not support comparation");
+                " does not support comparision");
       binary_expr_node_ptr->expr_type = "bool";
       break;
     }

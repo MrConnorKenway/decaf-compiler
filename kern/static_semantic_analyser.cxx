@@ -58,9 +58,17 @@ void static_semantic_analyser::analyse(const string& cid,
     // there should be corresponding function declaration in
     // current class' function table
     for (auto& [fid, prototype] : ie) {
-      auto& fe = global_symbol_table.try_fetch_func(cid, fid);
+      auto& ce = global_symbol_table.try_fetch_class(cid);
+      ss_assert(ce.func_table.count(fid), "Class ", cid,
+                " does not implement prototype ", fid, " declared by interface ", iid);
+      auto& fe = ce.func_table[fid];
       ss_assert(fe == prototype, "Prototype of function ", fid,
                 " mismatches interface ", iid);
+      ss_assert(current_class_entry.inheritance.proto_decl_interface.count(fid) == 0,
+                "Implements multiple prototype with same id ",
+                fid,
+                " in interface ", iid, " and ", current_class_entry.inheritance.proto_decl_interface[fid]);
+      current_class_entry.inheritance.proto_decl_interface.try_emplace(fid, iid);
     }
 
     // insert the implemented interface into inheritance
