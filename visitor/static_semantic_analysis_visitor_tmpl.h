@@ -51,8 +51,7 @@ class Static_semantic_analysis_visitor : public Visitor {
   Static_semantic_analysis_visitor(symbol_table& st, const class_entry& ce,
                                    string cid)
       : global_symbol_table(st),
-        class_scope(ce),
-        current_scope_ptr(&class_scope),
+        current_scope_ptr(new scope(ce)),
         current_class_id(std::move(cid)),
         current_func_id(),
         current_id(),
