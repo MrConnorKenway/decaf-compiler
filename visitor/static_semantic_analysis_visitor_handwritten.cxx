@@ -3,8 +3,8 @@
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
   if (!call_trace.empty() && call_trace.top() == action_type::GET_ARGS_TYPE) {
+    list_node_ptr->elements_type_list = vector<string>();
     for (auto node_ptr : list_node_ptr->list) {
-      list_node_ptr->elements_type_list = vector<string>();
       list_node_ptr->elements_type_list.value().push_back(decl_type(node_ptr));
     }
   } else {
