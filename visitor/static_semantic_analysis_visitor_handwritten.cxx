@@ -225,8 +225,8 @@ void Static_semantic_analysis_visitor::visit(Dot_op_node* dot_op_node_ptr) {
 void Static_semantic_analysis_visitor::visit(Index_op_node* index_op_node_ptr) {
   yylloc_manager y(index_op_node_ptr);
   auto array_type = decl_type(index_op_node_ptr->array);
-  auto pos = array_type.find('[');
-  ss_assert(pos != string::npos, "The left of index is not an array type");
+  auto base_type = is_array_type(array_type);
+  ss_assert(base_type.has_value(), "The left of index is not an array type");
   auto index_type = decl_type(index_op_node_ptr->index_expr);
   ss_assert(index_type == "int",
             "Index of an array should be \"int\" rather than ", index_type);

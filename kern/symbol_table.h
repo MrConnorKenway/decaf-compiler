@@ -71,10 +71,10 @@ using symbol_table_entry = std::variant<class_entry, interface_entry>;
 
 struct symbol_table : unordered_map<string, symbol_table_entry> {
   void check_return_type(string rt) {
-    auto pos = rt.find('[');
-    if (pos != string::npos) {
+    auto base_type = is_array_type(rt);
+    if (base_type.has_value()) {
       // this is an array type
-      rt = rt.substr(0, pos);
+      rt = base_type.value();
     }
     if (unordered_set<string>({"int", "double", "string", "bool", "void"})
             .count(rt) != 0) {
@@ -86,10 +86,10 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
   }
 
   void check_var_type(string vt) {
-    auto pos = vt.find('[');
-    if (pos != string::npos) {
+    auto base_type = is_array_type(vt);
+    if (base_type.has_value()) {
       // this is an array type
-      vt = vt.substr(0, pos);
+      vt = base_type.value();
     }
     if (unordered_set<string>({"int", "double", "string", "bool"}).count(vt) !=
         0) {
@@ -101,10 +101,10 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
   }
 
   class_entry& try_fetch_class(string cid) {
-    auto pos = cid.find('[');
-    if (pos != string::npos) {
+    auto base_type = is_array_type(cid);
+    if (base_type.has_value()) {
       // this is an array type
-      cid = cid.substr(0, pos);
+      cid = base_type.value();
     }
     if (count(cid) == 0 || std::holds_alternative<interface_entry>(at(cid))) {
       ss_assert(false, "Undefined reference to class ", cid);

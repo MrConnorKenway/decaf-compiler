@@ -53,8 +53,8 @@ class llvm_driver {
   void init_all_virtual_tables();
 
   llvm::Type* get_llvm_type(const var_type& type) {
-    auto pos = type.find('[');
-    if (pos == string::npos) {
+    auto base_type = is_array_type(type);
+    if (!base_type.has_value()) {
       if (builtin_types.count(type) != 0) {
         return builtin_types[type];
       }
@@ -62,8 +62,8 @@ class llvm_driver {
       // all decaf object is accessed by reference
       return user_defined_types[type]->getPointerTo();
     } else {
-      auto base_type = type.substr(0, pos);
-      assert(user_defined_types.count(base_type) != 0 || builtin_types.count(base_type) != 0);
+      auto _base_type = base_type.value();
+      assert(user_defined_types.count(_base_type) != 0 || builtin_types.count(_base_type) != 0);
       return builtin_types["array"];
     }
   }
