@@ -41,7 +41,7 @@ class scope {
     }
   }
 
-  var_entry lookup(const var_id& vid) const {
+  const var_entry& lookup(const var_id& vid) const {
     auto iter = this;
     while (iter) {
       if (iter->local_symbol_table.count(vid)) {

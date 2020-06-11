@@ -53,7 +53,7 @@ struct class_entry {
   unordered_set<interface_id> implemented_interface_set;
   ClassDecl_node* classdecl_node_ptr;
 
-  var_type try_fetch_variable(var_id vid) {
+  var_type try_fetch_variable(const var_id& vid) {
     ss_assert(field_table.count(vid) != 0, "Undefined reference to variable ",
               vid);
     return field_table[vid];
@@ -67,7 +67,7 @@ using symbol_table_entry = std::variant<class_entry, interface_entry>;
 
 struct symbol_table : unordered_map<string, symbol_table_entry> {
   void check_return_type(string rt) {
-    auto pos = rt.find("[");
+    auto pos = rt.find('[');
     if (pos != string::npos) {
       // this is an array type
       rt = rt.substr(0, pos);
@@ -82,7 +82,7 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
   }
 
   void check_var_type(string vt) {
-    auto pos = vt.find("[");
+    auto pos = vt.find('[');
     if (pos != string::npos) {
       // this is an array type
       vt = vt.substr(0, pos);
@@ -97,7 +97,7 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
   }
 
   class_entry& try_fetch_class(string cid) {
-    auto pos = cid.find("[");
+    auto pos = cid.find('[');
     if (pos != string::npos) {
       // this is an array type
       cid = cid.substr(0, pos);
@@ -108,28 +108,28 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
     return std::get<class_entry>(at(cid));
   }
 
-  const class_entry& try_fetch_class(string cid) const {
+  const class_entry& try_fetch_class(const string& cid) const {
     if (count(cid) == 0 || std::holds_alternative<interface_entry>(at(cid))) {
       ss_assert(false, "Undefined reference to class ", cid);
     }
     return std::get<class_entry>(at(cid));
   }
 
-  func_entry& try_fetch_func(string cid, string fid) {
+  func_entry& try_fetch_func(const string& cid, const string& fid) {
     auto& ce = try_fetch_class(cid);
     ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
               " in class ", cid);
     return ce.func_table[fid];
   }
 
-  const func_entry& try_fetch_func(string cid, string fid) const {
+  const func_entry& try_fetch_func(const string& cid, const string& fid) const {
     auto const& ce = try_fetch_class(cid);
     ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
               " in class ", cid);
     return ce.func_table.at(fid);
   }
 
-  interface_entry& try_fetch_interface(string iid) {
+  interface_entry& try_fetch_interface(const string& iid) {
     if (count(iid) == 0 || std::holds_alternative<class_entry>(at(iid))) {
       ss_assert(false, "Undefined reference to interface ", iid);
     }
