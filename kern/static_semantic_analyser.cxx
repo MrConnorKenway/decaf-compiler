@@ -1,7 +1,5 @@
 #include "kern/static_semantic_analyser.h"
 
-int scope::next_tid = 0;
-
 void static_semantic_analyser::analyse(const string& cid,
                                        class_entry& current_class_entry) {
   yylloc_manager y(current_class_entry.classdecl_node_ptr);

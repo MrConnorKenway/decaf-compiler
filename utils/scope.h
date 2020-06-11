@@ -9,23 +9,24 @@
 class scope {
  public:
   // this symbol table only contains variable symbols
-  using var_entry = std::tuple<int, var_type, llvm::Value*>;
+  using var_entry = std::pair<int, var_type>;
   unordered_map<var_id, var_entry> local_symbol_table;
+  unordered_map<int, llvm::Value*> var_uid_to_llvm_value;
   scope* parent_scope_ptr{};
   vector<scope*> children_scope_ptr;
 
-  static int next_tid;
+  static int next_uid;
 
   void display(vector<bool>& is_last_bools, bool& is_last) const {
     {
       for (auto iter = local_symbol_table.cbegin();
            iter != local_symbol_table.cend(); ++iter) {
         auto[vid, ve] = *iter;
-        auto[tid, vt, _] = ve;
+        auto[uid, vt] = ve;
         is_last = (std::next(iter) == local_symbol_table.cend()) &&
             children_scope_ptr.empty();
         Indent i(is_last_bools, is_last);
-        i.indent(vid, " ", std::to_string(tid), " ", vt);
+        i.indent(vid, " ", std::to_string(uid), " ", vt);
       }
     }
     if (children_scope_ptr.empty()) {
@@ -53,7 +54,7 @@ class scope {
   }
 
   void load_symbol_table_from_class(const class_entry& ce) {
-    next_tid = 0;
+    next_uid = 0;
     for (auto[vid, vt] : ce.inheritance.field_table) {
       try_insert(vid, vt);
     }
@@ -68,7 +69,7 @@ class scope {
   void try_insert(const var_id& vid, var_type vt) {
     ss_assert(local_symbol_table.count(vid) == 0,
               "Multiple definition of variable ", vid);
-    local_symbol_table.try_emplace(vid, next_tid++, vt, nullptr);
+    local_symbol_table.try_emplace(vid, next_uid++, vt);
   }
 
   scope() = default;

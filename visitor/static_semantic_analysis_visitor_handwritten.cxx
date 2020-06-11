@@ -1,5 +1,7 @@
 #include "build/static_semantic_analysis_visitor.h"
 
+int scope::next_uid = 0;
+
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
   if (!call_trace.empty() && call_trace.top() == action_type::GET_ARGS_TYPE) {
@@ -30,7 +32,7 @@ void Static_semantic_analysis_visitor::visit(Empty_node* empty_node_ptr) {
 void Static_semantic_analysis_visitor::visit(Ident_node* ident_node_ptr) {
   yylloc_manager y(ident_node_ptr);
   // identifier as an expression
-  std::tie(ident_node_ptr->tid, ident_node_ptr->expr_type, std::ignore) =
+  std::tie(ident_node_ptr->uid, ident_node_ptr->expr_type) =
       current_scope_ptr->lookup(ident_node_ptr->ident_name);
 }
 
