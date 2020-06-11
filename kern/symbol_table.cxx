@@ -5,7 +5,7 @@
 void func_entry::display(const string& fid, vector<bool>& is_last_bools,
                          bool& is_last) const {
   Indent i(is_last_bools, is_last);
-  i.indent("Function: " + fid);
+  i.indent("Function: ", fid);
   {
     Indent i(is_last_bools, is_last);
     i.indent("parameter list");
@@ -19,7 +19,7 @@ void func_entry::display(const string& fid, vector<bool>& is_last_bools,
         auto [vid, vt] = *iter;
         is_last = std::next(iter) == formal_table.cend();
         Indent i(is_last_bools, is_last);
-        i.indent(vid + ": " + vt);
+        i.indent(vid, ": ", vt);
       }
     }
   }
@@ -31,14 +31,14 @@ void func_entry::display(const string& fid, vector<bool>& is_last_bools,
   is_last = true;
   {
     Indent i(is_last_bools, is_last);
-    i.indent("return type: " + return_type);
+    i.indent("return type: ", return_type);
   }
 }
 
 void interface_entry::display(const string& iid, vector<bool>& is_last_bools,
                               bool& is_last) const {
   Indent i(is_last_bools, is_last);
-  i.indent("Interface: " + iid);
+  i.indent("Interface: ", iid);
   for (auto iter = cbegin(); iter != cend(); ++iter) {
     auto& [fid, fe] = *iter;
     is_last = std::next(iter) == cend();
@@ -49,7 +49,7 @@ void interface_entry::display(const string& iid, vector<bool>& is_last_bools,
 void class_entry::display(const symbol_table& global_symbol_table, const string& cid,
                           vector<bool>& is_last_bools, bool& is_last) const {
   Indent i(is_last_bools, is_last);
-  i.indent("Class: " + cid);
+  i.indent("Class: ", cid);
   {
     Indent i(is_last_bools, is_last);
     i.indent("Fields");
@@ -58,7 +58,7 @@ void class_entry::display(const symbol_table& global_symbol_table, const string&
       auto [vid, vt] = *iter;
       is_last = std::next(iter) == inheritance.field_table.cend();
       Indent i(is_last_bools, is_last);
-      i.indent(vid + ": " + vt);
+      i.indent(vid, ": ", vt);
     }
   }
 
@@ -83,7 +83,7 @@ void class_entry::display(const symbol_table& global_symbol_table, const string&
       auto iid = *iter;
       is_last = std::next(iter) == inheritance.interface_ids.cend();
       Indent i(is_last_bools, is_last);
-      i.indent("Implements: " + iid);
+      i.indent("Implements: ", iid);
     }
   }
 }

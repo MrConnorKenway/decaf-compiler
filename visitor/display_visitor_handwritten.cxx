@@ -93,13 +93,12 @@ void Display_visitor::visit(Empty_node* empty_node_ptr) {
 
 void Display_visitor::visit(Ident_node* ident_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(ident_node_ptr->node_type + " " + ident_node_ptr->ident_name);
+  i.indent(ident_node_ptr->node_type, " ", ident_node_ptr->ident_name);
 }
 
 void Display_visitor::visit(Base_type_node* base_type_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(base_type_node_ptr->node_type +
-           " type: " + base_type_code_to_str(base_type_node_ptr->type));
+  i.indent(base_type_node_ptr->node_type, " type: ", base_type_code_to_str(base_type_node_ptr->type));
 }
 
 void Display_visitor::visit(Array_type_node* array_type_node_ptr) {
@@ -112,8 +111,7 @@ void Display_visitor::visit(Array_type_node* array_type_node_ptr) {
 void Display_visitor::visit(
     User_defined_type_node* user_defined_type_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(user_defined_type_node_ptr->node_type + " " +
-           user_defined_type_node_ptr->type_ident_name);
+  i.indent(user_defined_type_node_ptr->node_type, " ", user_defined_type_node_ptr->type_ident_name);
 }
 
 void Display_visitor::visit(Assignment_node* assignment_node_ptr) {
@@ -126,8 +124,7 @@ void Display_visitor::visit(Assignment_node* assignment_node_ptr) {
 
 void Display_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(binary_expr_node_ptr->node_type +
-           " op: " + op_code_to_str(binary_expr_node_ptr->op));
+  i.indent(binary_expr_node_ptr->node_type, " op: ", op_code_to_str(binary_expr_node_ptr->op));
   binary_expr_node_ptr->left_operand->accept(*this);
   is_last = true;
   binary_expr_node_ptr->right_operand->accept(*this);
@@ -135,8 +132,7 @@ void Display_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
 
 void Display_visitor::visit(Unary_expr_node* unary_expr_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(unary_expr_node_ptr->node_type +
-           " op: " + op_code_to_str(unary_expr_node_ptr->op));
+  i.indent(unary_expr_node_ptr->node_type, " op: ", op_code_to_str(unary_expr_node_ptr->op));
   is_last = true;
   unary_expr_node_ptr->operand->accept(*this);
 }
@@ -144,9 +140,9 @@ void Display_visitor::visit(Unary_expr_node* unary_expr_node_ptr) {
 void Display_visitor::visit(Read_op_node* read_op_node_ptr) {
   Indent i(is_last_bools, is_last);
   if (read_op_node_ptr->read_type == t_ReadInteger) {
-    i.indent(read_op_node_ptr->node_type + " Read type: Read Integer");
+    i.indent(read_op_node_ptr->node_type, " Read type: Read Integer");
   } else {
-    i.indent(read_op_node_ptr->node_type + " Read type: Read Line");
+    i.indent(read_op_node_ptr->node_type, " Read type: Read Line");
   }
 }
 
@@ -185,25 +181,22 @@ void Display_visitor::visit(Index_op_node* index_op_node_ptr) {
 
 void Display_visitor::visit(Int_const_node* int_const_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(int_const_node_ptr->node_type +
-           " val: " + std::to_string(int_const_node_ptr->val));
+  i.indent(int_const_node_ptr->node_type, " val: ", std::to_string(int_const_node_ptr->val));
 }
 
 void Display_visitor::visit(Double_const_node* double_const_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(double_const_node_ptr->node_type +
-           " val: " + std::to_string(double_const_node_ptr->val));
+  i.indent(double_const_node_ptr->node_type, " val: ", std::to_string(double_const_node_ptr->val));
 }
 
 void Display_visitor::visit(Str_const_node* str_const_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(str_const_node_ptr->node_type + " val: " + str_const_node_ptr->val);
+  i.indent(str_const_node_ptr->node_type, " val: ", str_const_node_ptr->val);
 }
 
 void Display_visitor::visit(Bool_const_node* bool_const_node_ptr) {
   Indent i(is_last_bools, is_last);
-  i.indent(bool_const_node_ptr->node_type +
-           " val: " + std::to_string(bool_const_node_ptr->val));
+  i.indent(bool_const_node_ptr->node_type, " val: ", std::to_string(bool_const_node_ptr->val));
 }
 
 void Display_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
