@@ -123,11 +123,14 @@ void Create_symbol_table_visitor::visit(Variable_node* variable_node_ptr) {
 
   // this function may be called by a classdecl node or a functiondecl node
   switch (call_trace.top()) {
-    case node_type::CLASS:
+    case node_type::CLASS: {
       ss_assert(current_class_entry.field_table.count(tmp_id) == 0,
                 "Multiple definition for variable ", tmp_id);
-      current_class_entry.field_table.emplace(tmp_id, current_id);
+      auto uid = current_class_entry.field_table.size();
+      current_class_entry.field_table.try_emplace(tmp_id, uid, current_id);
+      // we will update uid later in `static_semantic_analyser'
       break;
+    }
 
     case node_type::FUNC:
     case node_type::PROTOTYPE: {

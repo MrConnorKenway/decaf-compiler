@@ -13,7 +13,7 @@ extern string src_file_name;
          << yylloc_ptr->first_column << " ";                              \
     ss_assert_helper(args);                                               \
     cerr << endl;                                                         \
-    exit(-1);                                                             \
+    abort();                                                              \
   } static_assert(true, "")
 
 template <typename T, typename... Args>

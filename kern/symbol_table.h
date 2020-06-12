@@ -18,7 +18,8 @@ using class_id = string;
 using func_id = string;
 using proto_id = string;
 using var_type = string;
-using var_table = unordered_map<var_id, var_type>;
+using var_entry = std::pair<ssize_t, var_type>;
+using var_table = unordered_map<var_id, var_entry>;
 
 struct func_entry {
   string return_type;
@@ -57,7 +58,7 @@ struct class_entry {
   unordered_set<interface_id> implemented_interface_set;
   ClassDecl_node* classdecl_node_ptr;
 
-  var_type try_fetch_variable(const var_id& vid) {
+  var_entry try_fetch_variable(const var_id& vid) {
     ss_assert(field_table.count(vid) != 0, "Undefined reference to variable ",
               vid);
     return field_table[vid];

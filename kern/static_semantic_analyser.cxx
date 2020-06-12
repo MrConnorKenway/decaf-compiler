@@ -26,8 +26,19 @@ void static_semantic_analyser::analyse(const string& cid,
   }
 
   // try insert variables that are declared in current class into inheritance
-  for (auto [vid, vt] : current_class_entry.field_table) {
-    current_class_entry.inheritance.field_table.try_emplace(vid, std::move(vt));
+  auto offset = current_class_entry.inheritance.field_table.size();
+  auto next_uid = offset;
+  for (auto&[vid, ve] : current_class_entry.field_table) {
+    // shift to make unique id
+    auto&[uid, vt] = ve;
+    uid += offset;
+    ss_assert(current_class_entry.inheritance.field_table.count(vid) == 0,
+              "CLass ",
+              cid,
+              " is trying to override base class ",
+              current_class_entry.parent_class_id,
+              " member variable ", vid);
+    current_class_entry.inheritance.field_table.try_emplace(vid, next_uid++, vt);
   }
 
   for (auto& [fid, fe] : current_class_entry.func_table) {

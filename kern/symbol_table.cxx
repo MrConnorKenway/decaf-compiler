@@ -55,10 +55,11 @@ void class_entry::display(const symbol_table& global_symbol_table, const string&
     i.indent("Fields");
     for (auto iter = inheritance.field_table.cbegin();
          iter != inheritance.field_table.cend(); ++iter) {
-      auto [vid, vt] = *iter;
+      auto& [vid, ve] = *iter;
       is_last = std::next(iter) == inheritance.field_table.cend();
       Indent i(is_last_bools, is_last);
-      i.indent(vid, ": ", vt);
+      auto& [uid, vt] = ve;
+      i.indent(vid, " ", uid, " ", vt);
     }
   }
 

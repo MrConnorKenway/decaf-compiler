@@ -9,13 +9,12 @@
 class scope {
  public:
   // this symbol table only contains variable symbols
-  using var_entry = std::pair<int, var_type>;
-  unordered_map<var_id, var_entry> local_symbol_table;
+  var_table local_symbol_table;
   unordered_map<int, llvm::Value*> var_uid_to_llvm_value;
   scope* parent_scope_ptr{};
   vector<scope*> children_scope_ptr;
 
-  static int next_uid;
+  static ssize_t next_uid;
 
   void display(vector<bool>& is_last_bools, bool& is_last) const {
     {
@@ -54,10 +53,14 @@ class scope {
   }
 
   void load_symbol_table_from_class(const class_entry& ce) {
-    next_uid = 0;
-    for (auto[vid, vt] : ce.inheritance.field_table) {
-      try_insert(vid, vt);
-    }
+    // the first member variable is virtual table pointer
+    // the second member variable is whole parent class variable (if this class
+    // inherits from some other class)
+    // member variables defined in this class start after the member variables of parent class
+    // the uid of a member variable is determined by its order
+    // in the output of for loop of `ce.field_table'
+    local_symbol_table = ce.inheritance.field_table;
+    next_uid = local_symbol_table.size();
   }
 
   void load_symbol_table_from_func(const func_entry& fe) {

@@ -23,7 +23,7 @@ class Empty_node : public AST_node_base {};
 class Ident_node : public AST_node_base {
  public:
   string ident_name;
-  int uid;  // -1
+  ssize_t uid;  // -1
 };
 
 // we declare type_node as ast_node_base in bison union

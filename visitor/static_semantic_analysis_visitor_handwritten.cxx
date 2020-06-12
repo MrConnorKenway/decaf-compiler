@@ -1,6 +1,6 @@
 #include "build/static_semantic_analysis_visitor.h"
 
-int scope::next_uid = 0;
+ssize_t scope::next_uid;
 
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
@@ -225,7 +225,7 @@ void Static_semantic_analysis_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   yylloc_manager y(dot_op_node_ptr);
   auto cid = decl_type(dot_op_node_ptr->obj);
   auto& ce = global_symbol_table.try_fetch_class(cid);
-  dot_op_node_ptr->expr_type =
+  std::tie(std::ignore, dot_op_node_ptr->expr_type) =
       ce.try_fetch_variable(dot_op_node_ptr->member_id->ident_name);
 }
 
