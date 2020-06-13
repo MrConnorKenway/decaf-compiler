@@ -94,7 +94,9 @@ void llvm_driver::gen_llvm_ir() {
     }
   }
 
-  current_module->print(llvm::errs(), nullptr);
+  std::error_code error_code;
+  llvm::raw_fd_ostream output_file("/home/auriaiur/decaf-compiler/build/main.ll", error_code);
+  current_module->print(output_file, nullptr);
 }
 
 llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), global_symbol_table(st) {
