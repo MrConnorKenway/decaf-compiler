@@ -29,6 +29,8 @@ void Codegen_visitor::visit(List_node* list_node_ptr) {
       }
     }
   }
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(This_node* this_node_ptr) {
@@ -94,7 +96,7 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
   } else {
     llvm_driver_.builder.CreateStore(right_value, left_addr);
   }
-  return_llvm_value = left_addr;
+  return_llvm_value = get_llvm_value(lhs);
 }
 
 void Codegen_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
@@ -318,7 +320,7 @@ void Codegen_visitor::visit(ClassDecl_node* classdecl_node_ptr) {
 }
 
 void Codegen_visitor::visit(Variable_node* variable_node_ptr) {
-  yylloc_manager y(variable_node_ptr);
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(StmtBlock_node* stmtblock_node_ptr) {
@@ -336,6 +338,8 @@ void Codegen_visitor::visit(StmtBlock_node* stmtblock_node_ptr) {
     }
   }
   stmtblock_node_ptr->stmt_list_optional->accept(*this);
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(FunctionDecl_node* functiondecl_node_ptr) {
@@ -358,6 +362,8 @@ void Codegen_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
     llvm_driver_.builder.CreateRet(get_llvm_value(returnstmt_node_ptr->expr_optional));
   }
   unreachable = true;
+
+  returnstmt_node_ptr = nullptr;
 }
 
 void Codegen_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
@@ -395,6 +401,8 @@ void Codegen_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   // next block
   reside_func->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(Call_node* call_node_ptr) {
@@ -437,6 +445,8 @@ void Codegen_visitor::visit(BreakStmt_node* breakstmt_node_ptr) {
   ss_assert(frame.break_dest_bb.has_value());
   llvm_driver_.builder.CreateBr(frame.break_dest_bb.value());
   unreachable = true;
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
@@ -445,6 +455,8 @@ void Codegen_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
   ss_assert(frame.cont_dest_bb.has_value());
   llvm_driver_.builder.CreateBr(frame.cont_dest_bb.value());
   unreachable = true;
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
@@ -479,6 +491,8 @@ void Codegen_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   // next block
   parent_bb->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(ForStmt_node* forstmt_node_ptr) {
@@ -526,6 +540,8 @@ void Codegen_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   // next block
   reside_func->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
+
+  return_llvm_value = nullptr;
 }
 
 void Codegen_visitor::visit(PrintStmt_node* printstmt_node_ptr) {
