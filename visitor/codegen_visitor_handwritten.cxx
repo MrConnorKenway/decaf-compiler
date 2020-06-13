@@ -59,9 +59,6 @@ void Codegen_visitor::visit(Base_type_node* base_type_node_ptr) {
 }
 
 void Codegen_visitor::visit(Array_type_node* array_type_node_ptr) {
-  yylloc_manager y(array_type_node_ptr);
-
-  ss_assert(false);
 }
 
 void Codegen_visitor::visit(User_defined_type_node* user_defined_type_node_ptr) {
