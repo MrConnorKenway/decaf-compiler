@@ -9,10 +9,14 @@ typedef struct {
   char* c_str;
 } decaf_str;
 
+typedef union {
+  int64_t placeholder;
+} obj_ref;
+
 typedef struct {
   size_t len;
   size_t element_size;
-  void* elements;
+  obj_ref* elements;
 } decaf_arr;
 
 typedef struct {
@@ -70,7 +74,7 @@ decaf_arr* alloc_arr(size_t len, size_t element_size) {
   decaf_arr* arr = (decaf_arr*) malloc(sizeof(decaf_arr));
   arr->len = len;
   arr->element_size = element_size;
-  arr->elements = malloc(len * element_size);
+  arr->elements = (obj_ref*) malloc(len * element_size);
   return arr;
 }
 

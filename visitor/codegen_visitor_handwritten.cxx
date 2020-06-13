@@ -1,10 +1,12 @@
 #include "build/codegen_visitor.h"
 
-llvm::Value* Codegen_visitor::get_llvm_value(ast_node_ptr_t node_ptr, bool is_rval) {
+// if get_value_flag is set, then this function will
+// return the value instead of the address
+llvm::Value* Codegen_visitor::get_llvm_value(ast_node_ptr_t node_ptr, bool get_value_flag) {
   yylloc_manager y(node_ptr);
   stack_manager s(frame);
 
-  frame.is_rval = is_rval;
+  frame.get_value_flag = get_value_flag;
   node_ptr->accept(*this);
   ss_assert(frame.return_llvm_value);
   return frame.return_llvm_value;
@@ -28,7 +30,7 @@ void Codegen_visitor::visit(List_node* list_node_ptr) {
 void Codegen_visitor::visit(This_node* this_node_ptr) {
   yylloc_manager y(this_node_ptr);
 
-  assert(frame.is_rval);
+  assert(frame.get_value_flag);
   frame.return_llvm_value = frame.current_scope_ptr->lookup_llvm_value(-1);
 }
 
@@ -46,7 +48,7 @@ void Codegen_visitor::visit(Ident_node* ident_node_ptr) {
 
   auto value = frame.current_scope_ptr->lookup_llvm_value(ident_node_ptr->uid);
   frame.return_llvm_value = value;
-  if (frame.is_rval) {
+  if (frame.get_value_flag) {
     frame.return_llvm_value = llvm_driver_.builder.CreateLoad(frame.return_llvm_value);
   }
 }
@@ -69,7 +71,8 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
 
   auto lhs = assignment_node_ptr->LHS;
   auto rhs = assignment_node_ptr->RHS;
-  auto left_value = get_llvm_value(lhs, false);
+  // we want address of the left operand
+  auto left_addr = get_llvm_value(lhs, false);
   auto right_value = get_llvm_value(rhs);
   ss_assert(lhs->expr_type.has_value() && rhs->expr_type.has_value());
   auto left_type = lhs->expr_type.value();
@@ -79,16 +82,16 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
     if (right_type == "null") {
       auto null_value =
           llvm_driver_.builder.CreateIntToPtr(right_value, llvm_driver_.get_llvm_type(left_type));
-      llvm_driver_.builder.CreateStore(null_value, left_value);
+      llvm_driver_.builder.CreateStore(null_value, left_addr);
     } else {
       // convert from derived class to base class
       auto cast_value = llvm_driver_.builder.CreatePointerCast(right_value, llvm_driver_.get_llvm_type(left_type));
-      llvm_driver_.builder.CreateStore(cast_value, left_value);
+      llvm_driver_.builder.CreateStore(cast_value, left_addr);
     }
   } else {
-    llvm_driver_.builder.CreateStore(right_value, left_value);
+    llvm_driver_.builder.CreateStore(right_value, left_addr);
   }
-  frame.return_llvm_value = left_value;
+  frame.return_llvm_value = left_addr;
 }
 
 void Codegen_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
@@ -249,20 +252,21 @@ void Codegen_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   yylloc_manager y(dot_op_node_ptr);
   stack_manager s(frame);
 
+  llvm::Value* member_addr;
   if (dynamic_cast<This_node*>(dot_op_node_ptr->obj) != nullptr) {
     ss_assert(dot_op_node_ptr->member_id->uid > 0);
-    frame.return_llvm_value = frame.current_scope_ptr->lookup_llvm_value(dot_op_node_ptr->member_id->uid);
-    return;
+    member_addr = frame.current_scope_ptr->lookup_llvm_value(dot_op_node_ptr->member_id->uid);
+  } else {
+    auto obj_addr = get_llvm_value(dot_op_node_ptr->obj);
+    auto cid = dot_op_node_ptr->obj->expr_type.value();
+    auto vid = dot_op_node_ptr->member_id->ident_name;
+    // TODO: use dot_op_node_ptr->member_id->uid
+    auto uid = llvm_driver_.try_fetch_member_variable_uid(cid, vid);
+    ss_assert(uid >= 0);
+    member_addr = llvm_driver_.builder.CreateStructGEP(obj_addr, uid);
   }
 
-  auto obj_addr = get_llvm_value(dot_op_node_ptr->obj);
-  auto cid = dot_op_node_ptr->obj->expr_type.value();
-  auto vid = dot_op_node_ptr->member_id->ident_name;
-  // TODO: use dot_op_node_ptr->member_id->uid
-  auto uid = llvm_driver_.try_fetch_member_variable_uid(cid, vid);
-  ss_assert(uid >= 0);
-  auto member_addr = llvm_driver_.builder.CreateStructGEP(obj_addr, uid);
-  if (frame.is_rval) {
+  if (frame.get_value_flag) {
     frame.return_llvm_value = llvm_driver_.builder.CreateLoad(member_addr);
   } else {
     frame.return_llvm_value = member_addr;
@@ -275,26 +279,33 @@ void Codegen_visitor::visit(Index_op_node* index_op_node_ptr) {
 
   auto array_type = index_op_node_ptr->array->expr_type.value();
   auto element_type = llvm_driver_.get_llvm_type(array_type.substr(0, array_type.size() - 2));
-  auto array_addr = get_llvm_value(index_op_node_ptr->array);
+  auto element_pointer_type = element_type->getPointerTo();
+  auto array_obj_addr = get_llvm_value(index_op_node_ptr->array);
   auto arr_index = get_llvm_value(index_op_node_ptr->index_expr);
+  // we need to cast i32 arr_index to i64
+  auto cast_arr_index = llvm_driver_.builder.CreateIntCast(arr_index, llvm_driver_.builder.getInt64Ty(), false);
   // dynamic array access sanity check
   auto validate_index =
-      llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["validate_access"], {array_addr, arr_index});
-  auto underlying_arr_index = llvm_driver_.create_llvm_constant_signed_int(1);
-  auto struct_index = llvm_driver_.create_llvm_constant_signed_int(0);
-  auto underlying_arr_addr = llvm_driver_.builder.CreateGEP(array_addr, {struct_index, underlying_arr_index});
-  auto llvm_arr_type = llvm::ArrayType::get(element_type, 1);
-  auto cast_arr_addr = llvm_driver_.builder.CreateBitCast(underlying_arr_addr, llvm_arr_type);
-  frame.return_llvm_value = llvm_driver_.builder.CreateExtractElement(cast_arr_addr, arr_index);
+      llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["validate_access"], {array_obj_addr, cast_arr_index});
+  // get the address of the underlying array pointer
+  auto underlying_arr_addr_addr = llvm_driver_.builder.CreateStructGEP(array_obj_addr, 2);
+  // get the address of first element in array
+  auto underlying_arr_addr_val =
+      llvm_driver_.builder.CreateLoad(llvm_driver_.obj_ref_t->getPointerTo(), underlying_arr_addr_addr);
+  auto element_addr_addr = llvm_driver_.builder.CreateGEP(underlying_arr_addr_val, cast_arr_index);
+  frame.return_llvm_value = llvm_driver_.builder.CreatePointerCast(element_addr_addr, element_pointer_type);
+  if (frame.get_value_flag) {
+    frame.return_llvm_value = llvm_driver_.builder.CreateLoad(element_type, frame.return_llvm_value);
+  }
 }
 
 void Codegen_visitor::visit(Int_const_node* int_const_node_ptr) {
-  ss_assert(frame.is_rval);
+  ss_assert(frame.get_value_flag);
   frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int32(int_const_node_ptr->val);
 }
 
 void Codegen_visitor::visit(Double_const_node* double_const_node_ptr) {
-  ss_assert(frame.is_rval);
+  ss_assert(frame.get_value_flag);
   frame.return_llvm_value = llvm::ConstantFP::get(llvm_driver_.builder.getDoubleTy(), double_const_node_ptr->val);
 }
 
@@ -302,7 +313,7 @@ void Codegen_visitor::visit(Str_const_node* str_const_node_ptr) {
 }
 
 void Codegen_visitor::visit(Bool_const_node* bool_const_node_ptr) {
-  ss_assert(frame.is_rval);
+  ss_assert(frame.get_value_flag);
   frame.return_llvm_value = llvm::ConstantInt::get(llvm_driver_.builder.getInt1Ty(), bool_const_node_ptr->val);
 }
 
@@ -492,16 +503,18 @@ void Codegen_visitor::visit(PrintStmt_node* printstmt_node_ptr) {
 
   frame.args = vector<llvm::Value*>();
   printstmt_node_ptr->expr_list->accept(*this);
-  auto& builtin_types = llvm_driver_.builtin_types;
-  for (auto arg : frame.args.value()) {
-    auto arg_type = arg->getType();
-    if (arg_type == builtin_types["double"]) {
+  auto& type_list = printstmt_node_ptr->expr_list->elements_type_list.value();
+  auto& args = frame.args.value();
+  for (size_t i = 0; i < type_list.size(); ++i) {
+    auto arg_type = type_list[i];
+    auto arg = args[i];
+    if (arg_type == "double") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_double"], arg);
-    } else if (arg_type == builtin_types["int"]) {
+    } else if (arg_type == "int") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_int"], arg);
-    } else if (arg_type == builtin_types["bool"]) {
+    } else if (arg_type == "bool") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_bool"], arg);
-    } else if (arg_type == builtin_types["string"]) {
+    } else if (arg_type == "string") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_str"], arg);
     } else {
       ss_assert(false);

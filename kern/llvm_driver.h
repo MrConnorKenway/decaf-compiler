@@ -28,6 +28,7 @@ class llvm_driver {
   llvm::StructType* v_table_t;
   llvm::StructType* decaf_str_t;
   llvm::StructType* decaf_arr_t;
+  llvm::StructType* obj_ref_t;
 
   unordered_map<var_type, llvm::Type*> builtin_types;
   unordered_map<var_type, llvm::StructType*> user_defined_types;

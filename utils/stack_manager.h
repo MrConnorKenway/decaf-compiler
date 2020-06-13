@@ -9,7 +9,9 @@ struct Frame {
   optional<llvm::BasicBlock*> current_next_bb{};
   optional<llvm::BasicBlock*> current_bb{};
   optional<vector<llvm::Value*>> args{};
-  bool is_rval = true;
+  // true if we want to get the value
+  // rather than address
+  bool get_value_flag = true;
 };
 
 class stack_manager {

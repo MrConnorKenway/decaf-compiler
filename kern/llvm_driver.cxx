@@ -108,11 +108,13 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
 
   decaf_str_t = extern_module->getTypeByName("struct.decaf_str");
   decaf_arr_t = extern_module->getTypeByName("struct.decaf_arr");
+  obj_ref_t = extern_module->getTypeByName("union.obj_ref");
   v_entry_t = extern_module->getTypeByName("struct.v_entry");
   v_table_t = extern_module->getTypeByName("struct.v_table");
 
   assert(decaf_str_t);
   assert(decaf_arr_t);
+  assert(obj_ref_t);
   assert(v_entry_t);
   assert(v_table_t);
 
