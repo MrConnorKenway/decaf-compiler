@@ -391,7 +391,8 @@ void Codegen_visitor::visit(Call_node* call_node_ptr) {
   if (obj_type.empty()) {
     obj_type = current_cid;
   }
-  if (call_node_ptr->obj_optional->node_type == "This_node" || call_node_ptr->obj_optional->node_type == "Empty_node") {
+  if (dynamic_cast<This_node*>(call_node_ptr->obj_optional) != nullptr
+      || dynamic_cast<Empty_node*>(call_node_ptr->obj_optional) != nullptr) {
     caller = frame.current_scope_ptr->lookup_llvm_value(-1);
   } else {
     caller = get_llvm_value(call_node_ptr->obj_optional);
