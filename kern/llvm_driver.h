@@ -79,6 +79,10 @@ class llvm_driver {
     return llvm::ConstantInt::get(current_context, llvm::APInt(32, val, true));
   }
 
+  auto create_llvm_constant_signed_int64(int val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(64, val, true));
+  }
+
   auto create_llvm_signed_int64(llvm::TypeSize val) {
     return llvm::ConstantInt::get(current_context, llvm::APInt(64, val, true));
   }

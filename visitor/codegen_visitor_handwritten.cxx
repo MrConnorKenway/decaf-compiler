@@ -37,7 +37,7 @@ void Codegen_visitor::visit(This_node* this_node_ptr) {
 void Codegen_visitor::visit(Null_const_node* null_const_node_ptr) {
   yylloc_manager y(null_const_node_ptr);
 
-  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int32(0);
+  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int64(0);
 }
 
 void Codegen_visitor::visit(Empty_node* empty_node_ptr) {
