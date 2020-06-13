@@ -184,7 +184,9 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
       assert(param.getType() == get_llvm_type(cid));
       for (auto &[vid, _]:ce.inheritance.field_table) {
         // create gep instruction in order to access class member variables in function
-        create_member_variable_gep(cid, vid, &param, func_scope_ptr, true);
+        string var_name = cid + ".";
+        var_name += vid;
+        create_member_variable_gep(cid, vid, &param, func_scope_ptr, var_name, true);
       }
       func_scope_ptr->var_uid_to_llvm_value[-1] = &param;
       // update uid value, variable whose
@@ -194,7 +196,7 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
     }
 
     // copy the arguments to local llvm registers
-    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr);
+    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr, "arg");
     builder.CreateStore(&param, local_var);
     func_scope_ptr->var_uid_to_llvm_value[uid++] = local_var;
   }

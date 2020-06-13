@@ -335,7 +335,7 @@ void Codegen_visitor::visit(StmtBlock_node* stmtblock_node_ptr) {
   for (auto&[vid, ve] : scope_ptr->local_symbol_table) {
     auto&[uid, type] = ve;
     if (scope_ptr->var_uid_to_llvm_value.count(uid) == 0) {
-      scope_ptr->var_uid_to_llvm_value[uid] = llvm_driver_.create_alloca_inst(type);
+      scope_ptr->var_uid_to_llvm_value[uid] = llvm_driver_.create_alloca_inst(type, vid);
     }
   }
   stmtblock_node_ptr->stmt_list_optional->accept(*this);

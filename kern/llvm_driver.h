@@ -65,8 +65,8 @@ class llvm_driver {
     return uid;
   }
 
-  llvm::AllocaInst* create_alloca_inst(const var_type& type) {
-    return builder.CreateAlloca(get_llvm_type(type), nullptr);
+  llvm::AllocaInst* create_alloca_inst(const var_type& type, const var_id& vid) {
+    return builder.CreateAlloca(get_llvm_type(type), nullptr, vid);
   }
 
   auto get_sizeof(const var_type& type) {
@@ -98,7 +98,7 @@ class llvm_driver {
   void create_member_variable_gep(const class_id& cid,
                                   const var_id& vid,
                                   llvm::Value* class_ptr,
-                                  scope* func_scope_ptr, bool is_first_call = false) {
+                                  scope* func_scope_ptr, const var_id& var_name, bool is_first_call = false) {
     auto& ce = global_symbol_table.try_fetch_class(cid);
     auto[var_uid, ignore] = ce.inheritance.field_table.at(vid);
     auto field_index = var_uid;
@@ -114,7 +114,7 @@ class llvm_driver {
       field_index -= last_uid_inherited;
       auto member_var_addr =
           builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int32(0),
-                                        create_llvm_constant_signed_int32(field_index)});
+                                        create_llvm_constant_signed_int32(field_index)}, var_name);
       // set llvm::Value*
       func_scope_ptr->var_uid_to_llvm_value[var_uid] = member_var_addr;
       return;
@@ -122,7 +122,7 @@ class llvm_driver {
       // parent class variable
       // we first find out the class that define this variable
       assert(!ce.parent_class_id.empty());
-      create_member_variable_gep(ce.parent_class_id, vid, class_ptr, func_scope_ptr);
+      create_member_variable_gep(ce.parent_class_id, vid, class_ptr, func_scope_ptr, var_name);
     }
   }
 
