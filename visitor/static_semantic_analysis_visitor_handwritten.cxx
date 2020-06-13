@@ -298,12 +298,13 @@ void Static_semantic_analysis_visitor::visit(
 void Static_semantic_analysis_visitor::visit(
     ReturnStmt_node* returnstmt_node_ptr) {
   yylloc_manager y(returnstmt_node_ptr);
-  ss_assert(
-      decl_type(returnstmt_node_ptr->expr_optional) ==
-          global_symbol_table.try_fetch_func(current_class_id, current_func_id)
-              .return_type,
-      "Return type mismatch function ", current_func_id, " in class ",
-      current_class_id);
+  auto return_type = decl_type(returnstmt_node_ptr->expr_optional);
+  if (return_type.empty() && dynamic_cast<Empty_node*>(returnstmt_node_ptr->expr_optional) != nullptr) {
+    return_type = "void";
+  }
+  ss_assert(return_type == global_symbol_table.try_fetch_func(current_class_id, current_func_id).return_type,
+            "Return type mismatch function ", current_func_id, " in class ",
+            current_class_id);
 }
 
 void Static_semantic_analysis_visitor::visit(
