@@ -129,16 +129,18 @@ void Codegen_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
     }
     case '-': {
       rt_value = llvm_driver_.builder.CreateSub(left_value, right_value);
+      break;
     }
     case '*': {
       rt_value = llvm_driver_.builder.CreateMul(left_value, right_value);
+      break;
     }
     case '/': {
       rt_value = llvm_driver_.builder.CreateSDiv(left_value, right_value);
       break;
     }
     case '<': {
-      rt_value = llvm_driver_.builder.CreateICmpSLE(left_value, right_value);
+      rt_value = llvm_driver_.builder.CreateICmpSLT(left_value, right_value);
       break;
     }
     case '>': {
