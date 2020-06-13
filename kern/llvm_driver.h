@@ -99,12 +99,11 @@ class llvm_driver {
     return builder.CreateCall(builtin_funcs["alloc_arr"], {array_size, element_size});
   }
 
-  void create_member_variable_gep(const class_id& cid,
-                                  const var_id& vid,
+  auto create_member_variable_gep(const class_id& cid,
+                                  ssize_t var_uid,
                                   llvm::Value* class_ptr,
-                                  scope* func_scope_ptr, const var_id& var_name, bool is_first_call = false) {
+                                  const var_id& var_name, bool is_first_call = false) {
     auto& ce = global_symbol_table.try_fetch_class(cid);
-    auto[var_uid, ignore] = ce.inheritance.field_table.at(vid);
     auto field_index = var_uid;
     // the uid of the last inherited member variable from parent class
     ssize_t last_uid_inherited = ce.inheritance.field_table.size() - ce.field_table.size() - 1;
@@ -119,19 +118,13 @@ class llvm_driver {
       auto member_var_addr =
           builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int32(0),
                                         create_llvm_constant_signed_int32(field_index)}, var_name);
-      // set llvm::Value*
-      func_scope_ptr->var_uid_to_llvm_value[var_uid] = member_var_addr;
-      return;
+      return member_var_addr;
     } else {
       // parent class variable
       // we first find out the class that define this variable
       assert(!ce.parent_class_id.empty());
-      create_member_variable_gep(ce.parent_class_id, vid, class_ptr, func_scope_ptr, var_name);
+      return create_member_variable_gep(ce.parent_class_id, var_uid, class_ptr, var_name);
     }
-  }
-
-  static auto create_llvm_null_ptr(llvm::PointerType* ptr_type) {
-    return llvm::ConstantPointerNull::get(ptr_type);
   }
 
   auto get_virtual_table_ptr(const class_id& cid) {

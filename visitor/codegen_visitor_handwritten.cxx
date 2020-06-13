@@ -234,16 +234,6 @@ void Codegen_visitor::visit(New_array_op_node* new_array_op_node_ptr) {
   // we need to cast i32 arr_index to i64
   auto cast_arr_size = llvm_driver_.builder.CreateIntCast(array_size, llvm_driver_.builder.getInt64Ty(), false);
   auto arr_addr = llvm_driver_.alloc_array(cast_arr_size, element_type);
-  // TODO: check if we need to cast the underlying pointer
-//  // cast the underlying pointer, namely the `elements' pointer of struct.decaf_arr
-//  auto struct_index = llvm_driver_.create_llvm_constant_signed_int32(0);
-//  auto field_index = llvm_driver_.create_llvm_constant_signed_int32(1);
-//  auto underlying_arr_addr = llvm_driver_.builder.CreateGEP(arr_addr, {struct_index, field_index});
-//  auto cast_value =
-//      llvm_driver_.builder.CreatePointerCast(underlying_arr_addr,
-//                                             llvm_driver_.get_llvm_type(element_type)->getPointerTo());
-//  // and update the underlying array pointer
-//  llvm_driver_.builder.CreateStore(cast_value, underlying_arr_addr);
   frame.return_llvm_value = arr_addr;
 }
 
@@ -259,10 +249,11 @@ void Codegen_visitor::visit(Dot_op_node* dot_op_node_ptr) {
     auto obj_addr = get_llvm_value(dot_op_node_ptr->obj);
     auto cid = dot_op_node_ptr->obj->expr_type.value();
     auto vid = dot_op_node_ptr->member_id->ident_name;
-    // TODO: use dot_op_node_ptr->member_id->uid
-    auto uid = llvm_driver_.try_fetch_member_variable_uid(cid, vid);
+    auto uid = dot_op_node_ptr->member_id->uid;
     ss_assert(uid >= 0);
-    member_addr = llvm_driver_.builder.CreateStructGEP(obj_addr, uid);
+    string var_name = cid + ".";
+    var_name += vid;
+    member_addr = llvm_driver_.create_member_variable_gep(cid, uid, obj_addr, var_name, true);
   }
 
   if (frame.get_value_flag) {

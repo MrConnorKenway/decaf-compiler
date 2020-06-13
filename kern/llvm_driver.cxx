@@ -145,7 +145,6 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   }
 }
 
-// TODO: do we really need this method?
 void llvm_driver::declare_func(const class_id& cid, const func_id& fid, const func_entry& fe) {
   auto return_type = get_llvm_type(fe.return_type);
   vector<llvm::Type*> params;
@@ -182,11 +181,13 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
       // if param is "this" pointer
       is_this_ptr = false;
       assert(param.getType() == get_llvm_type(cid));
-      for (auto &[vid, _]:ce.inheritance.field_table) {
+      for (auto &[vid, ve]:ce.inheritance.field_table) {
         // create gep instruction in order to access class member variables in function
         string var_name = cid + ".";
         var_name += vid;
-        create_member_variable_gep(cid, vid, &param, func_scope_ptr, var_name, true);
+        auto[var_uid, _] = ve;
+        func_scope_ptr->var_uid_to_llvm_value[var_uid] =
+            create_member_variable_gep(cid, var_uid, &param, var_name, true);
       }
       func_scope_ptr->var_uid_to_llvm_value[-1] = &param;
       // update uid value, variable whose
