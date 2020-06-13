@@ -20,7 +20,7 @@ template <typename T, typename... Args>
 inline void ss_assert_helper(T&& t, Args&&... args);
 
 template <typename... Args>
-inline void ss_assert_helper(string s, Args&&... args);
+inline void ss_assert_helper(const string& s, Args&&... args);
 
 template <typename... Args>
 inline void ss_assert_helper();
@@ -32,7 +32,7 @@ template <typename T, typename... Args>
 inline void ss_assert_helper(T&& t);
 
 template <typename... Args>
-inline void ss_assert_helper(string s);
+inline void ss_assert_helper(const string& s);
 
 template <typename T, typename... Args>
 inline void ss_assert_helper(T&& t) {
@@ -40,7 +40,7 @@ inline void ss_assert_helper(T&& t) {
 }
 
 template <typename... Args>
-inline void ss_assert_helper(string s) {
+inline void ss_assert_helper(const string& s) {
   cerr << "\"" << s << "\"";
 }
 
@@ -51,7 +51,7 @@ inline void ss_assert_helper(T&& t, Args&&... args) {
 }
 
 template <typename... Args>
-inline void ss_assert_helper(string s, Args&&... args) {
+inline void ss_assert_helper(const string& s, Args&&... args) {
   cerr << "\"" << s << "\"";
   ss_assert_helper(std::forward<Args>(args)...);
 }
