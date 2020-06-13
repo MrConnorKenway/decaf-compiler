@@ -11,6 +11,7 @@ typedef struct {
 
 typedef struct {
   size_t len;
+  size_t element_size;
   void* elements;
 } decaf_arr;
 
@@ -57,9 +58,18 @@ decaf_str* read_line() {
   return str;
 }
 
+void validate_access(decaf_arr* arr, size_t i) {
+  assert(i < arr->len);
+}
+
+void* alloc_obj(size_t obj_size) {
+  return malloc(obj_size);
+}
+
 decaf_arr* alloc_arr(size_t len, size_t element_size) {
   decaf_arr* arr = (decaf_arr*) malloc(sizeof(decaf_arr));
   arr->len = len;
+  arr->element_size = element_size;
   arr->elements = malloc(len * element_size);
   return arr;
 }

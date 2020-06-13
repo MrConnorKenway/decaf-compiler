@@ -52,6 +52,19 @@ class scope {
     ss_assert(false, "Undefined reference to variable ", vid);
   }
 
+  // use uid to find the llvm value to access outside scope's variable
+  llvm::Value* lookup_llvm_value(int uid) const {
+    auto iter = this;
+    while (iter) {
+      if (iter->var_uid_to_llvm_value.count(uid)) {
+        return iter->var_uid_to_llvm_value.at(uid);
+      }
+      iter = iter->parent_scope_ptr;
+    }
+
+    ss_assert(false);
+  }
+
   void load_symbol_table_from_class(const class_entry& ce) {
     // the first member variable is virtual table pointer
     // the second member variable is whole parent class variable (if this class

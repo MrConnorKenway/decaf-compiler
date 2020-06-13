@@ -59,9 +59,9 @@ struct class_entry {
   ClassDecl_node* classdecl_node_ptr;
 
   var_entry try_fetch_variable(const var_id& vid) {
-    ss_assert(field_table.count(vid) != 0, "Undefined reference to variable ",
+    ss_assert(inheritance.field_table.count(vid) != 0, "Undefined reference to variable ",
               vid);
-    return field_table[vid];
+    return inheritance.field_table[vid];
   }
 
   void display(const symbol_table& global_symbol_table, const string& cid,

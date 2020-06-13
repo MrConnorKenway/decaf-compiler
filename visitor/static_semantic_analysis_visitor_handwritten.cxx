@@ -225,8 +225,10 @@ void Static_semantic_analysis_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   yylloc_manager y(dot_op_node_ptr);
   auto cid = decl_type(dot_op_node_ptr->obj);
   auto& ce = global_symbol_table.try_fetch_class(cid);
-  std::tie(std::ignore, dot_op_node_ptr->expr_type) =
+  ssize_t uid;
+  std::tie(uid, dot_op_node_ptr->expr_type) =
       ce.try_fetch_variable(dot_op_node_ptr->member_id->ident_name);
+  dot_op_node_ptr->member_id->uid = uid;
 }
 
 void Static_semantic_analysis_visitor::visit(Index_op_node* index_op_node_ptr) {
@@ -395,6 +397,7 @@ void Static_semantic_analysis_visitor::visit(
     PrintStmt_node* printstmt_node_ptr) {
   yylloc_manager y(printstmt_node_ptr);
   auto& type_list = decl_type_list(printstmt_node_ptr->expr_list);
+  // TODO: use is base_type
   unordered_set<string> base_type = {"int", "double", "string", "bool"};
   for (const auto& vt : type_list) {
     ss_assert(base_type.count(vt) != 0, "Cannot print non-base type");

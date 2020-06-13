@@ -1,5 +1,35 @@
 #include "llvm_driver.h"
 
+void llvm_driver::define_variable(const class_id& cid, const class_entry& ce) {
+  // define llvm IR of user defined type
+  if (user_defined_types.count(cid) != 0) {
+    return;
+  }
+  auto user_defined_type = llvm::StructType::create(current_context, cid);
+  user_defined_types[cid] = user_defined_type;
+
+  vector<llvm::Type*> struct_body;
+
+  auto parent_cid = ce.parent_class_id;
+  if (!parent_cid.empty()) {
+    // if cid has parent
+    if (user_defined_types.count(parent_cid) == 0) {
+      define_variable(parent_cid, global_symbol_table.try_fetch_class(parent_cid));
+    }
+    struct_body.push_back(user_defined_types[parent_cid]);
+  } else {
+    // every class contains a virtual table pointer
+    struct_body.push_back(v_table_t->getPointerTo());
+  }
+
+  // also put inherited fields into struct
+  for (auto&[vid, ve] : ce.field_table) {
+    auto&[_, vt] = ve;
+    struct_body.push_back(get_llvm_type(vt));
+  }
+  user_defined_type->setBody(struct_body);
+}
+
 void llvm_driver::gen_llvm_ir() {
   // unique identifier for function
   int uid = 0;
@@ -12,20 +42,7 @@ void llvm_driver::gen_llvm_ir() {
       auto& ce = std::get<class_entry>(entry);
       auto& cid = eid;
 
-      // define llvm IR of user defined type
-      assert(user_defined_types.count(cid) == 0);
-      auto user_defined_type = llvm::StructType::create(current_context, cid);
-      user_defined_types[cid] = user_defined_type;
-
-      vector<llvm::Type*> struct_body;
-      // every class contains a virtual table pointer
-      struct_body.push_back(v_table_t->getPointerTo());
-
-      // also put inherited fields into struct
-      for (auto&[vid, vt] : ce.inheritance.field_table) {
-        struct_body.push_back(get_llvm_type(vt));
-      }
-      user_defined_type->setBody(struct_body);
+      define_variable(cid, ce);
 
       // we don't have to handle the inherited function here, since
       // we will depend on virtual table to handle function call
@@ -60,8 +77,11 @@ void llvm_driver::gen_llvm_ir() {
           llvm::Function::Create(main_func_type, llvm::Function::ExternalLinkage, "main", current_module.get());
       auto basic_block = llvm::BasicBlock::Create(current_context, "entry", main_func);
       builder.SetInsertPoint(basic_block);
-      Codegen_visitor cv{};
+      Frame f = {nullptr, block_ptr->scope_ptr};
+      Codegen_visitor cv(*this, f, eid);
       cv.visit(block_ptr);
+
+      builder.CreateRetVoid();
       continue;
     }
 
@@ -101,11 +121,13 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   builtin_types["double"] = builder.getDoubleTy();
   builtin_types["bool"] = builder.getInt1Ty();
   builtin_types["void"] = builder.getVoidTy();
-  builtin_types["nullptr"] = builder.getInt8PtrTy();
+  builtin_types["null"] = builder.getInt8PtrTy();
 
   constexpr std::string_view
       extern_funcs[] =
-      {"print_str", "print_bool", "print_int", "print_double", "read_int", "read_line", "alloc_arr", "lookup_fptr"};
+      {"print_str", "print_bool", "print_int", "print_double", "read_int", "read_line", "alloc_obj", "validate_access",
+       "alloc_arr",
+       "lookup_fptr"};
 
   // declare external library functions
   for (auto& fid : extern_funcs) {
@@ -141,10 +163,11 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
   auto basic_block = llvm::BasicBlock::Create(current_context, "entry", func);
   builder.SetInsertPoint(basic_block);
   assert(fe.func_body.has_value());
-  auto scope_ptr = fe.func_body.value()->scope_ptr;
+  auto block_ptr = fe.func_body.value();
+  auto func_scope_ptr = block_ptr->scope_ptr;
   // the parent scope of a member function scope is the class scope
   // and it must not be nullptr
-  assert(scope_ptr->parent_scope_ptr);
+  assert(func_scope_ptr->parent_scope_ptr);
   auto& ce = global_symbol_table.try_fetch_class(cid);
 
   bool is_this_ptr = true;
@@ -157,21 +180,29 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
       assert(param.getType() == get_llvm_type(cid));
       for (auto &[vid, _]:ce.inheritance.field_table) {
         // create gep instruction in order to access class member variables in function
-        auto& entry = scope_ptr->parent_scope_ptr->local_symbol_table[vid];
-        auto val =
-            builder.CreateGEP(&param,
-                              {create_llvm_constant_signed_int(0),
-                               create_llvm_constant_signed_int(std::get<0>(entry))});
-        // set llvm::Value*
-        scope_ptr->var_uid_to_llvm_value[std::get<0>(entry)] = val;
+        create_member_variable_gep(cid, vid, &param, func_scope_ptr, true);
       }
+      func_scope_ptr->var_uid_to_llvm_value[-1] = &param;
+      // update uid value, variable whose
+      // uid greater than this uid is a llvm temporary variable
       uid = ce.inheritance.field_table.size();
       continue;
     }
 
-    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr, "arg_tmp");
+    // copy the arguments to local llvm registers
+    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr);
     builder.CreateStore(&param, local_var);
-    scope_ptr->var_uid_to_llvm_value[uid++] = local_var;
+    func_scope_ptr->var_uid_to_llvm_value[uid++] = local_var;
+  }
+
+  // now all the necessary initialization (including class member variables
+  // and function arguments) has finished
+  Frame f = {nullptr, block_ptr->scope_ptr};
+  Codegen_visitor cv(*this, f, cid);
+  cv.visit(block_ptr);
+
+  if (fe.return_type == "void") {
+    builder.CreateRetVoid();
   }
 }
 
