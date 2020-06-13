@@ -35,7 +35,7 @@ void Codegen_visitor::visit(This_node* this_node_ptr) {
 void Codegen_visitor::visit(Null_const_node* null_const_node_ptr) {
   yylloc_manager y(null_const_node_ptr);
 
-  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int(0);
+  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int32(0);
 }
 
 void Codegen_visitor::visit(Empty_node* empty_node_ptr) {
@@ -217,9 +217,7 @@ void Codegen_visitor::visit(New_op_node* new_op_node_ptr) {
   auto cast_obj_addr = llvm_driver_.builder.CreatePointerCast(raw_obj_addr, llvm_driver_.get_llvm_type(type));
 
   // pass virtual table pointer to class
-  auto struct_index = llvm_driver_.create_llvm_constant_signed_int(0);
-  auto field_index = struct_index;
-  auto mem_addr = llvm_driver_.builder.CreateGEP(cast_obj_addr, {struct_index, field_index});
+  auto mem_addr = llvm_driver_.builder.CreateStructGEP(cast_obj_addr, 0);
   llvm_driver_.builder.CreateStore(llvm_driver_.get_virtual_table_ptr(type), mem_addr);
   frame.return_llvm_value = cast_obj_addr;
 }
@@ -231,11 +229,13 @@ void Codegen_visitor::visit(New_array_op_node* new_array_op_node_ptr) {
   new_array_op_node_ptr->array_size->accept(*this);
   auto array_size = frame.return_llvm_value;
   auto element_type = new_array_op_node_ptr->alloc_obj_type->expr_type.value();
-  auto arr_addr = llvm_driver_.alloc_array(array_size, element_type);
+  // we need to cast i32 arr_index to i64
+  auto cast_arr_size = llvm_driver_.builder.CreateIntCast(array_size, llvm_driver_.builder.getInt64Ty(), false);
+  auto arr_addr = llvm_driver_.alloc_array(cast_arr_size, element_type);
   // TODO: check if we need to cast the underlying pointer
 //  // cast the underlying pointer, namely the `elements' pointer of struct.decaf_arr
-//  auto struct_index = llvm_driver_.create_llvm_constant_signed_int(0);
-//  auto field_index = llvm_driver_.create_llvm_constant_signed_int(1);
+//  auto struct_index = llvm_driver_.create_llvm_constant_signed_int32(0);
+//  auto field_index = llvm_driver_.create_llvm_constant_signed_int32(1);
 //  auto underlying_arr_addr = llvm_driver_.builder.CreateGEP(arr_addr, {struct_index, field_index});
 //  auto cast_value =
 //      llvm_driver_.builder.CreatePointerCast(underlying_arr_addr,
@@ -256,14 +256,12 @@ void Codegen_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   }
 
   auto obj_addr = get_llvm_value(dot_op_node_ptr->obj);
-  auto struct_index = llvm_driver_.create_llvm_constant_signed_int(0);
   auto cid = dot_op_node_ptr->obj->expr_type.value();
   auto vid = dot_op_node_ptr->member_id->ident_name;
   // TODO: use dot_op_node_ptr->member_id->uid
   auto uid = llvm_driver_.try_fetch_member_variable_uid(cid, vid);
   ss_assert(uid >= 0);
-  auto field_index = llvm_driver_.create_llvm_constant_signed_int(uid);
-  auto member_addr = llvm_driver_.builder.CreateGEP(obj_addr, {struct_index, field_index});
+  auto member_addr = llvm_driver_.builder.CreateStructGEP(obj_addr, uid);
   if (frame.is_rval) {
     frame.return_llvm_value = llvm_driver_.builder.CreateLoad(member_addr);
   } else {
@@ -292,7 +290,7 @@ void Codegen_visitor::visit(Index_op_node* index_op_node_ptr) {
 
 void Codegen_visitor::visit(Int_const_node* int_const_node_ptr) {
   ss_assert(frame.is_rval);
-  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int(int_const_node_ptr->val);
+  frame.return_llvm_value = llvm_driver_.create_llvm_constant_signed_int32(int_const_node_ptr->val);
 }
 
 void Codegen_visitor::visit(Double_const_node* double_const_node_ptr) {

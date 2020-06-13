@@ -74,22 +74,24 @@ class llvm_driver {
     return data_layout->getTypeAllocSize(get_llvm_type(type));
   }
 
+  auto create_llvm_constant_signed_int32(int val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(32, val, true));
+  }
+
+  auto create_llvm_signed_int64(llvm::TypeSize val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(64, val, true));
+  }
+
   llvm::Value* alloc_object(const var_type& obj_type) {
     // make sure that we are not allocating an array type
     assert(!is_array_type(obj_type).has_value());
-    auto obj_size =
-        llvm::ConstantInt::get(current_context, llvm::APInt(32, get_sizeof(obj_type), true));
+    auto obj_size = create_llvm_signed_int64(get_sizeof(obj_type));
     return builder.CreateCall(builtin_funcs["alloc_obj"], {obj_size});
   }
 
   llvm::Value* alloc_array(llvm::Value* array_size, const var_type& element_type) {
-    auto element_size =
-        llvm::ConstantInt::get(current_context, llvm::APInt(32, get_sizeof(element_type), true));
+    auto element_size = create_llvm_signed_int64(get_sizeof(element_type));
     return builder.CreateCall(builtin_funcs["alloc_arr"], {array_size, element_size});
-  }
-
-  auto create_llvm_constant_signed_int(int val) {
-    return llvm::ConstantInt::get(current_context, llvm::APInt(32, val, true));
   }
 
   void create_member_variable_gep(const class_id& cid,
@@ -110,8 +112,8 @@ class llvm_driver {
       }
       field_index -= last_uid_inherited;
       auto member_var_addr =
-          builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int(0),
-                                        create_llvm_constant_signed_int(field_index)});
+          builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int32(0),
+                                        create_llvm_constant_signed_int32(field_index)});
       // set llvm::Value*
       func_scope_ptr->var_uid_to_llvm_value[var_uid] = member_var_addr;
       return;
