@@ -244,9 +244,15 @@ void llvm_driver::init_all_virtual_tables() {
     auto v_entry_arr_t = llvm::ArrayType::get(v_entry_t, entry_num);
     auto v_entry_arr = llvm::ConstantArray::get(v_entry_arr_t, v_entry_arr_val);
     // the type of the two member variables of v_table is int32 and v_entry*
-    // TODO: we need to convert v_entry array type to v_entry pointer type
+    // we need to convert v_entry array type to v_entry pointer type
+    auto v_entry_arr_var = new llvm::GlobalVariable(*current_module,
+                                                    v_entry_arr_t,
+                                                    true,
+                                                    llvm::GlobalVariable::PrivateLinkage, v_entry_arr,
+                                                    cid + ".v_entry_array");
+    auto v_entry_ptr = llvm::ConstantExpr::getBitCast(v_entry_arr_var, v_entry_t->getPointerTo());
     auto v_table =
-        llvm::ConstantStruct::get(v_table_t, {builder.getInt64(entry_num), v_entry_arr});
+        llvm::ConstantStruct::get(v_table_t, {builder.getInt64(entry_num), v_entry_ptr});
 
     // declare virtual table as a global variable in llvm IR
     auto var = new llvm::GlobalVariable(*current_module,
