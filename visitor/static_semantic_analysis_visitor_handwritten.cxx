@@ -1,5 +1,7 @@
 #include "build/static_semantic_analysis_visitor.h"
 
+ssize_t scope::next_uid;
+
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
   if (!call_trace.empty() && call_trace.top() == action_type::GET_ARGS_TYPE) {
@@ -30,7 +32,7 @@ void Static_semantic_analysis_visitor::visit(Empty_node* empty_node_ptr) {
 void Static_semantic_analysis_visitor::visit(Ident_node* ident_node_ptr) {
   yylloc_manager y(ident_node_ptr);
   // identifier as an expression
-  std::tie(ident_node_ptr->tid, ident_node_ptr->expr_type) =
+  std::tie(ident_node_ptr->uid, ident_node_ptr->expr_type) =
       current_scope_ptr->lookup(ident_node_ptr->ident_name);
 }
 
@@ -39,28 +41,29 @@ void Static_semantic_analysis_visitor::visit(
   switch (base_type_node_ptr->type) {
     case t_int:
       current_id = "int";
-      return;
+      break;
 
     case t_bool:
       current_id = "bool";
-      return;
+      break;
 
     case t_double:
       current_id = "double";
-      return;
+      break;
 
     case t_string:
       current_id = "string";
-      return;
+      break;
 
     case t_void:
       current_id = "void";
-      return;
+      break;
 
     default:
       current_id = "unknown type code";
-      return;
+      break;
   }
+  base_type_node_ptr->expr_type = current_id;
 }
 
 void Static_semantic_analysis_visitor::visit(
@@ -83,6 +86,13 @@ void Static_semantic_analysis_visitor::visit(
   auto left_type = decl_type(assignment_node_ptr->LHS);
   auto right_type = decl_type(assignment_node_ptr->RHS);
   if (left_type != right_type) {
+    auto left_base_type = is_array_type(left_type);
+    auto right_base_type = is_array_type(right_type);
+    ss_assert(!(left_base_type.has_value() && right_base_type.has_value()), "LHS type ", left_type, " and RHS type ",
+              right_type, " mismatch");
+    if (left_base_type.has_value()) {
+      // if both side are array type
+    }
     // the grammar of decaf guarantees that left_type != "null"
     // check whether the RHS is the derived class of LHS
     if (right_type != "null") {
@@ -215,15 +225,17 @@ void Static_semantic_analysis_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   yylloc_manager y(dot_op_node_ptr);
   auto cid = decl_type(dot_op_node_ptr->obj);
   auto& ce = global_symbol_table.try_fetch_class(cid);
-  dot_op_node_ptr->expr_type =
+  ssize_t uid;
+  std::tie(uid, dot_op_node_ptr->expr_type) =
       ce.try_fetch_variable(dot_op_node_ptr->member_id->ident_name);
+  dot_op_node_ptr->member_id->uid = uid;
 }
 
 void Static_semantic_analysis_visitor::visit(Index_op_node* index_op_node_ptr) {
   yylloc_manager y(index_op_node_ptr);
   auto array_type = decl_type(index_op_node_ptr->array);
-  auto pos = array_type.find('[');
-  ss_assert(pos != string::npos, "The left of index is not an array type");
+  auto base_type = is_array_type(array_type);
+  ss_assert(base_type.has_value(), "The left of index is not an array type");
   auto index_type = decl_type(index_op_node_ptr->index_expr);
   ss_assert(index_type == "int",
             "Index of an array should be \"int\" rather than ", index_type);
@@ -385,6 +397,7 @@ void Static_semantic_analysis_visitor::visit(
     PrintStmt_node* printstmt_node_ptr) {
   yylloc_manager y(printstmt_node_ptr);
   auto& type_list = decl_type_list(printstmt_node_ptr->expr_list);
+  // TODO: use is base_type
   unordered_set<string> base_type = {"int", "double", "string", "bool"};
   for (const auto& vt : type_list) {
     ss_assert(base_type.count(vt) != 0, "Cannot print non-base type");

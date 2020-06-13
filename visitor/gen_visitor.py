@@ -28,13 +28,11 @@ def gen(args):
   # function to generate arbitrary visitor subclass
   with open(args.src, 'w') as src, \
           open('visitor/visitor_tmpl.h', 'r') as vis, \
-          open('visitor/'+args.class_name+'_tmpl.cxx', 'r') as src_tmpl, \
           open('visitor/'+args.class_name+'_tmpl.h', 'r') as header_tmpl, \
           open('ast/ast_tmpl.h', 'r') as ast_tmpl, \
           open(args.header, 'w') as header:
     class_name = args.class_name
     class_name = class_name[0].upper() + class_name[1:]
-    src_tmpl = Template(src_tmpl.read().replace('//', ''))
     header_tmpl = Template(header_tmpl.read().replace('///', ''))
 
     ast_tmpl = ast_tmpl.read()
@@ -49,7 +47,7 @@ def gen(args):
       function_def += '\nvoid {0}::visit({1}* {2}) {{\n}}\n'.format(
           class_name, subclass_name, subclass_name.lower() + '_ptr')
     header.write(header_tmpl.substitute(decl=function_decl))
-    src.write(src_tmpl.substitute(decl=function_def))
+    src.write('#include "build/{0}.h"\n\n{1}'.format(args.class_name, function_def))
 
 
 if __name__ == "__main__":
