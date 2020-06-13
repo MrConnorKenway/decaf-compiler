@@ -49,7 +49,9 @@ void Codegen_visitor::visit(Ident_node* ident_node_ptr) {
   auto value = frame.current_scope_ptr->lookup_llvm_value(ident_node_ptr->uid);
   frame.return_llvm_value = value;
   if (frame.get_value_flag) {
-    frame.return_llvm_value = llvm_driver_.builder.CreateLoad(frame.return_llvm_value);
+    frame.return_llvm_value =
+        llvm_driver_.builder.CreateLoad(llvm_driver_.get_llvm_type(ident_node_ptr->expr_type.value()),
+                                        frame.return_llvm_value);
   }
 }
 
@@ -267,7 +269,8 @@ void Codegen_visitor::visit(Dot_op_node* dot_op_node_ptr) {
   }
 
   if (frame.get_value_flag) {
-    frame.return_llvm_value = llvm_driver_.builder.CreateLoad(member_addr);
+    frame.return_llvm_value =
+        llvm_driver_.builder.CreateLoad(llvm_driver_.get_llvm_type(dot_op_node_ptr->expr_type.value()), member_addr);
   } else {
     frame.return_llvm_value = member_addr;
   }
