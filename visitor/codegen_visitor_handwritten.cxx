@@ -218,9 +218,11 @@ void Codegen_visitor::visit(New_op_node* new_op_node_ptr) {
   // cast it to corresponding type
   auto cast_obj_addr = llvm_driver_.builder.CreatePointerCast(raw_obj_addr, llvm_driver_.get_llvm_type(type));
 
-  // pass virtual table pointer to class
-  auto mem_addr = llvm_driver_.builder.CreateStructGEP(cast_obj_addr, 0);
-  llvm_driver_.builder.CreateStore(llvm_driver_.get_virtual_table_ptr(type), mem_addr);
+  // pass virtual table pointer to allocated object
+  // the first member variable of any object is v_ptr
+  auto v_ptr_addr =
+      llvm_driver_.builder.CreatePointerCast(cast_obj_addr, llvm_driver_.v_table_t->getPointerTo()->getPointerTo());
+  llvm_driver_.builder.CreateStore(llvm_driver_.get_virtual_table_ptr(type), v_ptr_addr);
   frame.return_llvm_value = cast_obj_addr;
 }
 
