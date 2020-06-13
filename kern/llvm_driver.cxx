@@ -72,12 +72,12 @@ void llvm_driver::gen_llvm_ir() {
       auto& fe = ce.func_table.at("main");
       assert(fe.func_body.has_value());
       auto block_ptr = fe.func_body.value();
-      auto main_func_type = llvm::FunctionType::get(builtin_types["int"], {}, false);
+      auto main_func_type = llvm::FunctionType::get(builtin_types["void"], {}, false);
       auto main_func =
           llvm::Function::Create(main_func_type, llvm::Function::ExternalLinkage, "main", current_module.get());
       auto basic_block = llvm::BasicBlock::Create(current_context, "entry", main_func);
       builder.SetInsertPoint(basic_block);
-      Frame f = {nullptr, block_ptr->scope_ptr};
+      Frame f = {block_ptr->scope_ptr};
       Codegen_visitor cv(*this, f, eid);
       cv.visit(block_ptr);
 
@@ -204,7 +204,7 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
 
   // now all the necessary initialization (including class member variables
   // and function arguments) has finished
-  Frame f = {nullptr, block_ptr->scope_ptr};
+  Frame f = {block_ptr->scope_ptr};
   Codegen_visitor cv(*this, f, cid);
   cv.visit(block_ptr);
 
