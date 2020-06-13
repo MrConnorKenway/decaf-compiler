@@ -128,8 +128,7 @@ void Static_semantic_analysis_visitor::visit(
                 " and RHS type ", right_type, " mismatch");
       ss_assert(
           left_type == "double" || left_type == "int" || left_type == "string",
-          "The type of left operand ", left_type, " does not support ",
-          binary_expr_node_ptr->op, " operation");
+          "The type of left operand ", left_type, " does not support '+' operation");
       binary_expr_node_ptr->expr_type = left_type;
       break;
     }
@@ -140,8 +139,7 @@ void Static_semantic_analysis_visitor::visit(
       ss_assert(left_type == right_type, "LHS type ", left_type,
                 " and RHS type ", right_type, " mismatch");
       ss_assert(left_type == "double" || left_type == "int",
-                "The type of left operand ", left_type, " does not support ",
-                binary_expr_node_ptr->op, " operation");
+                "The type of left operand ", left_type, " does not support '-' operation");
       binary_expr_node_ptr->expr_type = left_type;
       break;
     }
