@@ -74,7 +74,7 @@ decaf_arr* alloc_arr(size_t len, size_t element_size) {
   decaf_arr* arr = (decaf_arr*) malloc(sizeof(decaf_arr));
   arr->len = len;
   arr->element_size = element_size;
-  arr->elements = (obj_ref*) malloc(len * element_size);
+  arr->elements = (obj_ref*) malloc(len * sizeof(obj_ref));
   return arr;
 }
 
