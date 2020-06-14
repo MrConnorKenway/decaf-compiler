@@ -30,7 +30,11 @@ typedef struct {
 } v_table;
 
 void print_str(decaf_str* str) {
-  printf("(%zd)%s", str->len, str->c_str);
+  printf("%s", str->c_str);
+}
+
+void print_str_literal(char *str) {
+  printf("%s", str);
 }
 
 void print_bool(bool a_bool) {
