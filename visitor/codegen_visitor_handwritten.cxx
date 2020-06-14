@@ -361,6 +361,9 @@ void Codegen_visitor::visit(Double_const_node* double_const_node_ptr) {
 }
 
 void Codegen_visitor::visit(Str_const_node* str_const_node_ptr) {
+  ss_assert(frame.get_value_flag);
+  auto str_literal_addr = llvm_driver_.builder.CreateGlobalString(str_const_node_ptr->val);
+  return_llvm_value = llvm_driver_.builder.CreateStructGEP(str_literal_addr, 0);
 }
 
 void Codegen_visitor::visit(Bool_const_node* bool_const_node_ptr) {
@@ -615,6 +618,8 @@ void Codegen_visitor::visit(PrintStmt_node* printstmt_node_ptr) {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_bool"], arg);
     } else if (arg_type == "string") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_str"], arg);
+    } else if (arg_type == "string literal") {
+      llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_str_literal"], arg);
     } else {
       ss_assert(false);
     }
