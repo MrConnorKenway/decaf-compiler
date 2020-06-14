@@ -96,7 +96,7 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
   } else {
     llvm_driver_.builder.CreateStore(right_value, left_addr);
   }
-  return_llvm_value = get_llvm_value(lhs);
+  return_llvm_value = llvm_driver_.builder.CreateLoad(llvm_driver_.get_llvm_type(left_type), left_addr);
 }
 
 void Codegen_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
