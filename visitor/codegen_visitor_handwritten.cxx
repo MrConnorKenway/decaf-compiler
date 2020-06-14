@@ -88,7 +88,11 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
       auto null_value =
           llvm_driver_.builder.CreateIntToPtr(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(null_value, left_addr);
-    } else {
+    }  else if (right_type == "string literal") {
+      auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], right_value);
+      llvm_driver_.builder.CreateStore(str_addr, left_addr);
+    }
+    else {
       // convert from derived class to base class
       auto cast_value = llvm_driver_.builder.CreatePointerCast(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(cast_value, left_addr);
@@ -413,6 +417,10 @@ void Codegen_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
   auto return_type = returnstmt_node_ptr->expr_optional->expr_type.value();
   if (return_type.empty() && dynamic_cast<Empty_node*>(returnstmt_node_ptr->expr_optional) != nullptr) {
     llvm_driver_.builder.CreateRetVoid();
+  } else if (return_type == "string literal") {
+    auto string_literal_addr = get_llvm_value(returnstmt_node_ptr->expr_optional);
+    auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], string_literal_addr);
+    llvm_driver_.builder.CreateRet(str_addr);
   } else {
     llvm_driver_.builder.CreateRet(get_llvm_value(returnstmt_node_ptr->expr_optional));
   }

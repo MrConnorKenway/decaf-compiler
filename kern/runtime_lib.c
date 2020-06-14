@@ -74,6 +74,14 @@ void* alloc_obj(size_t obj_size) {
   return malloc(obj_size);
 }
 
+decaf_str* create_str_from_literal(char* c_str) {
+  decaf_str* str = (decaf_str*) malloc(sizeof(decaf_str));
+  str->len = strlen(c_str);
+  str->c_str = (char*) malloc(str->len);
+  str->c_str = strcpy(str->c_str, c_str);
+  return str;
+}
+
 decaf_arr* alloc_arr(size_t len, size_t element_size) {
   decaf_arr* arr = (decaf_arr*) malloc(sizeof(decaf_arr));
   arr->len = len;

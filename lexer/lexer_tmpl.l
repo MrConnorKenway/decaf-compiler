@@ -60,6 +60,7 @@ TYPE_ID [A-Z][A-Za-z0-9_]*
 <STR_LITERAL>\" {
     yylval.Str_const_node_ptr_t = new Str_const_node(strbuf);
     yylval.Str_const_node_ptr_t->yylloc_ptr = new YYLTYPE(yylloc);
+    strbuf.clear();
     BEGIN(INITIAL);
     return c_string;
 }

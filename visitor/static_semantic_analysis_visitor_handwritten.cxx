@@ -274,7 +274,7 @@ void Static_semantic_analysis_visitor::visit(
 
 void Static_semantic_analysis_visitor::visit(
     Str_const_node* str_const_node_ptr) {
-  str_const_node_ptr->expr_type = "string";
+  str_const_node_ptr->expr_type = "string literal";
 }
 
 void Static_semantic_analysis_visitor::visit(
@@ -323,9 +323,12 @@ void Static_semantic_analysis_visitor::visit(
   if (return_type.empty() && dynamic_cast<Empty_node*>(returnstmt_node_ptr->expr_optional) != nullptr) {
     return_type = "void";
   }
-  ss_assert(return_type == global_symbol_table.try_fetch_func(current_class_id, current_func_id).return_type,
-            "Return type mismatch function ", current_func_id, " in class ",
-            current_class_id);
+  auto& func_return_type = global_symbol_table.try_fetch_func(current_class_id, current_func_id).return_type;
+  if (return_type != func_return_type) {
+    ss_assert(return_type == "string literal" && func_return_type == "string",
+              "Return type mismatch function ", current_func_id, " in class ",
+              current_class_id);
+  }
 }
 
 void Static_semantic_analysis_visitor::visit(
@@ -418,7 +421,7 @@ void Static_semantic_analysis_visitor::visit(
   yylloc_manager y(printstmt_node_ptr);
   auto& type_list = decl_type_list(printstmt_node_ptr->expr_list);
   // TODO: use is base_type
-  unordered_set<string> base_type = {"int", "double", "string", "bool"};
+  unordered_set<string> base_type = {"int", "double", "string", "bool", "string literal"};
   for (const auto& vt : type_list) {
     ss_assert(base_type.count(vt) != 0, "Cannot print non-base type");
   }
