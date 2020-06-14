@@ -111,73 +111,123 @@ void Codegen_visitor::visit(Binary_expr_node* binary_expr_node_ptr) {
   auto left_type = llvm_driver_.get_llvm_type(lhs->expr_type.value());
   auto right_type = llvm_driver_.get_llvm_type(rhs->expr_type.value());
   decltype(return_llvm_value) rt_value;
-  switch (binary_expr_node_ptr->op) {
-    case '+': {
-      if (lhs->expr_type.value() == "string") {
-        // TODO: implement string cat
-        auto func = llvm_driver_.builtin_funcs["string_cat"];
-        assert(func);
-        rt_value = llvm_driver_.builder.CreateCall(func, {left_value, right_value});
-      } else {
-        rt_value = llvm_driver_.builder.CreateAdd(left_value, right_value);
+  if (lhs->expr_type.value() == "double") {
+    switch (binary_expr_node_ptr->op) {
+      case '+': {
+        rt_value = llvm_driver_.builder.CreateFAdd(left_value, right_value);
+        break;
       }
-      break;
-    }
-    case '%': {
-      rt_value = llvm_driver_.builder.CreateSRem(left_value, right_value);
-      break;
-    }
-    case '-': {
-      rt_value = llvm_driver_.builder.CreateSub(left_value, right_value);
-      break;
-    }
-    case '*': {
-      rt_value = llvm_driver_.builder.CreateMul(left_value, right_value);
-      break;
-    }
-    case '/': {
-      rt_value = llvm_driver_.builder.CreateSDiv(left_value, right_value);
-      break;
-    }
-    case '<': {
-      rt_value = llvm_driver_.builder.CreateICmpSLT(left_value, right_value);
-      break;
-    }
-    case '>': {
-      rt_value = llvm_driver_.builder.CreateICmpSGT(left_value, right_value);
-      break;
-    }
-    case t_greater_eq: {
-      rt_value = llvm_driver_.builder.CreateICmpSGE(left_value, right_value);
-      break;
-    }
-    case t_less_eq: {
-      rt_value = llvm_driver_.builder.CreateICmpSLE(left_value, right_value);
-      break;
-    }
+      case '%': {
+        rt_value = llvm_driver_.builder.CreateSRem(left_value, right_value);
+        break;
+      }
+      case '-': {
+        rt_value = llvm_driver_.builder.CreateFSub(left_value, right_value);
+        break;
+      }
+      case '*': {
+        rt_value = llvm_driver_.builder.CreateFMul(left_value, right_value);
+        break;
+      }
+      case '/': {
+        rt_value = llvm_driver_.builder.CreateFDiv(left_value, right_value);
+        break;
+      }
+      case '<': {
+        rt_value = llvm_driver_.builder.CreateFCmpOLT(left_value, right_value);
+        break;
+      }
+      case '>': {
+        rt_value = llvm_driver_.builder.CreateFCmpOGT(left_value, right_value);
+        break;
+      }
+      case t_less_eq: {
+        rt_value = llvm_driver_.builder.CreateFCmpOLE(left_value, right_value);
+        break;
+      }
+      case t_greater_eq: {
+        rt_value = llvm_driver_.builder.CreateFCmpOGE(left_value, right_value);
+        break;
+      }
 
-    case t_not_eq:
-    case t_eq: {
-      if (llvm_driver_.user_defined_types.count(lhs->expr_type.value()) != 0) {
-        // if is user defined type, then we check if they are pointing to
-        // the same address
-        left_value = llvm_driver_.get_pointer_value(left_value);
-        right_value = llvm_driver_.get_pointer_value(right_value);
+      case t_not_eq: {
+        rt_value = llvm_driver_.builder.CreateFCmpONE(left_value, right_value);
+        break;
       }
-      if (binary_expr_node_ptr->op == t_eq) {
-        rt_value = llvm_driver_.builder.CreateICmpEQ(left_value, right_value);
-      } else {
-        rt_value = llvm_driver_.builder.CreateICmpNE(left_value, right_value);
+      case t_eq: {
+        rt_value = llvm_driver_.builder.CreateFCmpOEQ(left_value, right_value);
+        break;
       }
-      break;
     }
-    case t_and: {
-      rt_value = llvm_driver_.builder.CreateAnd(left_value, right_value);
-      break;
-    }
-    case t_or: {
-      rt_value = llvm_driver_.builder.CreateOr(left_value, right_value);
-      break;
+  } else {
+    switch (binary_expr_node_ptr->op) {
+      case '+': {
+        if (lhs->expr_type.value() == "string") {
+          // TODO: implement string cat
+          auto func = llvm_driver_.builtin_funcs["string_cat"];
+          assert(func);
+          rt_value = llvm_driver_.builder.CreateCall(func, {left_value, right_value});
+        } else {
+          rt_value = llvm_driver_.builder.CreateAdd(left_value, right_value);
+        }
+        break;
+      }
+      case '%': {
+        rt_value = llvm_driver_.builder.CreateSRem(left_value, right_value);
+        break;
+      }
+      case '-': {
+        rt_value = llvm_driver_.builder.CreateSub(left_value, right_value);
+        break;
+      }
+      case '*': {
+        rt_value = llvm_driver_.builder.CreateMul(left_value, right_value);
+        break;
+      }
+      case '/': {
+        rt_value = llvm_driver_.builder.CreateSDiv(left_value, right_value);
+        break;
+      }
+      case '<': {
+        rt_value = llvm_driver_.builder.CreateICmpSLT(left_value, right_value);
+        break;
+      }
+      case '>': {
+        rt_value = llvm_driver_.builder.CreateICmpSGT(left_value, right_value);
+        break;
+      }
+      case t_greater_eq: {
+        rt_value = llvm_driver_.builder.CreateICmpSGE(left_value, right_value);
+        break;
+      }
+      case t_less_eq: {
+        rt_value = llvm_driver_.builder.CreateICmpSLE(left_value, right_value);
+        break;
+      }
+
+      case t_not_eq:
+      case t_eq: {
+        if (llvm_driver_.user_defined_types.count(lhs->expr_type.value()) != 0) {
+          // if is user defined type, then we check if they are pointing to
+          // the same address
+          left_value = llvm_driver_.get_pointer_value(left_value);
+          right_value = llvm_driver_.get_pointer_value(right_value);
+        }
+        if (binary_expr_node_ptr->op == t_eq) {
+          rt_value = llvm_driver_.builder.CreateICmpEQ(left_value, right_value);
+        } else {
+          rt_value = llvm_driver_.builder.CreateICmpNE(left_value, right_value);
+        }
+        break;
+      }
+      case t_and: {
+        rt_value = llvm_driver_.builder.CreateAnd(left_value, right_value);
+        break;
+      }
+      case t_or: {
+        rt_value = llvm_driver_.builder.CreateOr(left_value, right_value);
+        break;
+      }
     }
   }
 
