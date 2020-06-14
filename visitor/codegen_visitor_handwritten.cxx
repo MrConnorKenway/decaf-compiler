@@ -88,7 +88,11 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
       auto null_value =
           llvm_driver_.builder.CreateIntToPtr(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(null_value, left_addr);
-    } else {
+    }  else if (right_type == "string literal") {
+      auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], right_value);
+      llvm_driver_.builder.CreateStore(str_addr, left_addr);
+    }
+    else {
       // convert from derived class to base class
       auto cast_value = llvm_driver_.builder.CreatePointerCast(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(cast_value, left_addr);
@@ -361,6 +365,9 @@ void Codegen_visitor::visit(Double_const_node* double_const_node_ptr) {
 }
 
 void Codegen_visitor::visit(Str_const_node* str_const_node_ptr) {
+  ss_assert(frame.get_value_flag);
+  auto str_literal_addr = llvm_driver_.builder.CreateGlobalString(str_const_node_ptr->val);
+  return_llvm_value = llvm_driver_.builder.CreateStructGEP(str_literal_addr, 0);
 }
 
 void Codegen_visitor::visit(Bool_const_node* bool_const_node_ptr) {
@@ -410,6 +417,10 @@ void Codegen_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
   auto return_type = returnstmt_node_ptr->expr_optional->expr_type.value();
   if (return_type.empty() && dynamic_cast<Empty_node*>(returnstmt_node_ptr->expr_optional) != nullptr) {
     llvm_driver_.builder.CreateRetVoid();
+  } else if (return_type == "string literal") {
+    auto string_literal_addr = get_llvm_value(returnstmt_node_ptr->expr_optional);
+    auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], string_literal_addr);
+    llvm_driver_.builder.CreateRet(str_addr);
   } else {
     llvm_driver_.builder.CreateRet(get_llvm_value(returnstmt_node_ptr->expr_optional));
   }
@@ -615,6 +626,8 @@ void Codegen_visitor::visit(PrintStmt_node* printstmt_node_ptr) {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_bool"], arg);
     } else if (arg_type == "string") {
       llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_str"], arg);
+    } else if (arg_type == "string literal") {
+      llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["print_str_literal"], arg);
     } else {
       ss_assert(false);
     }

@@ -45,6 +45,9 @@ class Static_semantic_analysis_visitor : public Visitor {
     return list_node_ptr->elements_type_list.value();
   }
 
+  bool is_same_type(const var_type& left_type, const var_type& right_type);
+  bool is_derived_from(const var_type& derived_type, const var_type& base_type);
+
   Static_semantic_analysis_visitor(symbol_table& st, const class_entry& ce,
                                    string cid)
       : global_symbol_table(st),

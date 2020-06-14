@@ -1,19 +1,31 @@
-class c {
-   c x;
-
-   public int[] y()	{ return new int[10]; }
-
-   public void m () {
-      x.y()[1];
+class Main {
+    void main() {
+        int[][][] a;
+        int i;
+        int j;
+        int k;
+        int cnt;
+        cnt = 0;
+        int length;
+        length = 4;
+        a = NewArray(length, int[][]);
+        for (i = 0; i < length; i = i + 1) {
+            a[i] = NewArray(length, int[]);
+            for (j = 0; j < length; j = j + 1) {
+                a[i][j] = NewArray(length, int);
+                for (k = 0; k < length; k = k + 1) {
+                    a[i][j][k] = cnt;
+                    cnt = cnt + 1;
+                }
+            }
+        }
+        for (i = 0; i < length; i = i + 1) {
+            for (j = 0; j < length; j = j + 1) {
+                for (k = 0; k < length; k = k + 1) {
+                    Print(a[i][j][k]);
+                }
+            }
+        }
+        a[5][5];
     }
-
-   public int n() {
-      if (true) { }
-      else {
-	 return 1;
-       }
-    }
-
-   public static void main() { }
-
 }

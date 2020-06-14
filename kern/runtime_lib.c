@@ -30,7 +30,11 @@ typedef struct {
 } v_table;
 
 void print_str(decaf_str* str) {
-  printf("(%zd)%s", str->len, str->c_str);
+  printf("%s", str->c_str);
+}
+
+void print_str_literal(char *str) {
+  printf("%s", str);
 }
 
 void print_bool(bool a_bool) {
@@ -68,6 +72,14 @@ void validate_access(decaf_arr* arr, size_t i) {
 
 void* alloc_obj(size_t obj_size) {
   return malloc(obj_size);
+}
+
+decaf_str* create_str_from_literal(char* c_str) {
+  decaf_str* str = (decaf_str*) malloc(sizeof(decaf_str));
+  str->len = strlen(c_str);
+  str->c_str = (char*) malloc(str->len);
+  str->c_str = strcpy(str->c_str, c_str);
+  return str;
 }
 
 decaf_arr* alloc_arr(size_t len, size_t element_size) {

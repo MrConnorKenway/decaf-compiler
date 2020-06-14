@@ -1,0 +1,44 @@
+class NodeExt extends Node {
+  int y;
+  void f() {
+    Print(y);
+  }
+}
+
+class Node {
+  int x;
+  Node next;
+  void f() {
+    Print(x);
+  }
+}
+
+class Main {
+  int main() {
+    Node list;
+    Node node;
+    Node iter;
+    int i;
+    NodeExt ext;
+    list = null;
+    for(i = 0; i < 100; i = i + 1){
+      if(i % 2 == 0){
+        ext = New(NodeExt);
+        ext.y = -i;
+        node = ext;
+        node.next = list;
+      } else {
+        node = New(Node);
+        node.x = i;
+        node.next = list;
+      }
+      list = node;
+    }
+    iter = list;
+    while(iter != null){
+      iter.f();
+      iter = iter.next;
+    }
+    return 0;
+  }
+}

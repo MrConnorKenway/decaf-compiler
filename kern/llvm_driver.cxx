@@ -129,7 +129,10 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
 
   constexpr std::string_view
       extern_funcs[] =
-      {"print_str", "print_bool", "print_int", "print_double", "read_int", "read_line", "alloc_obj", "validate_access",
+      {"print_str", "print_str_literal", "print_bool", "print_int", "print_double", "read_int", "read_line",
+       "alloc_obj",
+       "create_str_from_literal",
+       "validate_access",
        "alloc_arr",
        "lookup_fptr"};
 
