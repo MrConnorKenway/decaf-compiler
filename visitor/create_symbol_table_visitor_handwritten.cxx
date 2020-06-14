@@ -173,6 +173,8 @@ void Create_symbol_table_visitor::visit(
   if (tmp_id == "main" && current_class_entry.classdecl_node_ptr->type_id->type_ident_name == "Main") {
     ss_assert(dynamic_cast<List_node*>(functiondecl_node_ptr->formals)->list.empty(),
               "Function \"main\" of class \"Main\" should not have arguments");
+    ss_assert(current_func_entry.return_type == "int",
+              "The return type of function \"main\" of class \"Main\" should be int");
   }
 
   functiondecl_node_ptr->formals->accept(*this);

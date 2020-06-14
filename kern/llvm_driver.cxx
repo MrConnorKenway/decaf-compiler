@@ -72,7 +72,7 @@ void llvm_driver::gen_llvm_ir() {
       auto& fe = ce.func_table.at("main");
       assert(fe.func_body.has_value());
       auto block_ptr = fe.func_body.value();
-      auto main_func_type = llvm::FunctionType::get(builtin_types["void"], {}, false);
+      auto main_func_type = llvm::FunctionType::get(builtin_types["int"], {}, false);
       auto main_func =
           llvm::Function::Create(main_func_type, llvm::Function::ExternalLinkage, "main", current_module.get());
       auto basic_block = llvm::BasicBlock::Create(current_context, "entry", main_func);
@@ -81,7 +81,7 @@ void llvm_driver::gen_llvm_ir() {
       Codegen_visitor cv(*this, f, eid);
       cv.visit(block_ptr);
 
-      builder.CreateRetVoid();
+      builder.CreateRet(create_llvm_constant_signed_int32(0));
       continue;
     }
 
