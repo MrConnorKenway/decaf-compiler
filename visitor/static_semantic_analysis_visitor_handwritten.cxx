@@ -2,6 +2,48 @@
 
 ssize_t scope::next_uid;
 
+bool Static_semantic_analysis_visitor::is_derived_from(const var_type & derived_type, const var_type & base_type) {
+  bool is_derived = false;
+  auto& right_ce = global_symbol_table.try_fetch_class(derived_type);
+  while (!right_ce.parent_class_id.empty()) {
+    if (right_ce.parent_class_id == base_type) {
+      is_derived = true;
+      break;
+    }
+    right_ce =
+        global_symbol_table.try_fetch_class(right_ce.parent_class_id);
+  }
+  return is_derived;
+}
+
+bool Static_semantic_analysis_visitor::is_same_type(const var_type & left_type, const var_type & right_type) {
+  if (left_type != right_type) {
+    if (left_type == "string" && right_type == "string literal") {
+      return true;
+    }
+    auto left_base_type = is_array_type(left_type);
+    auto right_base_type = is_array_type(right_type);
+    if (left_base_type.has_value() && right_base_type.has_value()) {
+      // if both side are array type
+      return is_same_type(left_type.substr(0, left_type.size() - 2),
+                          right_type.substr(0, right_type.size() - 2));
+    }
+    if (left_base_type.has_value() || right_base_type.has_value()) {
+      return right_type == "null";
+    }
+    // then both side must be non-array type
+    // the grammar of decaf guarantees that left_type != "null"
+    // check whether the RHS is the derived class of LHS
+    if (right_type != "null") {
+      return is_derived_from(right_type, left_type);
+    } else {
+      return left_type != "int" && left_type != "double" && left_type != "string" && left_type != "bool";
+    }
+  } else {
+    return true;
+  }
+}
+
 void Static_semantic_analysis_visitor::visit(List_node* list_node_ptr) {
   yylloc_manager y(list_node_ptr);
   if (!call_trace.empty() && call_trace.top() == action_type::GET_ARGS_TYPE) {
@@ -85,35 +127,8 @@ void Static_semantic_analysis_visitor::visit(
   yylloc_manager y(assignment_node_ptr);
   auto left_type = decl_type(assignment_node_ptr->LHS);
   auto right_type = decl_type(assignment_node_ptr->RHS);
-  if (left_type != right_type) {
-    auto left_base_type = is_array_type(left_type);
-    auto right_base_type = is_array_type(right_type);
-    ss_assert(!(left_base_type.has_value() && right_base_type.has_value()), "LHS type ", left_type, " and RHS type ",
-              right_type, " mismatch");
-    if (left_base_type.has_value()) {
-      // if both side are array type
-    }
-    // the grammar of decaf guarantees that left_type != "null"
-    // check whether the RHS is the derived class of LHS
-    if (right_type != "null") {
-      bool is_derived = false;
-      auto& right_ce = global_symbol_table.try_fetch_class(right_type);
-      while (!right_ce.parent_class_id.empty()) {
-        if (right_ce.parent_class_id == left_type) {
-          is_derived = true;
-          break;
-        }
-        right_ce =
-            global_symbol_table.try_fetch_class(right_ce.parent_class_id);
-      }
-      ss_assert(is_derived, "LHS type ", left_type, " and RHS type ",
-                right_type, " mismatch");
-    } else {
-      ss_assert(left_type != "int" && left_type != "double" &&
-                    left_type != "string" && left_type != "bool",
-                "LHS type ", left_type, " and RHS type null mismatch");
-    }
-  }
+  ss_assert(is_same_type(left_type, right_type), "LHS type ", left_type, " and RHS type ",
+            right_type, " mismatch");
   assignment_node_ptr->expr_type = left_type;
 }
 
