@@ -77,11 +77,11 @@ void llvm_driver::gen_llvm_ir() {
           llvm::Function::Create(main_func_type, llvm::Function::ExternalLinkage, "main", current_module.get());
       auto basic_block = llvm::BasicBlock::Create(current_context, "entry", main_func);
       builder.SetInsertPoint(basic_block);
-      Frame f = {nullptr, block_ptr->scope_ptr};
+      Frame f = {block_ptr->scope_ptr};
       Codegen_visitor cv(*this, f, eid);
       cv.visit(block_ptr);
 
-      builder.CreateRetVoid();
+      builder.CreateRet(create_llvm_constant_signed_int32(0));
       continue;
     }
 
@@ -94,7 +94,9 @@ void llvm_driver::gen_llvm_ir() {
     }
   }
 
-  current_module->print(llvm::errs(), nullptr);
+  std::error_code error_code;
+  llvm::raw_fd_ostream output_file("/home/auriaiur/decaf-compiler/build/main.ll", error_code);
+  current_module->print(output_file, nullptr);
 }
 
 llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), global_symbol_table(st) {
@@ -106,11 +108,13 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
 
   decaf_str_t = extern_module->getTypeByName("struct.decaf_str");
   decaf_arr_t = extern_module->getTypeByName("struct.decaf_arr");
+  obj_ref_t = extern_module->getTypeByName("union.obj_ref");
   v_entry_t = extern_module->getTypeByName("struct.v_entry");
   v_table_t = extern_module->getTypeByName("struct.v_table");
 
   assert(decaf_str_t);
   assert(decaf_arr_t);
+  assert(obj_ref_t);
   assert(v_entry_t);
   assert(v_table_t);
 
@@ -141,7 +145,6 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   }
 }
 
-// TODO: do we really need this method?
 void llvm_driver::declare_func(const class_id& cid, const func_id& fid, const func_entry& fe) {
   auto return_type = get_llvm_type(fe.return_type);
   vector<llvm::Type*> params;
@@ -178,9 +181,13 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
       // if param is "this" pointer
       is_this_ptr = false;
       assert(param.getType() == get_llvm_type(cid));
-      for (auto &[vid, _]:ce.inheritance.field_table) {
+      for (auto &[vid, ve]:ce.inheritance.field_table) {
         // create gep instruction in order to access class member variables in function
-        create_member_variable_gep(cid, vid, &param, func_scope_ptr, true);
+        string var_name = cid + ".";
+        var_name += vid;
+        auto[var_uid, _] = ve;
+        func_scope_ptr->var_uid_to_llvm_value[var_uid] =
+            create_member_variable_gep(cid, var_uid, &param, var_name, true);
       }
       func_scope_ptr->var_uid_to_llvm_value[-1] = &param;
       // update uid value, variable whose
@@ -190,14 +197,14 @@ void llvm_driver::define_func(const class_id& cid, const func_id& fid, const fun
     }
 
     // copy the arguments to local llvm registers
-    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr);
+    auto local_var = builder.CreateAlloca(param.getType(), 0, nullptr, "arg");
     builder.CreateStore(&param, local_var);
     func_scope_ptr->var_uid_to_llvm_value[uid++] = local_var;
   }
 
   // now all the necessary initialization (including class member variables
   // and function arguments) has finished
-  Frame f = {nullptr, block_ptr->scope_ptr};
+  Frame f = {block_ptr->scope_ptr};
   Codegen_visitor cv(*this, f, cid);
   cv.visit(block_ptr);
 
@@ -242,9 +249,15 @@ void llvm_driver::init_all_virtual_tables() {
     auto v_entry_arr_t = llvm::ArrayType::get(v_entry_t, entry_num);
     auto v_entry_arr = llvm::ConstantArray::get(v_entry_arr_t, v_entry_arr_val);
     // the type of the two member variables of v_table is int32 and v_entry*
-    // TODO: we need to convert v_entry array type to v_entry pointer type
+    // we need to convert v_entry array type to v_entry pointer type
+    auto v_entry_arr_var = new llvm::GlobalVariable(*current_module,
+                                                    v_entry_arr_t,
+                                                    true,
+                                                    llvm::GlobalVariable::PrivateLinkage, v_entry_arr,
+                                                    cid + ".v_entry_array");
+    auto v_entry_ptr = llvm::ConstantExpr::getBitCast(v_entry_arr_var, v_entry_t->getPointerTo());
     auto v_table =
-        llvm::ConstantStruct::get(v_table_t, {builder.getInt64(entry_num), v_entry_arr});
+        llvm::ConstantStruct::get(v_table_t, {builder.getInt64(entry_num), v_entry_ptr});
 
     // declare virtual table as a global variable in llvm IR
     auto var = new llvm::GlobalVariable(*current_module,

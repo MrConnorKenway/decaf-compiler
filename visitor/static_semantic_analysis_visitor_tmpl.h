@@ -20,9 +20,6 @@ class Static_semantic_analysis_visitor : public Visitor {
   stack<action_type> call_trace;
   ast_node_ptr_t current_loop_node;
   scope* current_scope_ptr;
-  // this scope contains only the variable symbols
-  // of current class
-  scope class_scope;
 
   string visit_and_get_id_of(ast_node_ptr_t node_ptr) {
     current_id = "";

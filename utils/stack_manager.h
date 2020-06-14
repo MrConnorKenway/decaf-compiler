@@ -4,12 +4,13 @@
 #include "llvm/IR/Value.h"
 
 struct Frame {
-  llvm::Value* return_llvm_value{};
   scope* current_scope_ptr{};
-  optional<llvm::BasicBlock*> current_next_bb{};
-  optional<llvm::BasicBlock*> current_bb{};
+  optional<llvm::BasicBlock*> break_dest_bb{};
+  optional<llvm::BasicBlock*> cont_dest_bb{};
   optional<vector<llvm::Value*>> args{};
-  bool is_rval = true;
+  // true if we want to get the value
+  // rather than address
+  bool get_value_flag = true;
 };
 
 class stack_manager {
@@ -22,9 +23,6 @@ class stack_manager {
   }
 
   ~stack_manager() {
-    // handle return value and args specifically
-    old_frame.return_llvm_value = frame.return_llvm_value;
-    old_frame.args = frame.args;
-    frame = old_frame;
+    std::swap(frame, old_frame);
   }
 };

@@ -204,7 +204,12 @@ void Static_semantic_analysis_visitor::visit(
 }
 
 void Static_semantic_analysis_visitor::visit(Read_op_node* read_op_node_ptr) {
-  read_op_node_ptr->expr_type = "void";
+  if (read_op_node_ptr->read_type == t_ReadLine) {
+    read_op_node_ptr->expr_type = "string";
+  } else {
+    ss_assert(read_op_node_ptr->read_type = t_ReadInteger);
+    read_op_node_ptr->expr_type = "int";
+  }
 }
 
 void Static_semantic_analysis_visitor::visit(New_op_node* new_op_node_ptr) {
@@ -215,6 +220,7 @@ void Static_semantic_analysis_visitor::visit(New_op_node* new_op_node_ptr) {
 void Static_semantic_analysis_visitor::visit(
     New_array_op_node* new_array_op_node_ptr) {
   yylloc_manager y(new_array_op_node_ptr);
+  new_array_op_node_ptr->array_size->accept(*this);
   new_array_op_node_ptr->expr_type =
       decl_type(new_array_op_node_ptr->alloc_obj_type) + "[]";
 }

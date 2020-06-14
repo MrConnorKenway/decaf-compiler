@@ -28,6 +28,7 @@ class llvm_driver {
   llvm::StructType* v_table_t;
   llvm::StructType* decaf_str_t;
   llvm::StructType* decaf_arr_t;
+  llvm::StructType* obj_ref_t;
 
   unordered_map<var_type, llvm::Type*> builtin_types;
   unordered_map<var_type, llvm::StructType*> user_defined_types;
@@ -64,40 +65,48 @@ class llvm_driver {
     return uid;
   }
 
-  llvm::AllocaInst* create_alloca_inst(const var_type& type) {
-    return builder.CreateAlloca(get_llvm_type(type), nullptr);
+  llvm::AllocaInst* create_alloca_inst(const var_type& type, const var_id& vid) {
+    return builder.CreateAlloca(get_llvm_type(type), nullptr, vid);
   }
 
   auto get_sizeof(const var_type& type) {
     // use llvm::DataLayout to get the size of a llvm type
     auto data_layout = new llvm::DataLayout(current_module.get());
-    return data_layout->getTypeAllocSize(get_llvm_type(type));
+    assert(user_defined_types.count(type) != 0);
+    // all decaf object is accessed by reference
+    auto obj_type = user_defined_types[type];
+    return data_layout->getTypeAllocSize(obj_type);
+  }
+
+  auto create_llvm_constant_signed_int32(int val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(32, val, true));
+  }
+
+  auto create_llvm_constant_signed_int64(int val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(64, val, true));
+  }
+
+  auto create_llvm_signed_int64(llvm::TypeSize val) {
+    return llvm::ConstantInt::get(current_context, llvm::APInt(64, val, true));
   }
 
   llvm::Value* alloc_object(const var_type& obj_type) {
     // make sure that we are not allocating an array type
     assert(!is_array_type(obj_type).has_value());
-    auto obj_size =
-        llvm::ConstantInt::get(current_context, llvm::APInt(32, get_sizeof(obj_type), true));
+    auto obj_size = create_llvm_signed_int64(get_sizeof(obj_type));
     return builder.CreateCall(builtin_funcs["alloc_obj"], {obj_size});
   }
 
   llvm::Value* alloc_array(llvm::Value* array_size, const var_type& element_type) {
-    auto element_size =
-        llvm::ConstantInt::get(current_context, llvm::APInt(32, get_sizeof(element_type), true));
+    auto element_size = create_llvm_signed_int64(get_sizeof(element_type));
     return builder.CreateCall(builtin_funcs["alloc_arr"], {array_size, element_size});
   }
 
-  auto create_llvm_constant_signed_int(int val) {
-    return llvm::ConstantInt::get(current_context, llvm::APInt(32, val, true));
-  }
-
-  void create_member_variable_gep(const class_id& cid,
-                                  const var_id& vid,
+  auto create_member_variable_gep(const class_id& cid,
+                                  ssize_t var_uid,
                                   llvm::Value* class_ptr,
-                                  scope* func_scope_ptr, bool is_first_call = false) {
+                                  const var_id& var_name, bool is_first_call = false) {
     auto& ce = global_symbol_table.try_fetch_class(cid);
-    auto[var_uid, ignore] = ce.inheritance.field_table.at(vid);
     auto field_index = var_uid;
     // the uid of the last inherited member variable from parent class
     ssize_t last_uid_inherited = ce.inheritance.field_table.size() - ce.field_table.size() - 1;
@@ -110,21 +119,15 @@ class llvm_driver {
       }
       field_index -= last_uid_inherited;
       auto member_var_addr =
-          builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int(0),
-                                        create_llvm_constant_signed_int(field_index)});
-      // set llvm::Value*
-      func_scope_ptr->var_uid_to_llvm_value[var_uid] = member_var_addr;
-      return;
+          builder.CreateGEP(class_ptr, {create_llvm_constant_signed_int32(0),
+                                        create_llvm_constant_signed_int32(field_index)}, var_name);
+      return member_var_addr;
     } else {
       // parent class variable
       // we first find out the class that define this variable
       assert(!ce.parent_class_id.empty());
-      create_member_variable_gep(ce.parent_class_id, vid, class_ptr, func_scope_ptr);
+      return create_member_variable_gep(ce.parent_class_id, var_uid, class_ptr, var_name);
     }
-  }
-
-  static auto create_llvm_null_ptr(llvm::PointerType* ptr_type) {
-    return llvm::ConstantPointerNull::get(ptr_type);
   }
 
   auto get_virtual_table_ptr(const class_id& cid) {

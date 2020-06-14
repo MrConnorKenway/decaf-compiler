@@ -13,6 +13,8 @@ class Codegen_visitor : public Visitor {
 
   llvm_driver& llvm_driver_;
   const class_id& current_cid;
+  llvm::Value* return_llvm_value{};
+  bool unreachable = false;
   Frame frame{};
 
   Codegen_visitor(llvm_driver& ld, Frame& _frame, const class_id& cid)
