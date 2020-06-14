@@ -1,7 +1,19 @@
-
 class Hello {
-  public static void main(String argv[])
-  {
-    IO.putString ("hello world!\n");
+  string msg() {
+    return "hi\n";
+  }
+}
+
+class Main {
+  int main() {
+    Print("hello world!\n");
+    string str;
+    Hello hello;
+    hello = New(Hello);
+    str = hello.msg();
+    Print(str);
+    str = "test string assignment\n";
+    Print(str);
+    return 0;
   }
 }

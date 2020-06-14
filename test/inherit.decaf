@@ -1,0 +1,35 @@
+class Animal {
+  void name() {
+	Print("I'm animal\n");
+  }
+}
+
+class Dog extends Animal {
+  void name() {
+	Print("I'm dot\n");
+  }
+}
+
+class Cat extends Animal {
+  void name() {
+	Print("I'm cat\n");
+  }
+}
+
+class Unknown extends Animal {}
+
+class Main {
+  void main() {
+	Animal b;
+	Dog dog;
+	Cat cat;
+	dog = New(Dog);
+	cat = New(Cat);
+	b = dog;
+	b.name();
+	b = cat;
+	b.name();
+	Unknown u;
+	u.name();
+  }
+}
