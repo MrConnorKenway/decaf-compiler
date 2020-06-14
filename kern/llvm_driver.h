@@ -72,7 +72,10 @@ class llvm_driver {
   auto get_sizeof(const var_type& type) {
     // use llvm::DataLayout to get the size of a llvm type
     auto data_layout = new llvm::DataLayout(current_module.get());
-    return data_layout->getTypeAllocSize(get_llvm_type(type));
+    assert(user_defined_types.count(type) != 0);
+    // all decaf object is accessed by reference
+    auto obj_type = user_defined_types[type];
+    return data_layout->getTypeAllocSize(obj_type);
   }
 
   auto create_llvm_constant_signed_int32(int val) {
