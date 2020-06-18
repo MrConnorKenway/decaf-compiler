@@ -72,15 +72,16 @@ class llvm_driver {
   auto get_sizeof(const var_type& type) {
     // use llvm::DataLayout to get the size of a llvm type
     auto data_layout = new llvm::DataLayout(current_module.get());
-    if (type == "string") {
-      auto obj_type = builtin_types[type];
-      return data_layout->getTypeAllocSize(obj_type);
+    llvm::Type* obj_type;
+    if (builtin_types.count(type) != 0) {
+      obj_type = builtin_types[type];
     } else {
-      assert(user_defined_types.count(type) != 0);
-      // all decaf object is accessed by reference
-      auto obj_type = user_defined_types[type];
-      return data_layout->getTypeAllocSize(obj_type);
+      // we don't use obj_type = get_llvm_type(type) because
+      // here we want to get the size of the object rather than
+      // the size of pointer to the object
+      obj_type = get_llvm_type(type)->getPointerElementType();
     }
+    return data_layout->getTypeAllocSize(obj_type);
   }
 
   auto create_llvm_constant_signed_int32(int val) {
