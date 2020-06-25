@@ -106,6 +106,8 @@ llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), glo
   assert(current_module);
   assert(extern_module);
 
+  current_module->setTargetTriple(extern_module->getTargetTriple());
+
   decaf_str_t = extern_module->getTypeByName("struct.decaf_str");
   decaf_arr_t = extern_module->getTypeByName("struct.decaf_arr");
   obj_ref_t = extern_module->getTypeByName("union.obj_ref");
