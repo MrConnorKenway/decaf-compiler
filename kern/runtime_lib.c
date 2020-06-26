@@ -67,7 +67,10 @@ decaf_str* read_line() {
 }
 
 void validate_access(decaf_arr* arr, size_t i) {
-  assert(i < arr->len);
+  if (i >= arr->len) {
+    fprintf(stderr, "Array index out of bounds\n");
+    exit(-1);
+  }
 }
 
 void* alloc_obj(size_t obj_size) {

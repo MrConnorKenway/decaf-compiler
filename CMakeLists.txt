@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(DecafCompiler)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "--coverage -g")
+set(CMAKE_CXX_FLAGS "-g")
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(LLVM REQUIRED CONFIG)
@@ -94,8 +94,9 @@ add_custom_command(
 )
 
 add_custom_command(
-        OUTPUT runtime_lib.ll
+        OUTPUT runtime_lib.h
         COMMAND clang -S ${ROOT}/kern/runtime_lib.c -emit-llvm
+        COMMAND xxd -i runtime_lib.ll > runtime_lib.h
         DEPENDS ${ROOT}/kern/runtime_lib.c
         COMMENT "generating runtime library"
 )
@@ -111,7 +112,7 @@ add_library(lexer OBJECT lexer.cxx parser.tab.h ast.h)
 add_library(llvm_driver OBJECT kern/llvm_driver.cxx)
 target_link_libraries(llvm_driver ${llvm_libs})
 
-set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.ll)
+set_source_files_properties(kern/llvm_driver.cxx PROPERTIES OBJECT_DEPENDS runtime_lib.h)
 add_dependencies(symbol_table ast visitors)
 add_dependencies(static_analyser ast visitors)
 

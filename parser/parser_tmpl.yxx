@@ -10,7 +10,6 @@
 #define YYERROR_VERBOSE
 
 int yylex();
-string get_yytext();
 void yyerror(const char *s);
 
 ast_node_ptr_t root;

@@ -126,7 +126,9 @@ void static_semantic_analyser::analyse() {
   ss_assert(contains_Main, "Program doesn't contain \"Main\" class");
   yylloc_ptr = old_yylloc_ptr;
 
-  vector<bool> is_last_bools;
-  bool is_last;
-  global_symbol_table.display(is_last_bools, is_last);
+  if (verbose) {
+    vector<bool> is_last_bools;
+    bool is_last;
+    global_symbol_table.display(is_last_bools, is_last);
+  }
 }

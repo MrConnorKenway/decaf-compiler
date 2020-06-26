@@ -11,6 +11,7 @@
 #include <llvm/Support/SourceMgr.h>
 #include <memory>
 #include <string_view>
+#include <fstream>
 
 #include "utils/common.h"
 #include "kern/symbol_table.h"
@@ -39,8 +40,9 @@ class llvm_driver {
   unordered_map<class_id, llvm::GlobalVariable*> class_virtual_table;
 
   const symbol_table& global_symbol_table;
+  const string& output_path;
 
-  explicit llvm_driver(const symbol_table& st);
+  llvm_driver(const symbol_table& st, const string& output_path);
 
   void gen_llvm_ir();
 
@@ -162,5 +164,18 @@ class llvm_driver {
       assert(user_defined_types.count(_base_type) != 0 || builtin_types.count(_base_type) != 0);
       return builtin_types["array"];
     }
+  }
+
+  static string exec(const char* cmd) {
+    std::array<char, 128> buffer{};
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+      throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+      result += buffer.data();
+    }
+    return result;
   }
 };

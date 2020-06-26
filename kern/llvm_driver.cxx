@@ -1,4 +1,5 @@
 #include "llvm_driver.h"
+#include "build/runtime_lib.h"
 
 void llvm_driver::define_variable(const class_id& cid, const class_entry& ce) {
   // define llvm IR of user defined type
@@ -95,14 +96,22 @@ void llvm_driver::gen_llvm_ir() {
   }
 
   std::error_code error_code;
-  llvm::raw_fd_ostream output_file("/home/auriaiur/decaf-compiler/build/main.ll", error_code);
-  current_module->print(output_file, nullptr);
+  llvm::raw_fd_ostream output_main_ll("main.ll", error_code);
+  current_module->print(output_main_ll, nullptr);
+  exec(("clang main.ll runtime_lib.ll -o " + output_path).c_str());
+  exec("rm main.ll runtime_lib.ll");
 }
 
-llvm_driver::llvm_driver(const symbol_table& st) : builder(current_context), global_symbol_table(st) {
+llvm_driver::llvm_driver(const symbol_table& st, const string& path)
+    : builder(current_context), global_symbol_table(st), output_path(path) {
+  std::ofstream os;
+  os.open("runtime_lib.ll");
+  if (!os) {
+    cerr << "Unable to open runtime_lib.ll\n";
+  }
+  os << runtime_lib_ll;
   current_module = std::make_unique<llvm::Module>("decaf", current_context);
-  // TODO: bad usage of absolute path, use llvm::parseIR instead in future
-  extern_module = llvm::parseIRFile("/home/auriaiur/decaf-compiler/build/runtime_lib.ll", err, current_context);
+  extern_module = llvm::parseIRFile("runtime_lib.ll", err, current_context);
   assert(current_module);
   assert(extern_module);
 

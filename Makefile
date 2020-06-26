@@ -17,8 +17,14 @@ gdb-%:
 clean:
 	@rm -rf build/*
 
-test-%: $(BINDIR)/decaf
-	@echo - testing using $*.decaf
-	@$< test/$*.decaf
+$(BINDIR)/decaf: build
+
+$(BINDIR)/%.out: $(BINDIR)/decaf test/%.decaf
+	@$< test/$*.decaf -o $(BINDIR)/$*.out
+
+run-%: $(BINDIR)/%.out
+	@$(BINDIR)/$*.out
+
+.PRECIOUS: $(BINDIR)/%.out
 
 .PHONY: clean build all

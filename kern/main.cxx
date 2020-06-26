@@ -15,22 +15,26 @@ YYLTYPE* yylloc_ptr;
 string src_file_name;
 
 int yylex() { return lexer_ptr->yylex(); }
-string get_yytext() { return lexer_ptr->YYText(); }
 
 using std::cout;
 
 int main(int argc, char** argv) {
   int opt;
   bool verbose = false;
-  while ((opt = getopt(argc, argv, "hv")) != -1) {
+  string output_path;
+  while ((opt = getopt(argc, argv, "hvo:")) != -1) {
     switch (opt) {
       case 'v':
         verbose = true;
         break;
+      case 'o':
+        assert(optarg);
+        output_path = optarg;
+        break;
       case 'h':
       default:
-        exit(-1);
         fprintf(stderr, "Usage: %s [-hv] <decaf source file>\n", argv[0]);
+        exit(-1);
     }
   }
 
@@ -40,6 +44,10 @@ int main(int argc, char** argv) {
         "Mandatory argument(s) missing\nUsage: %s [-hv] <decaf source file>\n",
         argv[0]);
     exit(-1);
+  }
+
+  if (output_path.empty()) {
+    output_path = "a.out";
   }
 
   std::ifstream f(argv[optind]);
@@ -55,10 +63,10 @@ int main(int argc, char** argv) {
   Create_symbol_table_visitor cv;
   root->accept(cv);
 
-  static_semantic_analyser analyser(cv.global_symbol_table);
+  static_semantic_analyser analyser(cv.global_symbol_table, verbose);
   analyser.analyse();
 
-  llvm_driver ld(cv.global_symbol_table);
+  llvm_driver ld(cv.global_symbol_table, output_path);
   ld.gen_llvm_ir();
 
   if (verbose) {
