@@ -43,7 +43,6 @@ extern string src_file_name;
 	Int_const_node* Int_const_node_ptr_t;
 	Double_const_node* Double_const_node_ptr_t;
 	Str_const_node* Str_const_node_ptr_t;
-	int int_val;
 }
 
 %token <base_node_ptr_t> t_this
