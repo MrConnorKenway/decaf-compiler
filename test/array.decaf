@@ -1,5 +1,5 @@
 class Main {
-    void main() {
+    int main() {
         int[][][] a;
         int i;
         int j;
@@ -23,9 +23,10 @@ class Main {
             for (j = 0; j < length; j = j + 1) {
                 for (k = 0; k < length; k = k + 1) {
                     Print(a[i][j][k]);
+                    Print(" ");
                 }
             }
         }
-        a[5][5];
+		return 0;
     }
 }

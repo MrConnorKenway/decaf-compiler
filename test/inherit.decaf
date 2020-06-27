@@ -19,7 +19,7 @@ class Cat extends Animal {
 class Unknown extends Animal {}
 
 class Main {
-  void main() {
+  int main() {
 	Animal b;
 	Dog dog;
 	Cat cat;
@@ -29,7 +29,6 @@ class Main {
 	b.name();
 	b = cat;
 	b.name();
-	Unknown u;
-	u.name();
+	return 0;
   }
 }
