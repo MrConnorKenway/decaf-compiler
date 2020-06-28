@@ -110,8 +110,58 @@ void static_semantic_analyser::analyse() {
         ss_assert(ce.field_table.empty() && ce.func_table.size() == 1 && ce.func_table.count("main") == 1,
                   "\"Main\" class is not allowed to have member variables or any member function except \"main\"");
       }
-      for (auto& [fid, fe] : ce.func_table) {
+      auto members = ce.classdecl_node_ptr->field_list_optional->list;
+      for (auto &v : ce.field_table) {
+        // here we don't use the structural binding feature of C++ 17
+        // to initialize fid and fe, because
+        // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+        auto& vid = std::get<0>(v);
+        auto& [_, vt] = std::get<1>(v);
+        // check member variables' type
+        yylloc_manager y(
+            *std::find_if(members.cbegin(), members.cend(), [&](ast_node_ptr_t node_ptr) -> bool {
+              auto var_node_ptr = dynamic_cast<Variable_node*>(node_ptr);
+              if (var_node_ptr != nullptr) {
+                return var_node_ptr->id->ident_name == vid;
+              } else {
+                return false;
+              }
+            })
+        );
+        global_symbol_table.check_var_type(vt);
+      }
+      for (auto& f : ce.func_table) {
+        // don't use structural binding for the same reason as above
+        auto& fid = std::get<0>(f);
+        auto& fe = std::get<1>(f);
         ss_assert(fe.func_body.has_value(), "function ", fid, " has no body");
+        auto func_node_ptr =
+            *std::find_if(members.cbegin(), members.cend(), [&](ast_node_ptr_t node_ptr) -> bool {
+              auto func_node_ptr = dynamic_cast<FunctionDecl_node*>(node_ptr);
+              if (func_node_ptr != nullptr) {
+                return func_node_ptr->function_id->ident_name == fid;
+              } else {
+                return false;
+              }
+            });
+        yylloc_manager y(func_node_ptr);
+        global_symbol_table.check_return_type(fe.return_type);
+        auto formals = dynamic_cast<List_node*>(dynamic_cast<FunctionDecl_node*>(func_node_ptr)->formals)->list;
+        for (auto& v : fe.formal_table) {
+          // don't use structural binding for the same reason as above
+          auto& vid = std::get<0>(v);
+          auto& vt = std::get<1>(v);
+          yylloc_manager y(
+              *std::find_if(formals.cbegin(), formals.cend(), [&](ast_node_ptr_t node_ptr) -> bool {
+                auto var_node_ptr = dynamic_cast<Variable_node*>(node_ptr);
+                if (var_node_ptr != nullptr) {
+                  return var_node_ptr->id->ident_name == vid;
+                } else {
+                  return false;
+                }
+              }));
+          global_symbol_table.check_var_type(vt);
+        }
         sv.current_func_id = fid;
         auto& func_body_ptr = fe.func_body.value();
         func_body_ptr->scope_ptr = new scope(fe);

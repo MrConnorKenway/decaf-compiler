@@ -1,7 +1,7 @@
 #include "llvm_driver.h"
 #include "build/runtime_lib.h"
 
-void llvm_driver::define_variable(const class_id& cid, const class_entry& ce) {
+void llvm_driver::define_user_type(const class_id& cid, const class_entry& ce) {
   // define llvm IR of user defined type
   if (user_defined_types.count(cid) != 0) {
     return;
@@ -15,15 +15,16 @@ void llvm_driver::define_variable(const class_id& cid, const class_entry& ce) {
   if (!parent_cid.empty()) {
     // if cid has parent
     if (user_defined_types.count(parent_cid) == 0) {
-      define_variable(parent_cid, global_symbol_table.try_fetch_class(parent_cid));
+      define_user_type(parent_cid, global_symbol_table.try_fetch_class(parent_cid));
     }
+    // put parent struct variable into struct
     struct_body.push_back(user_defined_types[parent_cid]);
   } else {
     // every class contains a virtual table pointer
     struct_body.push_back(v_table_t->getPointerTo());
   }
 
-  // also put inherited fields into struct
+  // also put self-defined fields into struct
   for (auto&[vid, ve] : ce.field_table) {
     auto&[_, vt] = ve;
     struct_body.push_back(get_llvm_type(vt));
@@ -43,7 +44,17 @@ void llvm_driver::gen_llvm_ir() {
       auto& ce = std::get<class_entry>(entry);
       auto& cid = eid;
 
-      define_variable(cid, ce);
+      define_user_type(cid, ce);
+    }
+  }
+
+  for (auto&[eid, entry] : global_symbol_table) {
+    if (eid == "Main") {
+      continue;
+    }
+    if (std::holds_alternative<class_entry>(entry)) {
+      auto& ce = std::get<class_entry>(entry);
+      auto& cid = eid;
 
       // we don't have to handle the inherited function here, since
       // we will depend on virtual table to handle function call
@@ -98,8 +109,14 @@ void llvm_driver::gen_llvm_ir() {
   std::error_code error_code;
   llvm::raw_fd_ostream output_main_ll("main.ll", error_code);
   current_module->print(output_main_ll, nullptr);
-  exec(("clang main.ll runtime_lib.ll -o " + output_path).c_str());
-  exec("rm main.ll runtime_lib.ll");
+  auto exit_code = system(("clang main.ll runtime_lib.ll -o " + output_path).c_str());
+  if (exit_code != 0) {
+    exit(exit_code);
+  }
+  exit_code = system("rm main.ll runtime_lib.ll");
+  if (exit_code != 0) {
+    exit(exit_code);
+  }
 }
 
 llvm_driver::llvm_driver(const symbol_table& st, const string& path)
