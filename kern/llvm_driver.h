@@ -156,9 +156,13 @@ class llvm_driver {
       if (builtin_types.count(type) != 0) {
         return builtin_types[type];
       }
-      assert(user_defined_types.count(type) != 0);
-      // all decaf object is accessed by reference
-      return user_defined_types[type]->getPointerTo();
+      if (user_defined_types.count(type) == 0) {
+        // we reference a type before its definition
+        return llvm::StructType::create(current_context, type);
+      } else {
+        // all decaf object is accessed by reference
+        return user_defined_types[type]->getPointerTo();
+      }
     } else {
       auto _base_type = base_type.value();
       assert(user_defined_types.count(_base_type) != 0 || builtin_types.count(_base_type) != 0);

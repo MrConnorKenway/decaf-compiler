@@ -6,7 +6,10 @@ void llvm_driver::define_user_type(const class_id& cid, const class_entry& ce) {
   if (user_defined_types.count(cid) != 0) {
     return;
   }
-  auto user_defined_type = llvm::StructType::create(current_context, cid);
+  auto user_defined_type = current_module->getTypeByName(cid);
+  if (user_defined_type == nullptr) {
+    user_defined_type = llvm::StructType::create(current_context, cid);
+  }
   user_defined_types[cid] = user_defined_type;
 
   vector<llvm::Type*> struct_body;
