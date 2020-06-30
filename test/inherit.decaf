@@ -6,7 +6,7 @@ class Animal {
 
 class Dog extends Animal {
   void name() {
-	Print("I'm dot\n");
+	Print("I'm dog\n");
   }
 }
 
@@ -20,15 +20,18 @@ class Unknown extends Animal {}
 
 class Main {
   int main() {
-	Animal b;
+	Animal a;
 	Dog dog;
 	Cat cat;
 	dog = New(Dog);
 	cat = New(Cat);
-	b = dog;
-	b.name();
-	b = cat;
-	b.name();
+	a = dog;
+	a.name();
+	a = cat;
+	a.name();
+	Unknown u;
+	u = New(Unknown);
+	u.name();
 	return 0;
   }
 }

@@ -122,16 +122,24 @@ struct symbol_table : unordered_map<string, symbol_table_entry> {
 
   func_entry& try_fetch_func(const string& cid, const string& fid) {
     auto& ce = try_fetch_class(cid);
-    ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
+    ss_assert(ce.inheritance.func_decl_class.count(fid), "Undefined reference to function ", fid,
               " in class ", cid);
-    return ce.func_table[fid];
+    if (ce.func_table.count(fid) == 0) {
+      return try_fetch_func(ce.inheritance.func_decl_class[fid], fid);
+    } else {
+      return ce.func_table[fid];
+    }
   }
 
   const func_entry& try_fetch_func(const string& cid, const string& fid) const {
     auto const& ce = try_fetch_class(cid);
-    ss_assert(ce.func_table.count(fid), "Undefined reference to function ", fid,
+    ss_assert(ce.inheritance.func_decl_class.count(fid), "Undefined reference to function ", fid,
               " in class ", cid);
-    return ce.func_table.at(fid);
+    if (ce.func_table.count(fid) == 0) {
+      return try_fetch_func(ce.inheritance.func_decl_class.at(fid), fid);
+    } else {
+      return ce.func_table.at(fid);
+    }
   }
 
   interface_entry& try_fetch_interface(const string& iid) {

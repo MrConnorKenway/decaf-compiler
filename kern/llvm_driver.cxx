@@ -59,14 +59,10 @@ void llvm_driver::gen_llvm_ir() {
       auto& ce = std::get<class_entry>(entry);
       auto& cid = eid;
 
-      // we don't have to handle the inherited function here, since
-      // we will depend on virtual table to handle function call
       for (auto&[fid, decl_class_id] : ce.inheritance.func_decl_class) {
         func_name_to_uid[fid];
-        if (decl_class_id == cid) {
-          auto& fe = ce.func_table.at(fid);
-          declare_func(cid, fid, fe);
-        }
+        auto& fe = global_symbol_table.try_fetch_func(decl_class_id, fid);
+        declare_func(cid, fid, fe);
       }
     }
   }

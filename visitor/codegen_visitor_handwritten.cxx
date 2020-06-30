@@ -493,6 +493,7 @@ void Codegen_visitor::visit(Call_node* call_node_ptr) {
                                       {v_ptr_val, llvm::ConstantInt::get(llvm_driver_.current_context,
                                                                          llvm::APInt(32, f_uid, false))});
   auto func = llvm_driver_.user_defined_func_table[obj_type][func_name];
+  ss_assert(func != nullptr);
   auto func_type = func->getFunctionType();
   // cast function pointer to the correct function type
   auto cast_f_ptr = llvm_driver_.builder.CreateBitCast(f_ptr, func_type->getPointerTo());
