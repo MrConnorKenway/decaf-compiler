@@ -88,11 +88,11 @@ void Codegen_visitor::visit(Assignment_node* assignment_node_ptr) {
       auto null_value =
           llvm_driver_.builder.CreateIntToPtr(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(null_value, left_addr);
-    }  else if (right_type == "string literal") {
-      auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], right_value);
+    } else if (right_type == "string literal") {
+      auto str_addr =
+          llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], right_value);
       llvm_driver_.builder.CreateStore(str_addr, left_addr);
-    }
-    else {
+    } else {
       // convert from derived class to base class
       auto cast_value = llvm_driver_.builder.CreatePointerCast(right_value, llvm_driver_.get_llvm_type(left_type));
       llvm_driver_.builder.CreateStore(cast_value, left_addr);
@@ -340,8 +340,7 @@ void Codegen_visitor::visit(Index_op_node* index_op_node_ptr) {
   // we need to cast i32 arr_index to i64
   auto cast_arr_index = llvm_driver_.builder.CreateIntCast(arr_index, llvm_driver_.builder.getInt64Ty(), false);
   // dynamic array access sanity check
-  auto validate_index =
-      llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["validate_access"], {array_obj_addr, cast_arr_index});
+  llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["validate_access"], {array_obj_addr, cast_arr_index});
   // get the address of the underlying array pointer
   auto underlying_arr_addr_addr = llvm_driver_.builder.CreateStructGEP(array_obj_addr, 2);
   // get the address of first element in array
@@ -419,7 +418,8 @@ void Codegen_visitor::visit(ReturnStmt_node* returnstmt_node_ptr) {
     llvm_driver_.builder.CreateRetVoid();
   } else if (return_type == "string literal") {
     auto string_literal_addr = get_llvm_value(returnstmt_node_ptr->expr_optional);
-    auto str_addr = llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], string_literal_addr);
+    auto str_addr =
+        llvm_driver_.builder.CreateCall(llvm_driver_.builtin_funcs["create_str_from_literal"], string_literal_addr);
     llvm_driver_.builder.CreateRet(str_addr);
   } else {
     llvm_driver_.builder.CreateRet(get_llvm_value(returnstmt_node_ptr->expr_optional));
@@ -433,8 +433,8 @@ void Codegen_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   yylloc_manager y(whilestmt_node_ptr);
   stack_manager s(frame);
 
-  auto reside_func = llvm_driver_.builder.GetInsertBlock()->getParent();
-  auto cond_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "while_cond", reside_func);
+  auto enclosing_func = llvm_driver_.builder.GetInsertBlock()->getParent();
+  auto cond_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "while_cond", enclosing_func);
   auto loop_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "while_body");
   auto next_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "while_next");
   // used by continue and break statement
@@ -449,7 +449,7 @@ void Codegen_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   llvm_driver_.builder.CreateCondBr(condition, loop_bb, next_bb);
 
   // loop block
-  reside_func->getBasicBlockList().push_back(loop_bb);
+  enclosing_func->getBasicBlockList().push_back(loop_bb);
   llvm_driver_.builder.SetInsertPoint(loop_bb);
   // emit for body code
   whilestmt_node_ptr->stmt->accept(*this);
@@ -462,7 +462,7 @@ void Codegen_visitor::visit(WhileStmt_node* whilestmt_node_ptr) {
   }
 
   // next block
-  reside_func->getBasicBlockList().push_back(next_bb);
+  enclosing_func->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
 
   return_llvm_value = nullptr;
@@ -525,8 +525,8 @@ void Codegen_visitor::visit(ContinueStmt_node* continuestmt_node_ptr) {
 void Codegen_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   yylloc_manager y(ifstmt_node_ptr);
 
-  auto parent_bb = llvm_driver_.builder.GetInsertBlock()->getParent();
-  auto then_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "if_then", parent_bb);
+  auto enclosing_func = llvm_driver_.builder.GetInsertBlock()->getParent();
+  auto then_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "if_then", enclosing_func);
   auto else_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "else");
   auto next_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "if_next");
   auto condition = get_llvm_value(ifstmt_node_ptr->condition_expr);
@@ -542,7 +542,7 @@ void Codegen_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   }
 
   // else block
-  parent_bb->getBasicBlockList().push_back(else_bb);
+  enclosing_func->getBasicBlockList().push_back(else_bb);
   llvm_driver_.builder.SetInsertPoint(else_bb);
   ifstmt_node_ptr->else_stmt_optional->accept(*this);
   if (unreachable) {
@@ -552,7 +552,7 @@ void Codegen_visitor::visit(IfStmt_node* ifstmt_node_ptr) {
   }
 
   // next block
-  parent_bb->getBasicBlockList().push_back(next_bb);
+  enclosing_func->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
 
   return_llvm_value = nullptr;
@@ -565,8 +565,8 @@ void Codegen_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   // emit init code
   forstmt_node_ptr->init_expr_optional->accept(*this);
 
-  auto reside_func = llvm_driver_.builder.GetInsertBlock()->getParent();
-  auto cond_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "for_cond", reside_func);
+  auto enclosing_func = llvm_driver_.builder.GetInsertBlock()->getParent();
+  auto cond_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "for_cond", enclosing_func);
   auto loop_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "for_body");
   auto next_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "for_next");
   auto step_bb = llvm::BasicBlock::Create(llvm_driver_.current_context, "for_step");
@@ -582,7 +582,7 @@ void Codegen_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   llvm_driver_.builder.CreateCondBr(condition, loop_bb, next_bb);
 
   // loop block
-  reside_func->getBasicBlockList().push_back(loop_bb);
+  enclosing_func->getBasicBlockList().push_back(loop_bb);
   llvm_driver_.builder.SetInsertPoint(loop_bb);
   // emit for body code
   forstmt_node_ptr->stmt->accept(*this);
@@ -595,13 +595,13 @@ void Codegen_visitor::visit(ForStmt_node* forstmt_node_ptr) {
   }
 
   // emit for step code
-  reside_func->getBasicBlockList().push_back(step_bb);
+  enclosing_func->getBasicBlockList().push_back(step_bb);
   llvm_driver_.builder.SetInsertPoint(step_bb);
   forstmt_node_ptr->step_expr_optional->accept(*this);
   llvm_driver_.builder.CreateBr(cond_bb);
 
   // next block
-  reside_func->getBasicBlockList().push_back(next_bb);
+  enclosing_func->getBasicBlockList().push_back(next_bb);
   llvm_driver_.builder.SetInsertPoint(next_bb);
 
   return_llvm_value = nullptr;
