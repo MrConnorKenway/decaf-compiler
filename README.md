@@ -1,7 +1,7 @@
 # A toy decaf language compiler
 
 ## Requirements
-This project depends on `flex`, `bison`, `make`, `g++` and `python3`. Make sure your `g++` compiler support c++17 standard.
+This project depends on `flex`, `bison`, `make`, `g++`, `clang`, `LLVM` library, `CMake` with version greater than `3.16` and `python3`. Make sure your `g++` compiler support c++17 standard.
 
 ## Installation
 Run 
@@ -18,11 +18,15 @@ make clean
 ## Testing
 This project provides plenty of test cases, located in directory `test`. To test specific decaf source file, simply run
 ```shell
-make test-%
+make run-%
 ```
 where `%` represents the name without extension of files in `test` folder.
 
 ## Features
+
+### Fundamental Object-Orient programming features
+
+`decaf` supports encapsulation, polymorphism and inheritance. However it doesn't implement function overloading, `super` method, constructor, destructor and `public` `private` `protected` decoration or any advanced feature.
 
 ### Support various syntax and semantic check
 
@@ -43,7 +47,11 @@ Folder `ast/` contains the definition of AST. The language keywords, allowed ope
 
 All the testing source file are put in `test/`.
 
-In `visitor/`, file `visitor/%_visitor_handwritten.cxx` contains the implementation of visit methods. `visitor/gen_visitor.py` use `visitor/%_visitor_tmpl.cxx` and `visitor/%_visitor_tmpl.h` to generate `build/src/%_visitor.cxx` and `build/include/%_visitor.h`. 
+`kern/` is the kernel of this project. It contains the definition of symbol table, a LLVM driver class that further encapsulate the LLVM C++ API, a static semantic analyser, a runtime library written in C and the entry point of the project.
+
+In `visitor/`, file `visitor/%_visitor_handwritten.cxx` contains the implementation of visit methods. `visitor/gen_visitor.py` use `visitor/%_visitor_tmpl.cxx` and `visitor/%_visitor_tmpl.h` to generate `build/%_visitor.cxx` and `build/%_visitor.h`. 
+
+`utils/` provides lots of auxiliary class.
 
 ## Customization
 To add a new syntax feature, you first append grammar rules in `parser/bnf` and `parser/gen_parser.py` will automatically generate declaration in declaration section of `build/gen/parser_gen.yxx`. You can write syntax action in `parser/parser_handwritten.yxx` and then use `parser/merge_hand_and_gen.py` to merge them together. After that you need to define the corresponding AST node of your syntax feature and add the class definition in `ast/ast_tmpl.h`. Note that this project has provided a script (`ast/gen_ast.py`) to automatically generate constructor and accept function, so you only need to provide fields declaration. Then you need to provide implementation of visit method in `visitor/%_visitor_handwritten.cxx`.
